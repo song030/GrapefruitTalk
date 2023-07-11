@@ -23,10 +23,25 @@
    <item>
     <widget class="QStackedWidget" name="stack_main">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_login">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
@@ -256,6 +271,21 @@ border-radius:5px;
      </widget>
      <widget class="QWidget" name="page_join">
       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0,1">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <spacer name="horizontalSpacer_4">
          <property name="orientation">
@@ -641,6 +671,18 @@ border-radius:5px;
        <property name="spacing">
         <number>0</number>
        </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QFrame" name="frame_2">
          <property name="frameShape">
@@ -753,12 +795,6 @@ padding: 3px;</string>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <property name="handleWidth">
-          <number>3</number>
-         </property>
-         <property name="childrenCollapsible">
-          <bool>false</bool>
-         </property>
          <widget class="QFrame" name="frame_4">
           <property name="styleSheet">
            <string notr="true"/>
@@ -779,7 +815,37 @@ padding: 3px;</string>
               </sizepolicy>
              </property>
              <property name="styleSheet">
-              <string notr="true">background-color:white;</string>
+              <string notr="true">QScrollArea {
+	border: None;
+	background-color:rgba(100, 100, 100, 100);
+}
+
+QScrollBar:vertical{
+	border: None;
+	background-color: white;
+	width:18px;
+	margin: 0 0 0 0;
+	border-radius: 0px;
+}
+
+/* 핸들러 바 */
+QScrollBar::handle:vertical {
+    background-color: white;
+    min-width: 30px;
+    border: 2px solid rgb(242,234,232);
+    border-radius:8px;
+
+}
+QScrollBar::sub-line:vertical {
+	border: None;
+	background-color: white;
+	width:18px;
+	margin: 0 0 0 0;
+	border-radius: 0px;
+}</string>
+             </property>
+             <property name="verticalScrollBarPolicy">
+              <enum>Qt::ScrollBarAlwaysOn</enum>
              </property>
              <property name="horizontalScrollBarPolicy">
               <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -795,9 +861,12 @@ padding: 3px;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>671</width>
-                <height>714</height>
+                <width>947</width>
+                <height>734</height>
                </rect>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_6">
                <property name="spacing">
@@ -922,22 +991,10 @@ padding: 3px;</string>
            </item>
           </layout>
          </widget>
-         <widget class="QFrame" name="frame_menu">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Box</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
+         <widget class="QStackedWidget" name="stack_menu">
+          <widget class="QWidget" name="page_single"/>
+          <widget class="QWidget" name="page_multi"/>
+          <widget class="QWidget" name="page_setting"/>
          </widget>
         </widget>
        </item>

@@ -7,9 +7,10 @@ from Views.MainWidget import MainWidget
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
 
+    # 글꼴 설정
     fontDB = QFontDatabase()
-
     fontDB.addApplicationFont("./FONT/NanumSquareRoundB.ttf")
     fontDB.addApplicationFont("./FONT/NanumSquareRoundEB.ttf")
     fontDB.addApplicationFont("./FONT/NanumSquareRoundL.ttf")

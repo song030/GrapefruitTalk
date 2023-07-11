@@ -24,6 +24,8 @@ class Ui_MainWidget(object):
         self.page_login = QtWidgets.QWidget()
         self.page_login.setObjectName("page_login")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.page_login)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
         spacerItem = QtWidgets.QSpacerItem(322, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem)
@@ -107,6 +109,8 @@ class Ui_MainWidget(object):
         self.page_join = QtWidgets.QWidget()
         self.page_join.setObjectName("page_join")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.page_join)
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_4.setSpacing(0)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         spacerItem7 = QtWidgets.QSpacerItem(277, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem7)
@@ -261,6 +265,7 @@ class Ui_MainWidget(object):
         self.page_talk = QtWidgets.QWidget()
         self.page_talk.setObjectName("page_talk")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.page_talk)
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_4.setSpacing(0)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.frame_2 = QtWidgets.QFrame(self.page_talk)
@@ -313,8 +318,6 @@ class Ui_MainWidget(object):
         self.verticalLayout_4.addWidget(self.frame_2)
         self.splitter = QtWidgets.QSplitter(self.page_talk)
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter.setHandleWidth(3)
-        self.splitter.setChildrenCollapsible(False)
         self.splitter.setObjectName("splitter")
         self.frame_4 = QtWidgets.QFrame(self.splitter)
         self.frame_4.setStyleSheet("")
@@ -329,13 +332,42 @@ class Ui_MainWidget(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
         self.scrollArea.setSizePolicy(sizePolicy)
-        self.scrollArea.setStyleSheet("background-color:white;")
+        self.scrollArea.setStyleSheet("QScrollArea {\n"
+"    border: None;\n"
+"    background-color:rgba(100, 100, 100, 100);\n"
+"}\n"
+"\n"
+"QScrollBar:vertical{\n"
+"    border: None;\n"
+"    background-color: white;\n"
+"    width:18px;\n"
+"    margin: 0 0 0 0;\n"
+"    border-radius: 0px;\n"
+"}\n"
+"\n"
+"/* 핸들러 바 */\n"
+"QScrollBar::handle:vertical {\n"
+"    background-color: white;\n"
+"    min-width: 30px;\n"
+"    border: 2px solid rgb(242,234,232);\n"
+"    border-radius:8px;\n"
+"\n"
+"}\n"
+"QScrollBar::sub-line:vertical {\n"
+"    border: None;\n"
+"    background-color: white;\n"
+"    width:18px;\n"
+"    margin: 0 0 0 0;\n"
+"    border-radius: 0px;\n"
+"}")
+        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.scrollArea.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 671, 714))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 947, 734))
+        self.scrollAreaWidgetContents.setStyleSheet("")
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_6.setContentsMargins(15, 15, 15, 15)
@@ -385,19 +417,24 @@ class Ui_MainWidget(object):
         self.btn_send.setObjectName("btn_send")
         self.horizontalLayout_6.addWidget(self.btn_send)
         self.verticalLayout_7.addLayout(self.horizontalLayout_6)
-        self.frame_menu = QtWidgets.QFrame(self.splitter)
-        self.frame_menu.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.frame_menu.setStyleSheet("")
-        self.frame_menu.setFrameShape(QtWidgets.QFrame.Box)
-        self.frame_menu.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame_menu.setObjectName("frame_menu")
+        self.stack_menu = QtWidgets.QStackedWidget(self.splitter)
+        self.stack_menu.setObjectName("stack_menu")
+        self.page_single = QtWidgets.QWidget()
+        self.page_single.setObjectName("page_single")
+        self.stack_menu.addWidget(self.page_single)
+        self.page_multi = QtWidgets.QWidget()
+        self.page_multi.setObjectName("page_multi")
+        self.stack_menu.addWidget(self.page_multi)
+        self.page_setting = QtWidgets.QWidget()
+        self.page_setting.setObjectName("page_setting")
+        self.stack_menu.addWidget(self.page_setting)
         self.verticalLayout_4.addWidget(self.splitter)
         self.verticalLayout_4.setStretch(1, 1)
         self.stack_main.addWidget(self.page_talk)
         self.verticalLayout.addWidget(self.stack_main)
 
         self.retranslateUi(MainWidget)
-        self.stack_main.setCurrentIndex(1)
+        self.stack_main.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWidget)
 
     def retranslateUi(self, MainWidget):
