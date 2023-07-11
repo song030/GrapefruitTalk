@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import Qt
 
 from Source.Views.UI_DialogWarning import Ui_DlgWarning
@@ -34,7 +34,7 @@ class DialogWarning(QDialog, Ui_DlgWarning):
     # 다이얼로그 타입 설정
     # bt_cnt : 버튼 수량
     # t_type : 다이얼로그 타입
-    def set_dialog_type(self, bt_cnt, t_type):
+    def set_dialog_type(self, bt_cnt:int, t_type:str):
         if bt_cnt == 1:
             self.layout_double.setVisible(False)
             self.btn_single.setVisible(True)
