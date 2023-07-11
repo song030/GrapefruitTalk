@@ -686,7 +686,7 @@ border-radius:5px;
        <item>
         <widget class="QFrame" name="frame_2">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -861,8 +861,8 @@ QScrollBar::sub-line:vertical {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>947</width>
-                <height>734</height>
+                <width>948</width>
+                <height>736</height>
                </rect>
               </property>
               <property name="styleSheet">
