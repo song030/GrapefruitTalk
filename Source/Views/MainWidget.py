@@ -10,6 +10,8 @@ from Source.Views.DialogWarning import DialogWarning
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 
+from Source.client import Client
+
 
 class MainWidget(QWidget, Ui_MainWidget):
     def __init__(self):
@@ -24,6 +26,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 이벤트 연결
         self.connect_event()
+
+        self.__chatroom = Client(self, 'soyeon')
 
 
     # 화면 글꼴 설정
@@ -123,7 +127,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.dlg_warning.exec():
             self.stack_main.setCurrentWidget(self.page_talk)
-            self.init_talk()
+            # self.init_talk()
         else:
             pass
 
@@ -131,22 +135,24 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # ================================================== 대화 화면 ==================================================
 
-    # 대화 방 초기화
-    def init_talk(self):
-        self.add_date_line()
+    # 대화 방 생성
 
-        text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-        for i in range(5):
-            talkbox = TalkBox("", "자몽자몽", text, datetime.now())
-            self.layout_talk.addLayout(talkbox.layout)
-
-        # self.clear_layout(self.layout_talk)
-        # talkbox = TalkBox("", "자몽자몽", text, datetime.now())
-        # self.layout_talk.addLayout(talkbox.layout)
-
-    # 일자 표시선 추가
-    def add_date_line(self):
-        talkbox = DateLine(datetime.now())
-        self.layout_talk.addLayout(talkbox.layout)
+    # self.__chatroom = Client(self, 'soyeon')
+    # def init_talk(self):
+    #     self.add_date_line()
+    #
+    #     text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+    #     for i in range(5):
+    #         talkbox = TalkBox("", "자몽자몽", text, datetime.now())
+    #         self.layout_talk.addLayout(talkbox.layout)
+    #
+    #     # self.clear_layout(self.layout_talk)
+    #     # talkbox = TalkBox("", "자몽자몽", text, datetime.now())
+    #     # self.layout_talk.addLayout(talkbox.layout)
+    #
+    # # 일자 표시선 추가
+    # def add_date_line(self):
+    #     talkbox = DateLine(datetime.now())
+    #     self.layout_talk.addLayout(talkbox.layout)
 
     # ==============================================================================================================

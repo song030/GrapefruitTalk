@@ -23,7 +23,7 @@
    <item>
     <widget class="QStackedWidget" name="stack_main">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_login">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
@@ -795,7 +795,7 @@ padding: 3px;</string>
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>671</width>
+                <width>698</width>
                 <height>714</height>
                </rect>
               </property>
