@@ -1,9 +1,14 @@
+from datetime import datetime
 
-from PyQt5.QtWidgets import QWidget, QListView, QLabel
+from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
+from PyQt5.QtGui import QResizeEvent
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
+
 from Source.Views.Font import Font
 from Source.Views.DialogWarning import DialogWarning
+from Source.Views.TalkBox import TalkBox
+from Source.Views.DateLine import DateLine
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -86,7 +91,28 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join.clicked.connect(self.join_input_check)
 
         # ===== 대화방
-        self.splitter.moveSplitter(600,0)
+        self.page_talk.showEvent = self.resizeEvent
+        # self.splitter.moveSplitter(600,0)
+
+    # 화면 변화가 일어났을때 대화창 사이즈 변화
+    def resizeEvent(self, a0: QResizeEvent) -> None:
+        self.scrollAreaWidgetContents.setFixedWidth(self.scrollArea.width()-30)
+
+
+    # 레이아웃 비우기
+    def clear_layout(self, layout:QLayout):
+        while layout.count():
+            item = layout.takeAt(0)
+            widget = item.widget()
+
+            if widget is not None:
+                print("1",widget)
+                widget.setParent(None)
+
+            # 아이템이 레이아웃일 경우 재귀 호출로 레이아웃 내의 위젯 삭제
+            else:
+                print("2",widget)
+                self.clear_layout(item.layout())
 
     # ================================================== 회원가입 ==================================================
 
@@ -97,7 +123,30 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.dlg_warning.exec():
             self.stack_main.setCurrentWidget(self.page_talk)
+            self.init_talk()
         else:
             pass
+
+    # ==============================================================================================================
+
+    # ================================================== 대화 화면 ==================================================
+
+    # 대화 방 초기화
+    def init_talk(self):
+        self.add_date_line()
+
+        text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        for i in range(5):
+            talkbox = TalkBox("", "자몽자몽", text, datetime.now())
+            self.layout_talk.addLayout(talkbox.layout)
+
+        # self.clear_layout(self.layout_talk)
+        # talkbox = TalkBox("", "자몽자몽", text, datetime.now())
+        # self.layout_talk.addLayout(talkbox.layout)
+
+    # 일자 표시선 추가
+    def add_date_line(self):
+        talkbox = DateLine(datetime.now())
+        self.layout_talk.addLayout(talkbox.layout)
 
     # ==============================================================================================================
