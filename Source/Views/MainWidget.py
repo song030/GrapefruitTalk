@@ -11,6 +11,10 @@ from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 
 from Source.client import Client
+import sqlite3
+import pandas as pd
+
+
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -28,6 +32,18 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.connect_event()
 
         self.__chatroom = Client(self, 'soyeon')
+
+        # 디비 연결
+        # DB 연결 및 데이터 리스트업
+
+        # conn = sqlite3.connect("../../data/grapefruit_talk.db", check_same_thread=False)
+        #
+        # df = pd.read_sql('select * from TB_USER', conn) # 전체 데이터프레임
+        # id_df = pd.read_sql("select USER_ID from TB_USER", conn)
+        # self.id_list = id_df.values.tolist() # 아이디 리스트
+        #
+        # pwd_df = pd.read_sql("select USER_PW from TB_USER", conn)
+        # self.pwd_list = pwd_df.values.tolist() # 비밀번호 리스트
 
 
     # 화면 글꼴 설정
@@ -94,9 +110,22 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join_cancel.clicked.connect(lambda: self.stack_main.setCurrentWidget(self.page_login))
         self.btn_join.clicked.connect(self.join_input_check)
 
+
+        self.btn_join_id.clicked.connect(self.check_id_txt)
+
         # ===== 대화방
         self.page_talk.showEvent = self.resizeEvent
         # self.splitter.moveSplitter(600,0)
+
+    def check_id_txt(self):
+        user_id = self.edt_join_id.text()
+        print(user_id)
+        if user_id in self.id_list:
+            self.dlg_warning.set_dialog_type(1, "used_id")
+            return None
+        elif user_id not in self.id_list:
+            self.dlg_warning.set_dialog_type(1, "user_can_used")
+            return user_id
 
     # 화면 변화가 일어났을때 대화창 사이즈 변화
     def resizeEvent(self, a0: QResizeEvent) -> None:
@@ -122,6 +151,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 회원가입 입력확인
     def join_input_check(self):
+        """"""
 
         self.dlg_warning.set_dialog_type(2, "test")
 

@@ -46,3 +46,8 @@ class DialogWarning(QDialog, Ui_DlgWarning):
         # type, text 원하는 대로 입력하여 사용하기, 아래는 예시
         if t_type == "test":
             self.lbl_text.setText("제품을 선택해주세요.")
+        if t_type == 'used_id':
+            self.lbl_text.setText('사용 중인 아이디입니다.')
+        if t_type == 'user_can_used':
+            self.lbl_text.setText('사용할 수 있는 아이디입니다.')
+

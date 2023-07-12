@@ -2,47 +2,36 @@ from datetime import datetime
 
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPlainTextEdit
 from PyQt5.QtGui import QPixmap, QPainterPath, QPainter
-from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint, pyqtSignal, QObject
+from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint
 
 from Source.Views.Font import Font
 
-class TalkBox(QObject):
-    message_signal = pyqtSignal(str, str, str, str)
-
-    def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime):
+class TalkBox:
+    def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime, signal):
         """
         :param t_img: 프로필 타입 → 추 후 수정예정
         :param t_nick: 닉네임
         :param t_talk: 텍스트
         :param t_time: 발송 시간
         """
-        super().__init__()
-        self.image = t_img
-        self.nickname = t_nick
-        self.message = t_talk
-        self.time = t_time
-
-
+        self.signal = signal
         self._grid_layout = QGridLayout()
         self._grid_layout.setAlignment(Qt.AlignLeft)
         self._grid_layout.setColumnStretch(0, 0)
         self._grid_layout.setColumnStretch(1, 2)
         self._grid_layout.setHorizontalSpacing(10)
         self._grid_layout.setVerticalSpacing(10)
-
         # 프로필 이미지
         self._lbl_profile = QLabel()
         self._lbl_profile.setFixedSize(50, 50)
         self._lbl_profile.setPixmap(QPixmap("../Images/img_profile_king.png"))
         self._lbl_profile.setStyleSheet("background-color:rgb(248,228,208);border-radius:25px")
         self._grid_layout.addWidget(self._lbl_profile, 0, 0, 2, 1, Qt.AlignTop)
-
         # 닉네임
         self._lbl_nick = QLabel()
         self._lbl_nick.setText(f"[ {t_nick} ]")
         self._lbl_nick.setFont(Font.button(3))
         self._grid_layout.addWidget(self._lbl_nick, 0, 1)
-
         # 말풍선
         self._lbl_talk = QPlainTextEdit()
         self._lbl_talk.setReadOnly(True) # readonly로 설정
@@ -54,25 +43,12 @@ class TalkBox(QObject):
         self._lbl_talk.setPlainText(t_talk)
         self._lbl_talk.setReadOnly(True)
         self._grid_layout.addWidget(self._lbl_talk, 1, 1)
-
         # 발송 시간
-        # t_time = t_time.strftime("%H:%M")
-        # time_str = self.time.strftime("%H:%M")
+        t_time = t_time.strftime("%H:%M")
         self._lbl_time = QLabel()
         self._lbl_time.setFont(Font.text(3))
         self._lbl_time.setText(t_time)
         self._grid_layout.addWidget(self._lbl_time, 2, 1)
-
-    # def update_message(self, message, time):
-    #     self.message = message
-    #     self.time = time
-    #     time_str = self.time.strftime("%H:%M")
-    #     self.message_signal.emit(self.image, self.nickname, self.message, self.time)
-
-    def update_message(self, message, time):
-        self.message = message
-        # self.time = datetime.strptime(time, '%H-%M')
-        self.message_signal.emit(self.name, self.color, self.message, self.time)
 
     @property
     def layout(self):
