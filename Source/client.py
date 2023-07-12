@@ -116,17 +116,24 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
-                print('메세지는', message)
+                print('메세지는', message.decode('ISO-8859-1'))
                 if message:
                     try:
-                        connected_users = pickle.loads(message)  # 나중에 pickle -> sqlite
+                        connected_users = pickle.loads(message)
                         self.connected_clients.clear()
                         for name in connected_users:
                             self.connected_clients.addItem(name)
 
+                        print('여길 타나요')
+                        self.add_date_line()
+                        talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
+                        self.talk_page.layout_talk.addLayout(talkbox.layout)
+
+
                     except:
                         # self.textBrowser.append(message.decode(self.format_type))
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
+                        print('아니면 여길 타나요')
                         self.add_date_line()
                         talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
                         self.talk_page.layout_talk.addLayout(talkbox.layout)

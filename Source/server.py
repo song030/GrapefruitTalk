@@ -9,7 +9,7 @@ class Server(object):
     """클라이언트 연결을 처리하는 서버 객체를 만듭니다. Server 클래스는
        누가 연결되어 있는지 추적하고 클라이언트로부터 메시지를 받아서 다시 클라이언트에게 보내는 역할을 합니다.
     """
-    print('헐랭')
+
     # 변수
     buffer_num = 4000 # 버퍼
     port_num = 1121  # 포트
@@ -123,6 +123,7 @@ class Server(object):
             else:
                 values['client'].send(message.encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
 
+
         # for user, data in self.connected_clients_dict.items():
         #     client = data.get("client")
         #     try:
@@ -150,8 +151,9 @@ class Server(object):
                         continue
                     else:
                         message_date = datetime.datetime.now()
-                        self.send_msg_to_clients(username, ">" + username + ": " + message + " - " + message_date.strftime(
-                            " %x %I:%M %p"))
+                        # self.send_msg_to_clients(username, ">" + username + ": " + message + " - " + message_date.strftime(
+                        #     " %x %I:%M %p"))
+                        self.send_msg_to_clients(username, message)
 
                 # else:
                 #     self.send_msg_to_clients(username, message)
