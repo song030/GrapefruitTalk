@@ -133,7 +133,7 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
 
                         self.add_date_line()
-                        client_msgbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
+                        client_msgbox = TalkBox('', '테스트', str(message.decode(self.format_type)), datetime.datetime.now())
                         # print('클래스 생성했음')
                         self.talk_page.layout_talk.addLayout(client_msgbox.layout)
                         # print('레이아웃 추가되었는지?')
