@@ -55,7 +55,7 @@ class Client(Ui_MainWidget):
                 # 버튼 시그널 연결
                 self.talk_page.btn_send.clicked.connect(self.send_message)
                 self.talk_page.edt_txt.returnPressed.connect(self.send_message)
-                self.signal.connect(self.handle_received_message) # 추가
+
                 # self.disconnect_button.clicked.connect(self.disconnect_func)
                 # self.talk_page.show()
                 # 채팅방 참여 메세지
@@ -112,13 +112,11 @@ class Client(Ui_MainWidget):
                     try:
                         connected_users = pickle.loads(message)
                         print('이건머져', connected_users)
-                        print('혹시 여길 타나요?')
 
                     except:
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode('ISO-8859-1'))
                         self.signal.emit(message.decode(self.format_type))
+                        self.signal.connect(self.handle_received_message)  # 추가
                         # self.signal.connect(self.handle_received_message)
                         self.add_date_line()
                         # talkbox = TalkBox("", "자몽자몽", 'text', datetime.now(), self.signal)
