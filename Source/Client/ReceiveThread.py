@@ -12,5 +12,7 @@ class ReceiveThread(QThread):
     def run(self) -> None:
         while True:
             data = self.client.recevie()
+            print("[ 데이터 수신 ]")
+            print(data)
 
             self.res_message.emit(data)

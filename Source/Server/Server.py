@@ -77,7 +77,7 @@ class Server:
 
     def process_data(self, sock, data):
         # 받은 데이터에 대한 처리 결과 반환 내용 넣기
-        return "convert_data"
+        return data
 
     def handler(self, sock):
         while True:
@@ -86,8 +86,12 @@ class Server:
             if not data:
                 break
 
+            print("[ 데이터 수신 ]")
             # 수신된 데이터에 따른 결과 반환값을 클라이언트로 보내주기
+            print(data)
             process_data = self.process_data(sock, data)
+
+            print("[ 결과 발송 ]")
             self.send(sock, process_data)
 
 
@@ -96,7 +100,10 @@ if __name__ == "__main__":
 
     while True:
         print("대기중...")
+
         c_sock, c_addr = server.accept()
         c_thread = Thread(target=server.handler, args=c_sock, daemon=True)
         c_thread.start()
+
         print("클라이언트 접속 :", server.client)
+        print(c_addr)
