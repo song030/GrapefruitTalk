@@ -109,7 +109,7 @@ class Client(Ui_MainWidget):
         talkbox = DateLine(datetime.datetime.now())
         self.talk_page.layout_talk.addLayout(talkbox.layout)
 
-    def receive_message(self, client_message):
+    def receive_message(self): # client_message
         """
         각각 다른 스레드에서 있는 서버에서 메세지를 받기 위한 역할을 한다.
         메세지는 서버에서 받아지고 첫번째로 피클 모듈을 사용하여 리스트 형식으로 변형된다.

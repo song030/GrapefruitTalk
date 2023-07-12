@@ -16,6 +16,7 @@ class TalkBox:
         :param t_talk: 텍스트
         :param t_time: 발송 시간
         """
+        super().__init__()
         self.image = t_img
         self.nickname = t_nick
         self.message = t_talk
