@@ -9,6 +9,7 @@ from Source.Views.Font import Font
 from Source.Views.DialogWarning import DialogWarning
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
+from Source.Views.ListItem import ListItem
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -60,6 +61,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 채팅방
         self.lbl_room_name.setFont(Font.button(3))
         self.edt_txt.setFont(font_txt_normal)
+        self.splitter.moveSplitter(100, 0)
 
     # 화면 위젯 초기화
     def set_ui(self):
@@ -91,13 +93,10 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join.clicked.connect(self.join_input_check)
 
         # ===== 대화방
-        self.page_talk.showEvent = self.resizeEvent
-        # self.splitter.moveSplitter(600,0)
-
-    # 화면 변화가 일어났을때 대화창 사이즈 변화
-    def resizeEvent(self, a0: QResizeEvent) -> None:
-        self.scrollAreaWidgetContents.setFixedWidth(self.scrollArea.width()-15)
-
+        self.splitter.moveSplitter(100,0)
+        self.btn_single.clicked.connect(lambda: self.init_list("single"))
+        self.btn_multi.clicked.connect(lambda: self.init_list("multi"))
+        self.btn_friend.clicked.connect(lambda: self.init_list("friend"))
 
     # 레이아웃 비우기
     def clear_layout(self, layout:QLayout):
@@ -124,6 +123,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         if self.dlg_warning.exec():
             self.stack_main.setCurrentWidget(self.page_talk)
             self.init_talk()
+            self.init_list()
         else:
             pass
 
@@ -148,5 +148,83 @@ class MainWidget(QWidget, Ui_MainWidget):
     def add_date_line(self):
         talkbox = DateLine(datetime.now())
         self.layout_talk.addLayout(talkbox.layout)
+
+
+    def init_list(self, t_type="multi"):
+        if self.layout_list.count() > 0:
+            self.clear_layout(self.layout_list)
+
+        # 1:1 단톡방
+        if t_type == "single":
+            # 다른 버튼 체크 비활성
+            self.btn_multi.setChecked(False)
+            self.btn_friend.setChecked(False)
+
+            # 온라인
+            online = QLabel()
+            online.setFont(Font.button(3))
+            self.layout_list.addWidget(online)
+
+            for i in range(3):
+                item = ListItem("닉네임", "마지막 메시지 입니다.")
+                item.set_info(datetime.now(), i)
+                self.layout_list.addLayout(item.layout)
+
+            on_num = self.layout_list.count() - 1
+            online.setText(f"온라인 - {on_num}명")
+
+            # 오프라인
+            offline = QLabel()
+            offline.setFont(Font.button(3))
+            self.layout_list.addWidget(offline)
+
+            for i in range(3):
+                item = ListItem("닉네임", "마지막 메시지 입니다.")
+                item.set_info(datetime.now(), i)
+                self.layout_list.addLayout(item.layout)
+
+            off_num = self.layout_list.count() - 1 - on_num
+            offline.setText(f"오프라인 - {off_num}명")
+        
+        # 단체방
+        elif t_type == "multi":
+            # 다른 버튼 체크 비활성
+            self.btn_single.setChecked(False)
+            self.btn_friend.setChecked(False)
+
+            for i in range(5):
+                item = ListItem("닉네임", "상태상태")
+                item.set_info(datetime.now(), i)
+                self.layout_list.addLayout(item.layout)
+        
+        # 친구 리스트
+        elif t_type == "friend":
+            # 다른 버튼 체크 비활성
+            self.btn_single.setChecked(False)
+            self.btn_multi.setChecked(False)
+
+            # 온라인
+            online = QLabel()
+            online.setFont(Font.button(3))
+            self.layout_list.addWidget(online)
+            
+            for i in range(3):
+                item = ListItem("닉네임", "상태상태")
+                self.layout_list.addLayout(item.layout)
+
+            on_num = self.layout_list.count() - 1
+            online.setText(f"온라인 - {on_num}명")
+            
+            # 오프라인
+            offline = QLabel()
+            offline.setFont(Font.button(3))
+            self.layout_list.addWidget(offline)
+
+            for i in range(3):
+                item = ListItem("닉네임", "상태상태")
+                self.layout_list.addLayout(item.layout)
+
+            off_num = self.layout_list.count()-1-on_num
+            offline.setText(f"오프라인 - {off_num}명")
 
     # ==============================================================================================================

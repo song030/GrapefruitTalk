@@ -33,7 +33,7 @@ class Font:
         return font
 
     @staticmethod
-    def text(t_size=1):
+    def text(t_size=1, t_blod=True):
         font = QFont()
         if t_size == 1:
             font.setPointSize(12)
@@ -41,5 +41,12 @@ class Font:
             font.setPointSize(11)
         elif t_size == 3:
             font.setPointSize(10)
-        font.setFamily("나눔스퀘어라운드 Bold")
+        elif t_size == 4:
+            font.setPointSize(9)
+
+        if t_blod:
+            font.setFamily("나눔스퀘어라운드 Bold")
+        else:
+            font.setFamily("나눔스퀘어라운드 Regular")
+
         return font
