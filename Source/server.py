@@ -121,11 +121,12 @@ class Server(object):
         for key, values in self.connected_clients_dict.items(): # 연결된 유저들을 for문으로 돌려서 key값이 user_name과 같다면(접속한 클라이언트라면)
             # values에는 username, addr, client가 key값으로 들어있음(json 형태)
             if key == username:
+                print('현재 유저라 메세지 보내기를 생략합니다')
                 continue  # 현재 클라이언트 배제
             else:
                 print('보낼 메세지는 ', message.encode(self.format_type))
                 # messages = (username + message).encode(self.format_type)
-                values['client'].send(message.encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
+                values['client'].send((username + ': ' + message).encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
 
 
         # for user, data in self.connected_clients_dict.items():
@@ -155,7 +156,7 @@ class Server(object):
                         continue
                     else:
                         message_date = datetime.datetime.now()
-                        print('클라이언트에서 들어온 메세지는', username, addr, client)
+                        print(f'클라이언트 유저이름-{username}')
                         # self.send_msg_to_clients(username, ">" + username + ": " + message + " - " + message_date.strftime(
                         #     " %x %I:%M %p"))
                         self.send_msg_to_clients(username, message) # 클라이언트들에게 정보 보내기

@@ -117,38 +117,32 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
-                decoded_message = message.decode(self.format_type)
+                # decoded_message = message.decode('ISO-8859-1')
                 # print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
                 # print('들어온 메세지는 해독안한', message)
-
-
                 if message:
                     try:
                         connected_users = pickle.loads(message)
-                        self.connected_clients.clear()
-                        for name in connected_users:
-                            self.connected_clients.addItem(name)
-
-
+                        print('혹시 여길 타나요?')
+                        # self.connected_clients.clear()
+                        # for name in connected_users:
+                        #     self.connected_clients.addItem(name)
                     except:
+                        print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
                         # self.textBrowser.append(message.decode(self.format_type))
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
-                        print('아니면 여길 타나요')
-                        self.add_date_line()
-                        client_msgbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
-                        print('클래스 생성했음')
-                        self.talk_page.layout_talk.addLayout(client_msgbox.layout)
-                        print('레이아웃 추가되었는지?')
 
-
-
-
+                        # self.add_date_line()
+                        # client_msgbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
+                        # print('클래스 생성했음')
+                        # self.talk_page.layout_talk.addLayout(client_msgbox.layout)
+                        # print('레이아웃 추가되었는지?')
         except(ConnectionAbortedError, ConnectionResetError):
             pass
 
     def disconnect_func(self):
         """클라이언트가 연결을 종료할 때 실행되는 함수. 만약 x버튼이 있다면"""
-
+        self.connected_state = False
         # self.socket_for_client.send("exit".encode(self.format_type))
         try:
             self.socket_for_client.send('DISCONNECT'.encode(self.format_type))
@@ -161,7 +155,7 @@ class Client(Ui_MainWidget):
         """Username이 유효하지 않을 때 실행되는 함수."""
         # from Client.welcome import WelcomeScreen
         self.chatroom.destroy()
-        dialog = QtWidgets.QDialog()
+        # dialog = QtWidgets.QDialog()
         # self.__welcomescreen = WelcomeScreen(dialog)
         # self.__welcomescreen = LoginScreen.Ui_Welcomescreen()
         # self.__welcomescreen.setupUi(self.__welcomescreen)
