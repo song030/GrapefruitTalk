@@ -64,7 +64,8 @@ class TalkBox(QObject):
 
     def update_message(self, message):
         self.message = message
-        self.message_signal.emit(self.image, self.nickname, self.message, self.time)
+        time_str = self.time.strftime('%Y-%m-%d')
+        self.message_signal.emit(self.image, self.nickname, self.message, time_str)
 
     @property
     def layout(self):
