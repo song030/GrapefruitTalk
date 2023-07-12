@@ -118,6 +118,8 @@ class Client(Ui_MainWidget):
                 message = self.socket_for_client.recv(self.buffer_num)
                 decoded_message = message.decode('ISO-8859-1')
                 print('메세지는', message.decode('ISO-8859-1'))
+
+
                 if message:
                     try:
                         connected_users = pickle.loads(message)
