@@ -36,7 +36,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.receive_thread = ReceiveThread(self.client)
             self.id = ""
             self.address = self.client.address()
-            self.connect_thread()
+            self.connect_thread_signal()
             self.receive_thread.start()
 
     # 화면 글꼴 설정
@@ -116,7 +116,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
 
-    def connect_thread(self):
+    def connect_thread_signal(self):
         self.receive_thread.res_message.connect(self.receive_message)
 
     # 레이아웃 비우기
@@ -182,6 +182,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         self.edt_txt.setText("")
 
+    # 메시지 수신
     def receive_message(self, data):
         print("in receive")
         self.add_talk(0, "받음", data, datetime.now())
