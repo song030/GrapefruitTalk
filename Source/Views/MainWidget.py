@@ -155,4 +155,9 @@ class MainWidget(QWidget, Ui_MainWidget):
     #     talkbox = DateLine(datetime.now())
     #     self.layout_talk.addLayout(talkbox.layout)
 
+    def add_talk(self,a, b, c, d):
+        print('여기진짜 타냐고 ~~~~~~~~~~~~~~~~~~')
+        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
+        self.layout_talk.addLayout(talkbox.layout)
+
     # ==============================================================================================================

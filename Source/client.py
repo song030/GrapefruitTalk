@@ -123,6 +123,7 @@ class Client(Ui_MainWidget):
                 if message:
                     try:
                         connected_users = pickle.loads(message)
+                        print('이건머져', connected_users)
                         print('혹시 여길 타나요?')
                         # self.connected_clients.clear()
                         # for name in connected_users:
@@ -133,10 +134,9 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
 
                         self.add_date_line()
-                        client_msgbox = TalkBox('', '테스트', str(message.decode(self.format_type)), datetime.datetime.now())
-                        # print('클래스 생성했음')
-                        self.talk_page.layout_talk.addLayout(client_msgbox.layout)
-                        # print('레이아웃 추가되었는지?')
+                        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
+                        self.layout_talk.addLayout(talkbox.layout)
+
         except(ConnectionAbortedError, ConnectionResetError):
             pass
 

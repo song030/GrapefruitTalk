@@ -119,12 +119,14 @@ class Server(object):
         """
         print("클라이언트들에게 메세지를 보냅니다.")
         print('현재 연결된 유저들: ', self.connected_usernames_list)
+        print('현재 클라이언트들 딕셔너리: ', self.connected_clients_dict)
         for user in self.connected_usernames_list:
             if user == username:
+
                 pass
             else:
-                print('보낼 메세지는: ', message.encode(self.format_type))
-                self.connected_clients_dict[username]['client'].send((message).encode(self.format_type))
+                print(username, '이 보낼 메세지는: ', message.encode(self.format_type))
+                self.connected_clients_dict[user]['client'].send((message).encode(self.format_type))
         # for key, values in self.connected_clients_dict.items(): # 연결된 유저들을 for문으로 돌려서 key값이 user_name과 같다면(접속한 클라이언트라면)
         #     # values에는 username, addr, client가 key값으로 들어있음(json 형태)
         #     print(key, values)
