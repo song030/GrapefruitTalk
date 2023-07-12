@@ -2,6 +2,8 @@ import socket
 import datetime
 import threading
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QLayout
 import sys
 import pickle
 from Views.UI_MainWidget import Ui_MainWidget
@@ -117,9 +119,6 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
-                # decoded_message = message.decode('ISO-8859-1')
-                # print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
-                # print('들어온 메세지는 해독안한', message)
                 if message:
                     try:
                         connected_users = pickle.loads(message)
@@ -130,12 +129,13 @@ class Client(Ui_MainWidget):
                         #     self.connected_clients.addItem(name)
                     except:
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode(self.format_type))
-                        # self.textBrowser.append(message.decode('ISO-8859-1'))
-
                         self.add_date_line()
-                        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
-                        self.layout_talk.addLayout(talkbox.layout)
+                        talkbox = TalkBox("", "test_user", message.decode(self.format_type), datetime.datetime.now())
+                        QtCore.QMetaObject.invokeMethod(self.talk_page.layout_talk, 'addLayout',
+                                                        QtCore.Qt.QueuedConnection,
+                                                        QtCore.Q_ARG(QLayout, talkbox.layout))
+
+                        # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
         except(ConnectionAbortedError, ConnectionResetError):
             pass
