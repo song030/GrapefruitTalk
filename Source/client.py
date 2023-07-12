@@ -53,7 +53,7 @@ class Client(Ui_MainWidget):
                 # self.disconnect_button.clicked.connect(self.disconnect_func)
                 # self.talk_page.show()
                 # 채팅방 참여 메세지
-                talkbox = TalkBox('', self.username, f"{username}님이 채팅방에 참여하였습니다." , datetime.datetime.now(), self.signal)
+                talkbox = TalkBox('', self.username, f"{username}님이 채팅방에 참여하였습니다." , datetime.datetime.now())
                 self.talk_page.layout_talk.addLayout(talkbox.layout)
                 # 스레드 시작
                 self.receive_thread.start()
@@ -77,7 +77,7 @@ class Client(Ui_MainWidget):
                 self.socket_for_client.send(message.encode(self.format_type))
                 # 메세지 추가
                 self.add_date_line()
-                talkbox = TalkBox('', self.username, message, message_date, self.signal)
+                talkbox = TalkBox('', self.username, message, message_date)
                 self.talk_page.layout_talk.addLayout(talkbox.layout)
 
             except(ConnectionResetError):  # 서버가 실행되지 않았지만 클라이언트가 메시지를 보내려고 시도합니다.
@@ -113,12 +113,18 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode(self.format_type))
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
                         self.signal.emit(message.decode(self.format_type))
-                        self.add_date_line()
-                        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now(), self.signal)
-                        self.layout_talk.addLayout(talkbox.layout)
+                        self.signal.connect(self.make_talkbox)
+                        # self.add_date_line()
+                        # talkbox = TalkBox("", "자몽자몽", 'text', datetime.now(), self.signal)
+                        # self.layout_talk.addLayout(talkbox.layout)
 
         except(ConnectionAbortedError, ConnectionResetError):
             pass
+
+    def make_talkbox(self, message):
+        self.add_date_line()
+        talkbox = TalkBox("", "자몽자몽", message, datetime.now())
+        self.layout_talk.addLayout(talkbox.layout)
     def disconnect_func(self):
         """클라이언트가 연결을 종료할 때 실행되는 함수. 만약 x버튼이 있다면"""
         self.connected_state = False

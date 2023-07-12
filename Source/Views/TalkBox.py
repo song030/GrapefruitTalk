@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint
 from Source.Views.Font import Font
 
 class TalkBox:
-    def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime, signal):
+    def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime):
         """
         :param t_img: 프로필 타입 → 추 후 수정예정
         :param t_nick: 닉네임
