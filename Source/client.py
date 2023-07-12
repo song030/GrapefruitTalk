@@ -117,7 +117,7 @@ class Client(Ui_MainWidget):
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
                 decoded_message = message.decode('ISO-8859-1')
-                print('메세지는', message.decode('ISO-8859-1'))
+                print('들어온 메세지는', message.decode('ISO-8859-1'))
 
 
                 if message:
