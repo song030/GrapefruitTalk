@@ -294,5 +294,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             pass
         elif self.btn_multi.isChecked():
             pass
+        else:
+            pass
 
 # ==============================================================================================================
