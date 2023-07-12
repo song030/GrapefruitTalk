@@ -36,7 +36,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.receive_thread = ReceiveThread(self.client)
             self.id = ""
             self.address = self.client.address()
-
+            self.connect_thread()
             self.receive_thread.start()
 
     # 화면 글꼴 설정
@@ -179,6 +179,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             print("발송 완료")
             # self.add_talk(0, "테스트", text, datetime.now())
             pass
+
         self.edt_txt.setText("")
 
     def receive_message(self, data):
