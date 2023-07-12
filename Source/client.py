@@ -100,6 +100,7 @@ class Client(Ui_MainWidget):
                 # self.textBrowser.append("서버가 현재 오프라인 상태입니다.")
                 # self.talk_page.textBrowser.append("서버가 현재 오프라인 상태입니다.")
                 pass
+        self.talk_page.edt_txt.clear()
 
     def add_date_line(self):
         """날짜를 생성한다"""
@@ -116,9 +117,9 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
-                decoded_message = message.decode('ISO-8859-1')
-                print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
-                print('들어온 메세지는 utf-8', message.decode(self.format_type))
+                decoded_message = message.decode(self.format_type)
+                # print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
+                # print('들어온 메세지는 해독안한', message)
 
 
                 if message:
@@ -127,10 +128,6 @@ class Client(Ui_MainWidget):
                         self.connected_clients.clear()
                         for name in connected_users:
                             self.connected_clients.addItem(name)
-                        # print('여길 타나요')
-                        # self.add_date_line()
-                        # talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
-                        # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
 
                     except:
@@ -139,7 +136,9 @@ class Client(Ui_MainWidget):
                         print('아니면 여길 타나요')
                         self.add_date_line()
                         client_msgbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
+                        print('클래스 생성했음')
                         self.talk_page.layout_talk.addLayout(client_msgbox.layout)
+                        print('레이아웃 추가되었는지?')
 
 
 
