@@ -100,7 +100,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 화면 변화가 일어났을때 대화창 사이즈 변화
     def resizeEvent(self, a0: QResizeEvent) -> None:
-        self.scrollAreaWidgetContents.setFixedWidth(self.scrollArea.width()-30)
+        self.scrollAreaWidgetContents.setFixedWidth(self.scrollArea.width()-15)
 
 
     # 레이아웃 비우기

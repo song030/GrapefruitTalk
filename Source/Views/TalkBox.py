@@ -1,8 +1,8 @@
 from datetime import datetime
 
 from PyQt5.QtWidgets import QGridLayout, QLabel, QPlainTextEdit
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QPainterPath, QPainter
+from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint
 
 from Source.Views.Font import Font
 
@@ -24,7 +24,8 @@ class TalkBox:
         # 프로필 이미지
         self._lbl_profile = QLabel()
         self._lbl_profile.setFixedSize(50, 50)
-        self._lbl_profile.setPixmap(QPixmap("../Images/img_profile.png"))
+        self._lbl_profile.setPixmap(QPixmap("../Images/img_profile_king.png"))
+        self._lbl_profile.setStyleSheet("background-color:rgb(248,228,208);border-radius:25px")
         self._grid_layout.addWidget(self._lbl_profile, 0, 0, 2, 1, Qt.AlignTop)
 
         # 닉네임
@@ -42,6 +43,7 @@ class TalkBox:
                                     border-radius:5px;
                                     padding:10px;""")
         self._lbl_talk.setPlainText(t_talk)
+        self._lbl_talk.setReadOnly(True)
         self._grid_layout.addWidget(self._lbl_talk, 1, 1)
 
         # 발송 시간
