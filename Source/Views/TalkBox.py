@@ -35,6 +35,7 @@ class TalkBox:
 
         # 말풍선
         self._lbl_talk = QPlainTextEdit()
+        self._lbl_talk.setReadOnly(True) # readonly로 설정
         self._lbl_talk.setFont(Font.text(3))
         self._lbl_talk.setStyleSheet("""background-color:rgb(248,228,208);
                                     border:1px solid rgb(248,228,208);
