@@ -117,7 +117,8 @@ class Client(Ui_MainWidget):
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
                 decoded_message = message.decode('ISO-8859-1')
-                print('들어온 메세지는', message.decode('ISO-8859-1'))
+                print('들어온 메세지는 iso-8859', message.decode('ISO-8859-1'))
+                print('들어온 메세지는 utf-8', message.decode(self.format_type))
 
 
                 if message:
@@ -137,8 +138,10 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
                         print('아니면 여길 타나요')
                         self.add_date_line()
-                        talkbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
-                        self.talk_page.layout_talk.addLayout(talkbox.layout)
+                        client_msgbox = TalkBox('', '테스트', str(decoded_message), datetime.datetime.now())
+                        self.talk_page.layout_talk.addLayout(client_msgbox.layout)
+
+
 
 
         except(ConnectionAbortedError, ConnectionResetError):
