@@ -132,7 +132,7 @@ class Client(Ui_MainWidget):
                         self.add_date_line()
                         talkbox = TalkBox("", "test_user", message.decode(self.format_type), datetime.datetime.now())
                         talkbox.message_signal.connect(self.add_talkbox)
-                        talkbox.update_message(message.decode(self.format_type))
+                        talkbox.update_message(message.decode(self.format_type), 'test_time')
                         # QtCore.QMetaObject.invokeMethod(self.talk_page.layout_talk, 'addLayout',
                         #                                 QtCore.Qt.QueuedConnection,
                         #                                 QtCore.Q_ARG(QLayout, talkbox.layout))

@@ -57,10 +57,10 @@ class TalkBox(QObject):
 
         # 발송 시간
         # t_time = t_time.strftime("%H:%M")
-        time_str = self.time.strftime("%H:%M")
+        # time_str = self.time.strftime("%H:%M")
         self._lbl_time = QLabel()
         self._lbl_time.setFont(Font.text(3))
-        self._lbl_time.setText(time_str)
+        self._lbl_time.setText(t_time)
         self._grid_layout.addWidget(self._lbl_time, 2, 1)
 
     # def update_message(self, message, time):
@@ -71,7 +71,7 @@ class TalkBox(QObject):
 
     def update_message(self, message, time):
         self.message = message
-        self.time = datetime.strptime(time, '%H:%M')
+        # self.time = datetime.strptime(time, '%H-%M')
         self.message_signal.emit(self.name, self.color, self.message, self.time)
 
     @property
