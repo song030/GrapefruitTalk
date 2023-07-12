@@ -1090,7 +1090,7 @@ padding: 3px;</string>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="btn_out">
                <property name="styleSheet">
                 <string notr="true">border: 1px solid lightgray;
 border-radius: 5px;
@@ -1125,7 +1125,7 @@ padding: 3px;</string>
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_3">
+              <widget class="QPushButton" name="btn_add">
                <property name="minimumSize">
                 <size>
                  <width>34</width>
@@ -1150,7 +1150,7 @@ padding: 3px;</string>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="btn_setting">
                <property name="styleSheet">
                 <string notr="true">border: 1px solid lightgray;
 border-radius: 5px;

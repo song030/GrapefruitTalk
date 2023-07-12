@@ -20,6 +20,7 @@ class ListItem:
         self._grid_layout.setColumnStretch(0, 0)
         self._grid_layout.setColumnStretch(1, 1)
         self._grid_layout.setColumnStretch(2, 0)
+        self._grid_layout.setColumnStretch(3, 0)
         self._grid_layout.setHorizontalSpacing(10)
         self._grid_layout.setVerticalSpacing(10)
 
@@ -37,16 +38,24 @@ class ListItem:
         self._lbl_text = QLabel()
         self._lbl_text.setText(f"{t_text}")
         self._lbl_text.setFont(Font.text(4, False))
-        self._grid_layout.addWidget(self._lbl_text, 1, 1, Qt.AlignVCenter)
+        self._grid_layout.addWidget(self._lbl_text, 1, 1, 1, 2, Qt.AlignVCenter)
+
+        # 채팅방 인원
+        self._lbl_cnt = QLabel()
+        self._lbl_cnt.setFont(Font.text(4))
+        self._lbl_cnt.setFixedWidth(30)
+        self._lbl_cnt.setAlignment(Qt.AlignCenter)
+        self._grid_layout.addWidget(self._lbl_cnt, 0, 2, Qt.AlignCenter)
 
         # 발송 시간
         self._lbl_last_date = QLabel()
         self._lbl_last_date.setFont(Font.text(4, False))
-        self._grid_layout.addWidget(self._lbl_last_date, 0, 2, Qt.AlignVCenter)
+        self._grid_layout.addWidget(self._lbl_last_date, 0, 3, Qt.AlignVCenter)
 
         # 미확인 메시지 수
         self._lbl_no_check= NoMsgCnt()
-        self._grid_layout.addWidget(self._lbl_no_check.label, 1, 2, 1, 1, Qt.AlignCenter)
+        self._grid_layout.addWidget(self._lbl_no_check.label, 1, 3, 1, 1, Qt.AlignCenter)
+
 
     @property
     def layout(self):
@@ -56,3 +65,6 @@ class ListItem:
         t_last = t_last.strftime("%H:%M")
         self._lbl_last_date.setText(t_last)
         self._lbl_no_check.set_count(t_no_check)
+
+    def set_member_count(self, t_cnt:int):
+        self._lbl_cnt.setText(f"{t_cnt}명")
