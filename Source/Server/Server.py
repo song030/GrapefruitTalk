@@ -44,12 +44,14 @@ class Server:
 
     # 데이터 전송
     def send(self, sock:socket.socket, data):
-        self.send_all(sock, data)
+        self.send_all_client(data)
 
     # 접속한 모든 클라이언트에게 전송
-    def send_all(self, sock:socket.socket, data):
+    def send_all_client(self, data):
         if self.connected():
-            sock.sendall(pickle.dumps(data))
+            # 연결된 모든 클라이언트에 데이터 발송
+            for client in self.client.values():
+                client[0].sendall(pickle.dumps(data))
             return True
         else:
             return False

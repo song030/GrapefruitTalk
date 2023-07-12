@@ -3,6 +3,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from Source.Client import Client
 
 class ReceiveThread(QThread):
+
     res_message = pyqtSignal(str)
 
     def __init__(self, client:Client):
