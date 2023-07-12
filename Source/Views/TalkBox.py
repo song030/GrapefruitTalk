@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QRectF, QSizeF, QPoint, pyqtSignal, QObject
 
 from Source.Views.Font import Font
 
-class TalkBox:
+class TalkBox(QObject):
     message_signal = pyqtSignal(str, str, str, str)
 
     def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime):
