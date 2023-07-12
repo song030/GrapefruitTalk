@@ -79,7 +79,7 @@ class Server:
         # 받은 데이터에 대한 처리 결과 반환 내용 넣기
         return data
 
-    def handler(self, sock):
+    def handler(self, sock,):
         while True:
             data = self.recevie(sock)
 
@@ -93,6 +93,7 @@ class Server:
 
             print("[ 결과 발송 ]")
             self.send(sock, process_data)
+            print("발송 완료")
 
 
 if __name__ == "__main__":
@@ -102,7 +103,7 @@ if __name__ == "__main__":
         print("대기중...")
 
         c_sock, c_addr = server.accept()
-        c_thread = Thread(target=server.handler, args=c_sock, daemon=True)
+        c_thread = Thread(target=server.handler, args=(c_sock,), daemon=True)
         c_thread.start()
 
         print("클라이언트 접속 :", server.client)

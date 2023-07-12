@@ -176,10 +176,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 네트워크 발신 내용 추가하기
         text = self.edt_txt.text()
         if self.client.send(text):
-            self.add_talk(0, "테스트", text, datetime.now())
-        pass
+            print("발송 완료")
+            # self.add_talk(0, "테스트", text, datetime.now())
+            pass
+        self.edt_txt.setText("")
 
     def receive_message(self, data):
+        print("in receive")
         self.add_talk(0, "받음", data, datetime.now())
 
     # ==============================================================================================================
