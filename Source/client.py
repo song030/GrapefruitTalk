@@ -118,7 +118,9 @@ class Client(Ui_MainWidget):
                 message = self.socket_for_client.recv(self.buffer_num)
                 decoded_message = message.decode('ISO-8859-1')
                 print('메세지는', message.decode('ISO-8859-1'))
-
+                self.add_date_line()
+                talkbox = TalkBox('', self.username, str(decoded_message), datetime.datetime.now())
+                self.talk_page.layout_talk.addLayout(talkbox.layout)
 
                 if message:
                     try:
@@ -137,8 +139,8 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
                         print('아니면 여길 타나요')
                         self.add_date_line()
-                        talkbox = TalkBox('', self.username, str(decoded_message), datetime.datetime.now())
-                        self.talk_page.layout_talk.addLayout(talkbox.layout)
+                        # talkbox = TalkBox('', self.username, str(decoded_message), datetime.datetime.now())
+                        # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
 
         except(ConnectionAbortedError, ConnectionResetError):
