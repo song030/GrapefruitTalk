@@ -32,19 +32,25 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.connect_event()
 
         self.__chatroom = Client(self, 'soyeon')
+        self.__chatroom.signal.connect(self.make_talkbox)
 
         # 디비 연결
         # DB 연결 및 데이터 리스트업
 
-        # conn = sqlite3.connect("../../data/grapefruit_talk.db", check_same_thread=False)
-        #
-        # df = pd.read_sql('select * from TB_USER', conn) # 전체 데이터프레임
-        # id_df = pd.read_sql("select USER_ID from TB_USER", conn)
-        # self.id_list = id_df.values.tolist() # 아이디 리스트
-        #
-        # pwd_df = pd.read_sql("select USER_PW from TB_USER", conn)
-        # self.pwd_list = pwd_df.values.tolist() # 비밀번호 리스트
+        # conn = sqlite3.connect("../../data/grapefruit_talk.db")
+        conn = sqlite3.connect("C:\\Users\\KDT103\\Desktop\\coding\\0. 프로젝트\\팀프로젝트\\GrapefruitTalk\\data\\grapefruit_talk.db")
 
+        df = pd.read_sql('select * from TB_USER', conn) # 전체 데이터프레임
+        id_df = pd.read_sql("select USER_ID from TB_USER", conn)
+        self.id_list = id_df.values.tolist() # 아이디 리스트
+
+        pwd_df = pd.read_sql("select USER_PW from TB_USER",     conn)
+        self.pwd_list = pwd_df.values.tolist() # 비밀번호 리스트
+
+    def make_talkbox(self, message):
+        self.add_date_line()
+        talkbox = TalkBox("", "자몽자몽", message, datetime.now())
+        self.layout_talk.addLayout(talkbox.layout)
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -118,14 +124,15 @@ class MainWidget(QWidget, Ui_MainWidget):
         # self.splitter.moveSplitter(600,0)
 
     def check_id_txt(self):
+        """아이디 중복 확인"""
         user_id = self.edt_join_id.text()
-        print(user_id)
+        print(user_id, self.id_list)
         if user_id in self.id_list:
             self.dlg_warning.set_dialog_type(1, "used_id")
             return None
         elif user_id not in self.id_list:
             self.dlg_warning.set_dialog_type(1, "user_can_used")
-            return user_id
+            # return user_id
 
     # 화면 변화가 일어났을때 대화창 사이즈 변화
     def resizeEvent(self, a0: QResizeEvent) -> None:
@@ -185,9 +192,9 @@ class MainWidget(QWidget, Ui_MainWidget):
     #     talkbox = DateLine(datetime.now())
     #     self.layout_talk.addLayout(talkbox.layout)
 
-    def add_talk(self,a, b, c, d):
-        print('여기진짜 타냐고 ~~~~~~~~~~~~~~~~~~')
-        talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
-        self.layout_talk.addLayout(talkbox.layout)
+    # def add_talk(self,a, b, c, d):
+    #     print('여기진짜 타냐고 ~~~~~~~~~~~~~~~~~~')
+    #     talkbox = TalkBox("", "자몽자몽", 'text', datetime.now())
+    #     self.layout_talk.addLayout(talkbox.layout)
 
     # ==============================================================================================================

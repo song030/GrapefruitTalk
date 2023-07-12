@@ -19,9 +19,11 @@ class Client(Ui_MainWidget):
     port_num = 1121
     host_num = '10.10.20.103'  # socket.gethostbyname(socket.gethostname()) #'10.10.20.103' #socket.gethostbyname(socket.gethostname())
     print('호스트: ', host_num, '포트주소: ', port_num, '버퍼: ', buffer_num)
+    signal = pyqtSignal(str)
     server_num = (host_num, port_num)  # 호스트와 포트 주소를 server_num 변수에 저장한다.
+
     def __init__(self, MainWindow, username):
-        self.signal = pyqtSignal(str)
+        # self.signal = pyqtSignal(str)
         self.connected_state = False
         # self.__welcomescreen = None
         self.receive_thread = threading.Thread(target=self.receive_message)
@@ -38,9 +40,9 @@ class Client(Ui_MainWidget):
             print("서버에 연결할 수 없습니다.")
             sys.exit()
 
-    @pyqtSlot(str)
-    def handle_received_message(self, message):
-        self.make_talkbox(message)
+    # @pyqtSlot(str)
+    # def handle_received_message(self, message):
+    #     self.make_talkbox(message)
 
     def check_validate_user(self, username):
         """서버로 보내어 username이 유효한지 확인한다. 유효하면 채팅방을 보여준다.
@@ -116,7 +118,7 @@ class Client(Ui_MainWidget):
                     except:
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
                         self.signal.emit(message.decode(self.format_type))
-                        self.signal.connect(self.handle_received_message)  # 추가
+                        # self.signal.connect(self.handle_received_message)  # 추가
                         # self.signal.connect(self.handle_received_message)
                         self.add_date_line()
                         # talkbox = TalkBox("", "자몽자몽", 'text', datetime.now(), self.signal)
@@ -127,10 +129,10 @@ class Client(Ui_MainWidget):
 
 
 
-    def make_talkbox(self, message):
-        self.add_date_line()
-        talkbox = TalkBox("", "자몽자몽", message, datetime.now())
-        self.layout_talk.addLayout(talkbox.layout)
+    # def make_talkbox(self, message):
+    #     self.add_date_line()
+    #     talkbox = TalkBox("", "자몽자몽", message, datetime.now())
+    #     self.layout_talk.addLayout(talkbox.layout)
     def disconnect_func(self):
         """클라이언트가 연결을 종료할 때 실행되는 함수. 만약 x버튼이 있다면"""
         self.connected_state = False
