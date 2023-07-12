@@ -116,6 +116,7 @@ class Client(Ui_MainWidget):
         try:
             while self.connected_state:  # 무한 루프를 사용하여 메시지를 계속 수신한다.
                 message = self.socket_for_client.recv(self.buffer_num)
+                decoded_message = message.decode('ISO-8859-1')
                 print('메세지는', message.decode('ISO-8859-1'))
                 if message:
                     try:
@@ -123,11 +124,10 @@ class Client(Ui_MainWidget):
                         self.connected_clients.clear()
                         for name in connected_users:
                             self.connected_clients.addItem(name)
-
-                        print('여길 타나요')
-                        self.add_date_line()
-                        talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
-                        self.talk_page.layout_talk.addLayout(talkbox.layout)
+                        # print('여길 타나요')
+                        # self.add_date_line()
+                        # talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
+                        # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
 
                     except:
@@ -135,7 +135,7 @@ class Client(Ui_MainWidget):
                         # self.textBrowser.append(message.decode('ISO-8859-1'))
                         print('아니면 여길 타나요')
                         self.add_date_line()
-                        talkbox = TalkBox('', self.username, str(message), datetime.datetime.now())
+                        talkbox = TalkBox('', self.username, str(decoded_message), datetime.datetime.now())
                         self.talk_page.layout_talk.addLayout(talkbox.layout)
 
 
