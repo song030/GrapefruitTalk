@@ -124,8 +124,8 @@ class Server(object):
                 continue  # 현재 클라이언트 배제
             else:
                 print('보낼 메세지는 ', message.encode(self.format_type))
-                messages = username + message.encode(self.format_type)
-                values['client'].send(username, messages) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
+                # messages = (username + message).encode(self.format_type)
+                values['client'].send(username, message.encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
 
 
         # for user, data in self.connected_clients_dict.items():
