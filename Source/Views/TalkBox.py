@@ -14,7 +14,7 @@ class TalkBox:
         :param t_talk: 텍스트
         :param t_time: 발송 시간
         """
-        self.signal = signal
+
         self._grid_layout = QGridLayout()
         self._grid_layout.setAlignment(Qt.AlignLeft)
         self._grid_layout.setColumnStretch(0, 0)
