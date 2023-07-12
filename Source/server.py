@@ -118,15 +118,23 @@ class Server(object):
            :rtype: bool
         """
         print("클라이언트들에게 메세지를 보냅니다.")
-        for key, values in self.connected_clients_dict.items(): # 연결된 유저들을 for문으로 돌려서 key값이 user_name과 같다면(접속한 클라이언트라면)
-            # values에는 username, addr, client가 key값으로 들어있음(json 형태)
-            if key == username:
-                print('현재 유저라 메세지 보내기를 생략합니다')
-                continue  # 현재 클라이언트 배제
+        print('현재 연결된 유저들: ', self.connected_usernames_list)
+        for user in self.connected_usernames_list:
+            if user == username:
+                pass
             else:
-                print('보낼 메세지는 ', message.encode(self.format_type))
-                # messages = (username + message).encode(self.format_type)
-                values['client'].send((username + ': ' + message).encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
+                print('보낼 메세지는: ', message.encode(self.format_type))
+                self.connected_clients_dict[username]['client'].send((message).encode(self.format_type))
+        # for key, values in self.connected_clients_dict.items(): # 연결된 유저들을 for문으로 돌려서 key값이 user_name과 같다면(접속한 클라이언트라면)
+        #     # values에는 username, addr, client가 key값으로 들어있음(json 형태)
+        #     print(key, values)
+        #     if key == username:
+        #         print('현재 유저라 메세지 보내기를 생략합니다')
+        #         continue  # 현재 클라이언트 배제
+        #     else:
+        #         print('보낼 메세지는 ', message.encode(self.format_type))
+        #         # messages = (username + message).encode(self.format_type)
+        #         values['client'].send((username + ': ' + message).encode(self.format_type)) # 메세지를 포메팅해서 해독한 후에 클라이언트들에게 보내줌
 
 
         # for user, data in self.connected_clients_dict.items():
