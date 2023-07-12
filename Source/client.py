@@ -109,7 +109,7 @@ class Client(Ui_MainWidget):
         talkbox = DateLine(datetime.datetime.now())
         self.talk_page.layout_talk.addLayout(talkbox.layout)
 
-    def receive_message(self):
+    def receive_message(self, client_message):
         """
         각각 다른 스레드에서 있는 서버에서 메세지를 받기 위한 역할을 한다.
         메세지는 서버에서 받아지고 첫번째로 피클 모듈을 사용하여 리스트 형식으로 변형된다.
@@ -131,14 +131,22 @@ class Client(Ui_MainWidget):
                         print('서버에서 받은 메세지 출력: ', message.decode(self.format_type))
                         self.add_date_line()
                         talkbox = TalkBox("", "test_user", message.decode(self.format_type), datetime.datetime.now())
-                        QtCore.QMetaObject.invokeMethod(self.talk_page.layout_talk, 'addLayout',
-                                                        QtCore.Qt.QueuedConnection,
-                                                        QtCore.Q_ARG(QLayout, talkbox.layout))
+                        talkbox.message_signal.connect(self.add_talkbox)
+                        # QtCore.QMetaObject.invokeMethod(self.talk_page.layout_talk, 'addLayout',
+                        #                                 QtCore.Qt.QueuedConnection,
+                        #                                 QtCore.Q_ARG(QLayout, talkbox.layout))
 
                         # self.talk_page.layout_talk.addLayout(talkbox.layout)
 
         except(ConnectionAbortedError, ConnectionResetError):
             pass
+    def add_talkbox(self, img_path, name, msg, time):
+        talkbox = TalkBox(img_path, name, msg, time)
+        talkbox_layout = talkbox.layout()
+        self.talk_page.layout_talk.addLayout(talkbox_layout)
+
+
+
 
     def disconnect_func(self):
         """클라이언트가 연결을 종료할 때 실행되는 함수. 만약 x버튼이 있다면"""
