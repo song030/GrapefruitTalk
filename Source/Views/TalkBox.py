@@ -7,7 +7,7 @@ from Source.Views.Font import Font
 from Source.Views.ProfileImage import ProfileImage
 
 class TalkBox:
-    def __init__(self, t_img:str, t_nick:str, t_talk:str, t_time:datetime):
+    def __init__(self, t_img:int, t_nick:str, t_talk:str, t_time:datetime):
         """
         :param t_img: 프로필 타입 → 추 후 수정예정
         :param t_nick: 닉네임
