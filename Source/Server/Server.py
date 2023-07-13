@@ -59,6 +59,13 @@ class Server:
             self.client[sock.getpeername()][1] = data
             print(self.client[sock.getpeername()][1])
 
+    def send_client(self, sock: socket.socket, data):
+        if self.connected:
+            sock.sendall(pickle.dumps(data))
+            return True
+        else:
+            return False
+
     # 접속한 모든 클라이언트에게 전송
     def send_all_client(self, data):
         if self.connected():

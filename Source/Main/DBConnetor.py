@@ -27,16 +27,16 @@ class DBConnector:      # DB를 총괄하는 클래스
             DROP TABLE IF EXISTS TB_USER;  
             CREATE TABLE "TB_USER" (
                 "USER_NO" INTEGER,
-                "USER_ID" TEXT NOT NULL,
+                "USER_ID" TEXT NOT NULL UNIQUE,
                 "USER_NM" TEXT NOT NULL,
                 "USER_EMAIL" TEXT NOT NULL,
                 "USER_PW" TEXT NOT NULL,
                 "USER_CREATE_DATE" TEXT NOT NULL,
                 "USER_IMG" TEXT,
                 "USER_STATE" TEXT,
-                PRIMARY KEY ("USER_NO" AUTOINCREMENT),
-                UNIQUE KEY ("USER_ID")
+                PRIMARY KEY ("USER_NO" AUTOINCREMENT)
             );
+            
             DROP TABLE IF EXISTS TB_FRIEND;
             CREATE TABLE "TB_FRIEND" (
                 "USER_ID" TEXT,
@@ -44,6 +44,7 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "FRD_ACCEPT" TEXT,
                 FOREIGN KEY ("USER_ID") REFERENCES "TB_USER" ("USER_ID")
             );
+            
             DROP TABLE IF EXISTS TB_LOG;
             CREATE TABLE "TB_LOG" (
                 "USER_ID" TEXT,
@@ -93,7 +94,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         """)
         self.commit_db()
 
-    # todo: 회원가입부터 로그인 친구목록
     ## TB_USER ================================================================================ ##
     # 회원 정보 테이블 값 입력
     def insert_user(self, user_id, user_name, user_email, user_pw,
@@ -126,6 +126,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
 
     ## TB_friend ================================================================================ ##
+
     # 친구 목록 정보 테이블 값 입력
     def insert_friend(self, user_id, frd_id):
         self.cur.execute("insert into TB_FRIEND (CR_ID, CR_NM) values (?, ?)", (user_id, frd_id))
@@ -147,7 +148,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         row = self.cur.execute("select * from TB_FRIEND where FRD_ID = ?", (frd_id,)).fetchall()
         friend_id = row[0]
         return friend_id
-        # todo: sql문에도 and와 or문을 넣을 수 있다. 첫 번째 조건 뒤에 연산자를 추가하여 다음에 두번째 (id 먼저 pw를 조회) 하여 찾기
         # sql문에서 개수를 가지고 오는 방법 -> * 말고 count(컬럼명) 숫자로 값이 나옴
         # 데이터 프레임으로 받아와지면 줄 수가 몇개인지 확인 0이면 x 1이면 o
 
@@ -156,7 +156,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.cur.execute("delete from TB_FRIEND where FRD_ID = ?", (frd_id,))
         self.commit_db()
 
-    ## TB_log ================================================================================ ##
     # LOG 정보 테이블 값 입력
     def insert_log(self, user_id, login_time, logout_time):
         self.cur.execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)", (user_id, login_time, logout_time))
@@ -266,7 +265,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         user_cr_to = row[0]
         return user_cr_to
 
-    # todo: 어떤 부분을 삭제할 것인지 더 생각해보기
     def delete_user_chatroom(self, user_cr_to):
         self.cur.execute("delete from TB_CHATROOM where USER_CR_TO = ?", (user_cr_to,))
         self.commit_db()
@@ -328,28 +326,7 @@ if __name__ == '__main__':
 
     db.create_tables()
 
-    # user = db.insert_user("hong", "홍길동", "hong@naver.com", "hong1234", "2023.07.12", "", "")
-
-
-
-
-    # b = db.chatroom_id_creation("OE", "개인방")
-
-   # find_chatroom_list = db.find_chatroom_by_id()
-
-    # for i in range(1, 3):
-    #     db.delete_chatroom(f"OE_{i}")
-    # db.delete_chatroom("OE_8")
-
-    # a = c.execute("select * from TB_CHATROOM where CR_ID = ?", ("OE_1",)).fetchall()
-    # print(a)
-    # b = a[0]
-    # print(b)
-
-    chatroom_list = db.find_chatroom()
-    print(chatroom_list)
-
-    # db.commit_db()
+    db.commit_db()
     db.end_conn()
 
 
