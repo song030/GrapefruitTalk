@@ -52,3 +52,7 @@ class TalkBox:
     @property
     def layout(self):
         return self._grid_layout
+
+    @property
+    def widget(self):
+        return self._lbl_talk

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWidget.ui'
+# Form implementation generated from reading ui file './UI/MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -344,7 +344,7 @@ class Ui_MainWidget(object):
 "}")
         self.btn_member.setText("")
         icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("../Images/btn_member.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2.addPixmap(QtGui.QPixmap("../../Images/btn_member.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_member.setIcon(icon2)
         self.btn_member.setIconSize(QtCore.QSize(22, 22))
         self.btn_member.setCheckable(True)
@@ -367,7 +367,6 @@ class Ui_MainWidget(object):
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("../../Images/btn_friend.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_friend.setIcon(icon3)
-
         self.btn_friend.setIconSize(QtCore.QSize(22, 22))
         self.btn_friend.setCheckable(True)
         self.btn_friend.setFlat(True)
@@ -468,9 +467,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_emoticon.setText("")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap("../../Images/btn_emoticon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_emoticon.setIcon(icon3)
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("../../Images/btn_emoticon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_emoticon.setIcon(icon4)
         self.btn_emoticon.setIconSize(QtCore.QSize(22, 22))
         self.btn_emoticon.setFlat(True)
         self.btn_emoticon.setObjectName("btn_emoticon")
@@ -481,9 +480,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_send.setText("")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap("../../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_send.setIcon(icon4)
+        icon5 = QtGui.QIcon()
+        icon5.addPixmap(QtGui.QPixmap("../../Images/btn_send.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_send.setIcon(icon5)
         self.btn_send.setIconSize(QtCore.QSize(22, 22))
         self.btn_send.setFlat(True)
         self.btn_send.setObjectName("btn_send")
@@ -507,9 +506,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_out.setText("")
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("../../Images/btn_out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_out.setIcon(icon5)
+        icon6 = QtGui.QIcon()
+        icon6.addPixmap(QtGui.QPixmap("../../Images/btn_out.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_out.setIcon(icon6)
         self.btn_out.setIconSize(QtCore.QSize(22, 22))
         self.btn_out.setObjectName("btn_out")
         self.horizontalLayout_7.addWidget(self.btn_out)
@@ -532,9 +531,9 @@ class Ui_MainWidget(object):
 "border-radius: 5px;\n"
 "padding: 3px;")
         self.btn_setting.setText("")
-        icon6 = QtGui.QIcon()
-        icon6.addPixmap(QtGui.QPixmap("../../Images/btn_setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_setting.setIcon(icon6)
+        icon7 = QtGui.QIcon()
+        icon7.addPixmap(QtGui.QPixmap("../../Images/btn_setting.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_setting.setIcon(icon7)
         self.btn_setting.setIconSize(QtCore.QSize(22, 22))
         self.btn_setting.setObjectName("btn_setting")
         self.horizontalLayout_7.addWidget(self.btn_setting)
@@ -571,13 +570,3 @@ class Ui_MainWidget(object):
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWidget = QtWidgets.QWidget()
-    ui = Ui_MainWidget()
-    ui.setupUi(MainWidget)
-    MainWidget.show()
-    sys.exit(app.exec_())

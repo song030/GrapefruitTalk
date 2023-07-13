@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout, QAction
 from PyQt5.QtCore import Qt, pyqtSlot
 
 from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
+from PyQt5 import QtTest
 
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
@@ -39,16 +40,16 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 이벤트 연결
         self.connect_event()
 
-        # 서버 연결
-        self.client = Client()
-        if not self.client.connect():
-            self.disconnect()
-        else:
-            self.receive_thread = ReceiveThread(self.client)
-            self.address = self.client.address()
-            self.connect_thread_signal()
-            self.receive_thread.start()
-            self.client.send(self.user_id)
+        # # 서버 연결
+        # self.client = Client()
+        # if not self.client.connect():
+        #     self.disconnect()
+        # else:
+        #     self.receive_thread = ReceiveThread(self.client)
+        #     self.address = self.client.address()
+        #     self.connect_thread_signal()
+        #     self.receive_thread.start()
+        #     self.client.send(self.user_id)
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -207,12 +208,15 @@ class MainWidget(QWidget, Ui_MainWidget):
     def send_message(self):
         # 네트워크 발신 내용 추가하기
         text = self.edt_txt.text()
-        if self.client.send(ReqChat(self.user_id, 0, text)):
-            print("발송 완료")
-            self.add_talk(0, "발송", text, datetime.now())
-            pass
+        widget = self.add_talk(0, "발송", text, datetime.now())
+        # if self.client.send(ReqChat(self.user_id, 0, text)):
+        #     print("발송 완료")
+        #     self.add_talk(0, "발송", text, datetime.now())
+        #     pass
 
+        QtTest.QTest.qWait(100)
         self.edt_txt.setText("")
+        self.scroll_talk.ensureVisible(0,self.scrollAreaWidgetContents.height())
 
     # 메시지 수신
     def receive_message(self, data:ReqChat):
