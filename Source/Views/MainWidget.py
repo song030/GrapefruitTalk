@@ -343,13 +343,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             for i in range(3):
                 item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
                 self.layout_list.addWidget(item.frame)
-                # --- 우클릭 : 친구 추가 메뉴
-                item.frame.setContextMenuPolicy(Qt.ActionsContextMenu)
-                request_action = QAction("친구 요청", item.frame)
-                request_action.triggered.connect(self.friend_request)
-                item.frame.addAction(request_action)
-                item.frame.setStyleSheet("QMenu::item {color: #E6A157; background: #FFF3E2; font-size: 12px;}"
-                                         "QMenu::item::selected{color: #FFF3E2; background: #E6A157;}")
+                # 우클릭 시 친구 추가 메뉴
+                item.set_context_menu("친구 추가 요청", self.friend_request)
 
             on_num = self.layout_list.count() - 1
             online.setText(f"온라인 - {on_num}명")
@@ -362,6 +357,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             for i in range(3):
                 item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
                 self.layout_list.addWidget(item.frame)
+                # 우클릭 시 친구 추가 메뉴
+                item.set_context_menu("친구 추가 요청", self.friend_request)
 
             off_num = self.layout_list.count() - 1 - on_num
             offline.setText(f"오프라인 - {off_num}명")
@@ -369,6 +366,17 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 친구 리스트
         elif t_type == "friend":
             self.btn_add.setVisible(False)
+
+            # --- 친구 신청
+            request_ = QLabel()
+            request_.setFont(Font.button(3))
+            self.layout_list.addWidget(request_)
+            item = ListItem(f"request0", "친구 후보", '')
+            item.set_button_box(self.add_friend)
+            self.layout_list.addWidget(item.frame)
+            reque_num = self.layout_list.count() - 1
+            request_.setText(f"친구 요청 - {reque_num}명")
+
             # 온라인
             online = QLabel()
             online.setFont(Font.button(3))
@@ -377,6 +385,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             for i in range(3):
                 item = ListItem(f"friend{i}", "친구", "상태상태상태상태상태상태")
                 self.layout_list.addWidget(item.frame)
+                # 우클릭 시 일대일 대화방으로 메뉴
+                item.set_context_menu("1:1 대화", self.move_single_chat, item)
 
             on_num = self.layout_list.count() - 1
             online.setText(f"온라인 - {on_num}명")
@@ -387,12 +397,15 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(offline)
 
             for i in range(3):
-                item = ListItem(f"friend{i:53d}", "닉네임", "상태상태상태상태상태상태")
+                item = ListItem(f"friend{i}", "닉네임", "상태상태상태상태상태상태")
                 self.layout_list.addWidget(item.frame)
+                # 우클릭 시 일대일 대화방으로 메뉴
+                item.set_context_menu("1:1 대화", self.move_single_chat, item)
 
             off_num = self.layout_list.count() - 1 - on_num
             offline.setText(f"오프라인 - {off_num}명")
 
+    # 채팅방 열기
     def open_chat_room(self, t_room: ListItem):
         """임시 ID로 검증"""
         t_room.no_msg_cnt = 0
@@ -405,7 +418,17 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 리스트 메뉴에서 원하는 줄 삭제 (가장 위에서 0부터 시작) --> ListItem 최상위 widget 추가로 메소드 변경
     def delete_list_item(self, t_row: int):
-        self.layout_list.takeAt(t_row)
+        # self.layout_list.takeAt(t_row)
+        layout = self.layout_list
+        for i in range(layout.count()):
+            item = layout.itemAt(i)
+            widget = item.widget()
+            if t_row == i:
+                if widget is not None:
+                    widget.deleteLater()
+                # 아이템이 레이아웃일 경우 재귀 호출로 레이아웃 내의 위젯 삭제
+                else:
+                    self.clear_layout(item.layout())
 
     # 현재 열려 있는 방 나가기
     def out_room(self):
@@ -413,7 +436,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         if self.dlg_warning.exec():
             self.delete_list_item(self.layout_list.count()-1)
 
-    # 방 추가 하기
+    # 방 추가 버튼 클릭 시 다이얼로그 연결
     def add_room(self):
         self.dlg_add_chat.reset_dialog()
         if self.dlg_add_chat.exec():
@@ -422,25 +445,50 @@ class MainWidget(QWidget, Ui_MainWidget):
             if not chat_name:
                 chat_name = ', '.join(chat_mem)
 
-            chat_mem = len(self.dlg_add_chat.members)
+            member_cnt = len(self.dlg_add_chat.members)
 
-            if chat_mem == 1:      # 개인방 추가
-                pass
-            elif chat_mem > 1:     # 단체방 추가
-                self.list_btn_check("multi")
-                item = ListItem(f"multi{self.layout_list.count()}", f"{chat_name}", "새로 추가한 채팅방입니다.")
-                item.member_cnt = chat_mem
-                item.set_info(datetime.now(), 0)
-                self.layout_list.addWidget(item.frame)
-                item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
+            if member_cnt == 1:      # 개인방 추가
+                self.new_chat_room("single", chat_name, chat_mem)
+            elif member_cnt > 1:     # 단체방 추가
+                self.new_chat_room("multi", chat_name, chat_mem)
 
-                self.open_chat_room(item)
-                self.clear_layout(self.layout_talk)
-                self.add_date_line()
-                self.add_notice_line(f"{self.user_id}")
+    def new_chat_room(self, t_type: str, t_name: str, t_member: list):
+        """
+        새 채팅방 생성 함수
+        :param t_type: single / multi
+        :param t_name: 채팅방 이름
+        :param t_member: 채팅방 참여멤버 (현재는 객체로 받고 있음 → DB 연결시 id로 수정)
+        :return:
+        """
+        self.list_btn_check(f"{t_type}")
+        item = ListItem(f"{t_type}{self.layout_list.count()}", f"{t_name}", "")
+        item.member_cnt = len(t_member)
+        item.set_info(datetime.now(), 0)
+        item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
+        self.layout_list.addWidget(item.frame)
+        
+        # 새 채팅방 열기
+        self.open_chat_room(item)
+        self.clear_layout(self.layout_talk)
+        self.add_date_line()
+        self.add_notice_line(f"{self.user_id}")
+
+    def add_friend(self, t_type):
+        self.delete_list_item(0)
+        self.delete_list_item(1)
+        if t_type:
+            print("수락")
+        else:
+            print("거절")
 
     # 친구 추가 신청
     @pyqtSlot()
     def friend_request(self):
         print("친구 신청!")
+
+    @pyqtSlot()
+    def move_single_chat(self, t_friend: ListItem):
+        """채팅 이력이 있는지 확인 후 없는 경우 상정"""
+        self.new_chat_room("single", t_friend.item_nm, [t_friend])
+
 # ==============================================================================================================
