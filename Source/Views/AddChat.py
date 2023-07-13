@@ -4,6 +4,7 @@ from datetime import datetime
 from Source.Views.Font import Font
 
 class AddChat(QDialog):
+    """친구 방 추가하는 부분"""
     def __init__(self):
         super().__init__()
 

@@ -74,5 +74,6 @@ class ListItem:
         self._lbl_cnt.setText(f"{t_cnt}명")
 
     def add_checkbox(self):
+        """체크박스 위해 추가했습니다."""
         check_box = QCheckBox()
         self._grid_layout.addWidget(check_box, 1, 4, 1, 1, Qt.AlignCenter)

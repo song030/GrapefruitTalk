@@ -44,6 +44,7 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.btn_single.setVisible(False)
 
         # type, text 원하는 대로 입력하여 사용하기, 아래는 예시
+        # 시그널 연결 해야 함.. 문구만 추가했습니다.
         if t_type == "test":
             self.lbl_text.setText("제품을 선택해주세요.")
         if t_type == 'used_id':
