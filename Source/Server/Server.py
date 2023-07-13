@@ -75,7 +75,7 @@ class Server:
         else:
             return False
 
-    # 발송자를 제외한 나머지 접속자에세 메시지 발송
+    # 발송자를 제외한 나머지 접속자에게 메시지 발송
     def send_message(self, data:ReqChat):
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
