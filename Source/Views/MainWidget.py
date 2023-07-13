@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
-from PyQt5.QtGui import QResizeEvent
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
 
@@ -10,6 +9,9 @@ from Source.Views.DialogWarning import DialogWarning
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 from Source.Views.ListItem import ListItem
+from Source.Client.Client import Client
+from Source.Client.ReceiveThread import ReceiveThread
+from Source.Main.DataClass import *
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -23,9 +25,22 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
 
+        self.user_id = "test0"
+        self.room_id = 0
+
         # 이벤트 연결
         self.connect_event()
 
+        # 서버 연결
+        self.client = Client()
+        if not self.client.connect():
+            self.disconnect()
+        else:
+            self.receive_thread = ReceiveThread(self.client)
+            self.address = self.client.address()
+            self.connect_thread_signal()
+            self.receive_thread.start()
+            self.client.send(self.user_id)
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -95,6 +110,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 대화방
         self.splitter.moveSplitter(100,0)
         self.btn_send.clicked.connect(self.send_message)
+        self.edt_txt.returnPressed.connect(self.send_message)
 
         # ===== 리스트 메뉴
         self.btn_single.clicked.connect(lambda: self.list_btn_check("single"))
@@ -102,6 +118,10 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_friend.clicked.connect(lambda: self.list_btn_check("friend"))
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
+
+    # 쓰레드 함수 연결
+    def connect_thread_signal(self):
+        self.receive_thread.res_message.connect(self.receive_message)
 
     # 레이아웃 비우기
     def clear_layout(self, layout:QLayout):
@@ -158,8 +178,18 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 메시지 발송
     def send_message(self):
         # 네트워크 발신 내용 추가하기
-        # self.add_talk(0, "자몽자몽", text, datetime.now())
-        pass
+        text = self.edt_txt.text()
+        if self.client.send(ReqChat(self.user_id, 0, text)):
+            print("발송 완료")
+            self.add_talk(0, "발송", text, datetime.now())
+            pass
+
+        self.edt_txt.setText("")
+
+    # 메시지 수신
+    def receive_message(self, data:ReqChat):
+        print("in receive")
+        self.add_talk(0, data.user_id, data.msg, datetime.now())
 
     # ==============================================================================================================
 
