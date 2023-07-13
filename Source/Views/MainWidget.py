@@ -178,9 +178,9 @@ class MainWidget(QWidget, Ui_MainWidget):
     def send_message(self):
         # 네트워크 발신 내용 추가하기
         text = self.edt_txt.text()
-        if self.client.send(text):
+        if self.client.send(ReqChat(self.user_id, 0, text)):
             print("발송 완료")
-            # self.add_talk(0, "테스트", text, datetime.now())
+            self.add_talk(0, "발송", text, datetime.now())
             pass
 
         self.edt_txt.setText("")

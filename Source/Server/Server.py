@@ -69,6 +69,7 @@ class Server:
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
             # 연결된 모든 클라이언트에 데이터 발송
             for client in self.client.values():
+                print(data.user_id, client[1])
                 if data.user_id != client[1]:
                     client[0].sendall(pickle.dumps(data))
             return True
@@ -98,8 +99,9 @@ class Server:
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
+        print(type(data))
         if type(data) == ReqChat:
-            return self.send_message(data)
+            return data
 
     def handler(self, sock,):
         while True:
