@@ -19,7 +19,7 @@ class NoticeLine:
         self._lbl_notice.setText(t_notice)
         self._lbl_notice.setFont(Font.text(3))
         self._lbl_notice.setStyleSheet("""border: None;
-                                        background: rgb(248,228,208);
+                                        background: rgba(248,228,208, 70);
                                         border-radius: 14px;
                                         padding: 8px 12px;""")
 
