@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from PyQt5.QtWidgets import QGridLayout, QLabel
+from PyQt5.QtWidgets import QGridLayout, QLabel, QCheckBox
 from PyQt5.QtCore import Qt
 
 from Source.Views.Font import Font
@@ -56,6 +56,10 @@ class ListItem:
         self._lbl_no_check= NoMsgCnt()
         self._grid_layout.addWidget(self._lbl_no_check.label, 1, 3, 1, 1, Qt.AlignCenter)
 
+        # 방 생성 체크박스
+        # self._check_box = QCheckBox()
+        # self._grid_layout.addWidget(self._check_box, 1, 4, 1, 1, Qt.AlignCenter)
+
 
     @property
     def layout(self):
@@ -68,3 +72,7 @@ class ListItem:
 
     def set_member_count(self, t_cnt:int):
         self._lbl_cnt.setText(f"{t_cnt}명")
+
+    def add_checkbox(self):
+        check_box = QCheckBox()
+        self._grid_layout.addWidget(check_box, 1, 4, 1, 1, Qt.AlignCenter)
