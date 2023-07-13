@@ -11,10 +11,10 @@ def main():
 
     # 글꼴 설정
     fontDB = QFontDatabase()
-    fontDB.addApplicationFont("../FONT/NanumSquareRoundB.ttf")
-    fontDB.addApplicationFont("../FONT/NanumSquareRoundEB.ttf")
-    fontDB.addApplicationFont("../FONT/NanumSquareRoundL.ttf")
-    fontDB.addApplicationFont("../FONT/NanumSquareRoundR.ttf")
+    fontDB.addApplicationFont("../../FONT/NanumSquareRoundB.ttf")
+    fontDB.addApplicationFont("../../FONT/NanumSquareRoundEB.ttf")
+    fontDB.addApplicationFont("../../FONT/NanumSquareRoundL.ttf")
+    fontDB.addApplicationFont("../../FONT/NanumSquareRoundR.ttf")
 
     window = MainWidget()
     window.show()
