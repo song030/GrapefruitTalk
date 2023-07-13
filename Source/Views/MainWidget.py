@@ -13,6 +13,7 @@ from Source.Views.UI_MainWidget import Ui_MainWidget
 
 from Source.Views.Font import Font
 from Source.Views.DialogWarning import DialogWarning
+from Source.Views.AddChat import AddChat
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 from Source.Views.NoticeLine import NoticeLine
@@ -33,6 +34,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
+        self.dlg_add_chat = AddChat()
 
         self.user_id = "test0"
         self.room_id = 0
@@ -85,7 +87,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 채팅방
         self.lbl_room_name.setFont(Font.button(3))
         self.edt_txt.setFont(font_txt_normal)
-        # self.splitter.moveSplitter(100, 0)
 
     # 화면 위젯 초기화
     def set_ui(self):
@@ -103,11 +104,11 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.back.setStyleSheet("background-color: rgba(20, 20, 20, 50);")
         self.back.hide()
 
-    # 테마 색상 설정
-    def set_theme_color(self, t_main: str = "#E6A157", t_room: str = "FFF3E2"):
+    # 테마 색상 설정 > 나중에
+    def set_theme_color(self, t_main: str = "#E6A157", t_room: str = "#FFF3E2"):
         self.page_login.setStyleSheet(f"background: {t_main}")
         self.page_join.setStyleSheet(f"background: {t_main}")
-        # self.scrollAreaWidgetContents.setStyleSheet(f"background: {t_room}")
+        self.scrollAreaWidgetContents.setStyleSheet(f"background: {t_room}")
 
     # 이벤트 연결
     def connect_event(self):
@@ -140,7 +141,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_message.connect(self.receive_message)
 
     # 레이아웃 비우기
-    def clear_layout(self, layout:QLayout):
+    def clear_layout(self, layout: QLayout):
+        if layout is None:
+            return
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -155,20 +158,23 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 회원가입 입력확인
     def join_input_check(self):
-
         self.dlg_warning.set_dialog_type(2, "test")
 
         if self.dlg_warning.exec():
-            self.stack_main.setCurrentWidget(self.page_talk)
+            # -- 채팅 화면 초기화
             self.init_talk()
             self.init_list("multi")
-        else:
-            pass
+            # --- 스플리터, 스크롤 위치 보정
+            self.splitter.setSizes([self.splitter.width() - 100, 100])
+            QtTest.QTest.qWait(100)
+            self.edt_txt.setText("")
+            self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
+            # -- 화면 출력
+            self.stack_main.setCurrentWidget(self.page_talk)
 
     # ==============================================================================================================
 
     # ================================================== 대화 화면 ==================================================
-
     # 대화 방 초기화
     def init_talk(self):
         self.add_date_line()
@@ -181,13 +187,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         # self.clear_layout(self.layout_talk)
         # talkbox = TalkBox("", "자몽자몽", text, datetime.now())
         # self.layout_talk.addLayout(talkbox.layout)
-
-        # 스플리터 위치 조정
-        self.splitter.setSizes([self.splitter.width()-100, 100])
-
-        # 스크롤 위치 조정
-        _x, _y = 100, 600
-        self.scroll_talk.ensureVisible(_x, _y)
 
     # 일자 표시선 추가
     def add_date_line(self):
@@ -216,7 +215,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         QtTest.QTest.qWait(100)
         self.edt_txt.setText("")
-        self.scroll_talk.ensureVisible(0,self.scrollAreaWidgetContents.height())
+        self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
     # 메시지 수신
     def receive_message(self, data:ReqChat):
@@ -285,6 +284,10 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
 
+    # def set_list_item(self, t_type):
+    #     self.clear_layout(self.layout_list)
+    #     self.init_list(t_type)
+
     # 리스트 메뉴 초기화
     def init_list(self, t_type):
         self.btn_add.setVisible(True)
@@ -317,7 +320,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 self.layout_list.addWidget(item.frame)
                 item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
 
-            off_num = self.layout_list.count() - 1 - on_num
+            off_num = self.layout_list.count() - 2 - on_num
             offline.setText(f"오프라인 - {off_num}명")
 
         # 단체방
@@ -342,9 +345,11 @@ class MainWidget(QWidget, Ui_MainWidget):
                 self.layout_list.addWidget(item.frame)
                 # --- 우클릭 : 친구 추가 메뉴
                 item.frame.setContextMenuPolicy(Qt.ActionsContextMenu)
-                request_action = QAction("친구할까요?", item.frame)
+                request_action = QAction("친구 요청", item.frame)
                 request_action.triggered.connect(self.friend_request)
                 item.frame.addAction(request_action)
+                item.frame.setStyleSheet("QMenu::item {color: #E6A157; background: #FFF3E2; font-size: 12px;}"
+                                         "QMenu::item::selected{color: #FFF3E2; background: #E6A157;}")
 
             on_num = self.layout_list.count() - 1
             online.setText(f"온라인 - {on_num}명")
@@ -389,38 +394,50 @@ class MainWidget(QWidget, Ui_MainWidget):
             offline.setText(f"오프라인 - {off_num}명")
 
     def open_chat_room(self, t_room: ListItem):
-        """임시 ID"""
+        """임시 ID로 검증"""
+        t_room.no_msg_cnt = 0
+        self.lbl_room_name.setObjectName(t_room.item_id)
+        self.lbl_room_name.setText(f"{t_room.item_nm}")
         if "multi" in t_room.item_id:
-            t_room.no_msg_cnt = 0
-            self.lbl_room_name.setText(f"{t_room.item_nm}")
             self.lbl_room_number.setText(f"{t_room.member_cnt}")
+        elif "single" in t_room.item_id:
+            self.lbl_room_number.clear()
 
-    # 리스트 메뉴에서 원하는 줄 삭제 (가장 위에서 0부터 시작)
+    # 리스트 메뉴에서 원하는 줄 삭제 (가장 위에서 0부터 시작) --> ListItem 최상위 widget 추가로 메소드 변경
     def delete_list_item(self, t_row: int):
-        layout = self.layout_list
-        for i in range(layout.count()):
-            item = layout.itemAt(i)
-            widget = item.widget()
-
-            if widget is None and t_row == i:
-                self.clear_layout(item.layout())
+        self.layout_list.takeAt(t_row)
 
     # 현재 열려 있는 방 나가기
     def out_room(self):
-        self.dlg_warning.set_dialog_type(2, "test")
+        self.dlg_warning.set_dialog_type(2, "exit_chat_room")
         if self.dlg_warning.exec():
-            self.delete_list_item(1)
-        else:
-            pass
+            self.delete_list_item(self.layout_list.count()-1)
 
     # 방 추가 하기
     def add_room(self):
-        if self.btn_single.isChecked():
-            pass
-        elif self.btn_multi.isChecked():
-            pass
-        else:
-            pass
+        self.dlg_add_chat.reset_dialog()
+        if self.dlg_add_chat.exec():
+            chat_name = self.dlg_add_chat.chat_name
+            chat_mem = self.dlg_add_chat.members
+            if not chat_name:
+                chat_name = ', '.join(chat_mem)
+
+            chat_mem = len(self.dlg_add_chat.members)
+
+            if chat_mem == 1:      # 개인방 추가
+                pass
+            elif chat_mem > 1:     # 단체방 추가
+                self.list_btn_check("multi")
+                item = ListItem(f"multi{self.layout_list.count()}", f"{chat_name}", "새로 추가한 채팅방입니다.")
+                item.member_cnt = chat_mem
+                item.set_info(datetime.now(), 0)
+                self.layout_list.addWidget(item.frame)
+                item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
+
+                self.open_chat_room(item)
+                self.clear_layout(self.layout_talk)
+                self.add_date_line()
+                self.add_notice_line(f"{self.user_id}")
 
     # 친구 추가 신청
     @pyqtSlot()

@@ -34,7 +34,7 @@ class DialogWarning(QDialog, Ui_DlgWarning):
     # 다이얼로그 타입 설정
     # bt_cnt : 버튼 수량
     # t_type : 다이얼로그 타입
-    def set_dialog_type(self, bt_cnt:int, t_type:str):
+    def set_dialog_type(self, bt_cnt: int, t_type: str):
         if bt_cnt == 1:
             self.layout_double.setVisible(False)
             self.btn_single.setVisible(True)
@@ -71,3 +71,5 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.lbl_text.setText('이메일 인증 완료')
         elif t_type == 'email_not_check':
             self.lbl_text.setText('이메일 인증 실패, 확인 후 재입력 해주시기 바랍니다.')
+        elif t_type == 'exit_chat_room':
+            self.lbl_text.setText('대화 내용이 모두 삭제됩니다.\n정말 채팅방을 나가시겠습니까?')

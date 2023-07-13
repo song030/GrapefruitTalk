@@ -108,4 +108,5 @@ class ListItem:
     def add_checkbox(self):
         """체크박스 위해 추가했습니다."""
         check_box = QCheckBox()
-        self._frame.layout().addWidget(check_box, 1, 4, 1, 1, Qt.AlignCenter)
+        _layout: QGridLayout = self._frame.layout()
+        _layout.addWidget(check_box, 1, 4, 1, 1, Qt.AlignCenter)
