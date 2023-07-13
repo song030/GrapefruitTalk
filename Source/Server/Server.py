@@ -1,13 +1,15 @@
 import socket
 import pickle
-# from db import DB
+
+from Source.DBConnetor import DBConnector
 from Source.DataClass import *
 
 from threading import Thread
+from datetime import datetime
 
 class Server:
     def __init__(self, port=1234, listener=1):
-        # db 초기화 내용 넣기
+        self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
         # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
@@ -72,6 +74,7 @@ class Server:
                 print(data.user_id, client[1])
                 if data.user_id != client[1]:
                     client[0].sendall(pickle.dumps(data))
+                    self.db.insert_content(data)
             return True
         else:
             return False
