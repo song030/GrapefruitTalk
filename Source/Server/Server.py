@@ -1,5 +1,6 @@
 import socket
 import pickle
+import datetime
 
 from Source.Main.DBConnetor import DBConnector
 from Source.Main.DataClass import *
@@ -51,14 +52,36 @@ class Server:
 
     # 데이터 전송
     def send(self, sock:socket.socket, data):
-
+        print(sock)
         # 데이터 타입에따른 데이터 전송
         if type(data) in [ReqChat]:
             self.send_message(data)
         elif type(data) == str:
             self.client[sock.getpeername()][1] = data
             print(self.client[sock.getpeername()][1])
+        elif type(data) in [PerLogin]:
+            self.send_client(sock, data)
+            self.db_log_inout_state_save(data.rescode, data.id, data.pw)
+        # elif type(data) in [ReqMembership]:
 
+    # 로그인/로그아웃 내역(시간)을 USER_TABLE에 저장하는 함수
+    def db_log_inout_state_save(self, rescode, id, pw):
+        """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
+        sql_ = ''
+        time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        print(time)
+        print(rescode)
+        print(id)
+        print(pw)
+        if rescode == 2:
+            sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time}' WHERE USER_ID = '{id}'"
+            self.db.connect().execute(sql_)
+            self.db.conn.commit()
+        All_TB_LOG = self.db.connect().execute("SELECT * FROM TB_LOG").fetchall()
+        if not All_TB_LOG:
+            print("예외처리 : TB_LOG에 아무것도 없습니다.")
+
+    # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):
         if self.connected:
             sock.sendall(pickle.dumps(data))
@@ -112,9 +135,17 @@ class Server:
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
-        print(type(data))
+        print("지금 위치는 process_data입니다.")
+        print(f"data입니다. : {data}")
         if type(data) == ReqChat:
             return data
+        elif type(data) == ReqLogin:
+            PerData: PerLogin = self.db.login(data)
+            print(f"PerData입니다 : {PerData}")
+            if PerData.rescode == 2:
+                self.client[sock.getpeername()][1] = PerData.id
+                print(f"Perdata.id : {PerData.id}")
+            return PerData
         else:
             return data
 
@@ -129,11 +160,9 @@ class Server:
             # 수신된 데이터에 따른 결과 반환값을 클라이언트로 보내주기
             print(data)
             process_data = self.process_data(sock, data)
-
             print("[ 데이터 처리 ]")
             self.send(sock, process_data)
             print("처리 완료")
-
 
 if __name__ == "__main__":
     server = Server()

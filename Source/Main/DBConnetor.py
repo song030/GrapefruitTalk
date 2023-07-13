@@ -13,7 +13,13 @@ class DBConnector:      # DB를 총괄하는 클래스
         return cls._instance
 
     def __init__(self):
-        self.cur = self.conn.cursor()
+        self.host = ''
+        self.port = 1234
+        self.create_tables()
+
+    def connect(self):   # db 커서 객체
+        cur = self.conn.cursor()
+        return cur
 
     def end_conn(self):  # db 종료
         self.conn.close()
@@ -23,11 +29,11 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## CREATE TABLES ======================================================================== ##
     def create_tables(self):  # 테이블 생성
-        self.cur.executescript("""
+        self.connect().executescript("""
             DROP TABLE IF EXISTS TB_USER;  
             CREATE TABLE "TB_USER" (
-                "USER_NO" INTEGER,
-                "USER_ID" TEXT NOT NULL UNIQUE,
+                "USER_NO" INTEGER UNIQUE,
+                "USER_ID" TEXT NOT NULL,
                 "USER_NM" TEXT NOT NULL,
                 "USER_EMAIL" TEXT NOT NULL,
                 "USER_PW" TEXT NOT NULL,
@@ -36,7 +42,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "USER_STATE" TEXT,
                 PRIMARY KEY ("USER_NO" AUTOINCREMENT)
             );
-            
             DROP TABLE IF EXISTS TB_FRIEND;
             CREATE TABLE "TB_FRIEND" (
                 "USER_ID" TEXT,
@@ -44,7 +49,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "FRD_ACCEPT" TEXT,
                 FOREIGN KEY ("USER_ID") REFERENCES "TB_USER" ("USER_ID")
             );
-            
             DROP TABLE IF EXISTS TB_LOG;
             CREATE TABLE "TB_LOG" (
                 "USER_ID" TEXT,
@@ -94,18 +98,19 @@ class DBConnector:      # DB를 총괄하는 클래스
         """)
         self.commit_db()
 
+    # todo: 회원가입부터 로그인 친구목록
     ## TB_USER ================================================================================ ##
     # 회원 정보 테이블 값 입력
     def insert_user(self, user_id, user_name, user_email, user_pw,
                     user_create_date, user_img, user_state):
-        self.cur.execute("insert into TB_USER (USER_ID, USER_NAME, USER_EMAIL, USER_PW, USER_CRATE_DATE, "
+        self.connect().execute("insert into TB_USER (USER_ID, USER_NAME, USER_EMAIL, USER_PW, USER_CRATE_DATE, "
                   "USER_IMG, USER_STATE) values (?, ?, ?, ?, ?, ?, ?)",
                   (user_id, user_name, user_email, user_pw, user_create_date, user_img, user_state))
         self.commit_db()
 
     # 회원 정보 테이블 전체 조회
     def find_user(self):
-        rows_data = self.cur.execute("select * from TB_USER").fetchall()
+        rows_data = self.connect().execute("select * from TB_USER").fetchall()
         if len(rows_data) == 0:
             return None
 
@@ -116,25 +121,24 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # user_id를 기준으로 행 조회
     def find_user_by_id(self, user_id: str):
-        row = self.cur.execute("select * from TB_USER where USER_ID = ?", (user_id,)).fetchall()
+        row = self.connect().execute("select * from TB_USER where USER_ID = ?", (user_id,)).fetchall()
         id = row[0]
         return id
 
     # user_id를 기준으로 행 삭제
     def delete_user(self, user_id: str):
-        self.cur.execute("delete from TB_USER where USER_ID = ?", (user_id,))
+        self.connect().execute("delete from TB_USER where USER_ID = ?", (user_id,))
         self.commit_db()
 
     ## TB_friend ================================================================================ ##
-
     # 친구 목록 정보 테이블 값 입력
     def insert_friend(self, user_id, frd_id):
-        self.cur.execute("insert into TB_FRIEND (CR_ID, CR_NM) values (?, ?)", (user_id, frd_id))
+        self.connect().execute("insert into TB_FRIEND (CR_ID, CR_NM) values (?, ?)", (user_id, frd_id))
         self.commit_db()
 
     # 친구 목록 테이블 전체 조회
     def find_friend(self):
-        rows_data = self.cur.execute("select * from TB_FRIEND").fetchall()
+        rows_data = self.connect().execute("select * from TB_FRIEND").fetchall()
         if len(rows_data) == 0:
             return None
 
@@ -145,25 +149,27 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # FRD_ID를 기준으로 행 조회
     def find_friend_by_frd_id(self, frd_id):
-        row = self.cur.execute("select * from TB_FRIEND where FRD_ID = ?", (frd_id,)).fetchall()
+        row = self.connect().execute("select * from TB_FRIEND where FRD_ID = ?", (frd_id,)).fetchall()
         friend_id = row[0]
         return friend_id
+        # todo: sql문에도 and와 or문을 넣을 수 있다. 첫 번째 조건 뒤에 연산자를 추가하여 다음에 두번째 (id 먼저 pw를 조회) 하여 찾기
         # sql문에서 개수를 가지고 오는 방법 -> * 말고 count(컬럼명) 숫자로 값이 나옴
         # 데이터 프레임으로 받아와지면 줄 수가 몇개인지 확인 0이면 x 1이면 o
 
     # FRD_ID를 기준으로 행 삭제
     def delete_friend(self, frd_id: str):
-        self.cur.execute("delete from TB_FRIEND where FRD_ID = ?", (frd_id,))
+        self.connect().execute("delete from TB_FRIEND where FRD_ID = ?", (frd_id,))
         self.commit_db()
 
+    ## TB_log ================================================================================ ##
     # LOG 정보 테이블 값 입력
     def insert_log(self, user_id, login_time, logout_time):
-        self.cur.execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)", (user_id, login_time, logout_time))
+        self.connect().execute("insert into TB_LOG (USER_ID, LOGIN_TIME, LOGOUT_TIME) values (?, ?, ?)", (user_id, login_time, logout_time))
         self.commit_db()
 
     # LOG 테이블 전체 조회
     def find_log(self):
-        rows_data = self.cur.execute("select * from TB_LOG").fetchall()
+        rows_data = self.connect().execute("select * from TB_LOG").fetchall()
         if len(rows_data) == 0:
             return None
 
@@ -174,20 +180,20 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # LOGIN_TIME을 기준으로 행 조회
     def find_login_time(self, login_time: str):
-        row = self.cur.execute("select * from TB_LOG where LOGIN_TIME = ?", (login_time,)).fetchall()
+        row = self.connect().execute("select * from TB_LOG where LOGIN_TIME = ?", (login_time,)).fetchall()
         time = row[0]
         return time
 
     # LOGOUT_TIME을 기준으로 행 조회
     def find_logout_time(self, logout_time: str):
-        row = self.cur.execute("select * from TB_LOG where LOGOUT_TIME = ?", (logout_time,)).fetchall()
+        row = self.connect().execute("select * from TB_LOG where LOGOUT_TIME = ?", (logout_time,)).fetchall()
         time = row[0]
         return time
 
     ## TB_chatroom ================================================================================ ##
     # 채팅방 일련 번호 생성
     def chatroom_id_creation(self, cr_id, cr_name):
-        ids = self.cur.execute("select * from TB_CHATROOM where CR_ID like ?", (f"%{cr_id}%",)).fetchall()
+        ids = self.connect().execute("select * from TB_CHATROOM where CR_ID like ?", (f"%{cr_id}%",)).fetchall()
         if len(ids) == 0:       # ids의 값이 없을 경우 초기 번호로 자동 설정
             cr_id = cr_id + "_1"
             cr_name = cr_name
@@ -208,12 +214,12 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 채팅방 정보 테이블에 값 입력
     def insert_chatroom(self, cr_id, cr_name):
-        self.cur.execute("insert into TB_CHATROOM (CR_ID, CR_NM) values (?, ?)", (cr_id, cr_name))
+        self.connect().execute("insert into TB_CHATROOM (CR_ID, CR_NM) values (?, ?)", (cr_id, cr_name))
         self.commit_db()
 
     # 채팅방 정보 테이블 전체 조회
     def find_chatroom(self):
-        rows_data = self.cur.execute("select * from TB_CHATROOM").fetchall()
+        rows_data = self.connect().execute("select * from TB_CHATROOM").fetchall()
         # CR_ID, CR_NM
         if len(rows_data) == 0:     # chatroom 테이블에 값이 없을 경우 None으로 반환
             return None
@@ -225,27 +231,27 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 채팅방 번호를 기준으로 행 조회
     def find_chatroom_by_id(self, cr_id: str):
-        row = self.cur.execute("select * from TB_CHATROOM where CR_ID = ?", (cr_id,)).fetchall()
+        row = self.connect().execute("select * from TB_CHATROOM where CR_ID = ?", (cr_id,)).fetchall()
         id = row[0]
         return id
 
     # 채팅방 이름을 기준으로 행 조회
     def find_chatroom_by_name(self, cr_name: str):
-        row = self.cur.execute("select * from TB_CHATROOM where CR_NM = ?", (cr_name,)).fetchall()
+        row = self.connect().execute("select * from TB_CHATROOM where CR_NM = ?", (cr_name,)).fetchall()
         chatroom_name = row[0]
         return chatroom_name
 
     def delete_chatroom(self, cr_id: str):
-        self.cur.execute("delete from TB_CHATROOM where CR_ID = ?", (cr_id,))
+        self.connect.execute("delete from TB_CHATROOM where CR_ID = ?", (cr_id,))
         self.commit_db()
 
     ## TB_user_chatroom ================================================================================ ##
     def insert_user_chatroom(self, cr_id, user_cr_from, user_cr_to):
-        self.cur.execute("insert into TB_USER_CHATROOM (CR_ID, USER_CR_FROM, USER_CR_TO) values (?, ?, ?)", (cr_id, user_cr_from, user_cr_to))
+        self.connect().execute("insert into TB_USER_CHATROOM (CR_ID, USER_CR_FROM, USER_CR_TO) values (?, ?, ?)", (cr_id, user_cr_from, user_cr_to))
         self.commit_db()
 
     def find_user_chatroom(self):
-        rows_data = self.cur.execute("select * from TB_USER_CHATROOM").fetchall()
+        rows_data = self.connect().execute("select * from TB_USER_CHATROOM").fetchall()
         # CR_ID, CR_NM
         if len(rows_data) == 0:
             return None
@@ -256,23 +262,24 @@ class DBConnector:      # DB를 총괄하는 클래스
         return find_result_list
 
     def find_user_chatroom_by_from(self, user_cr_from):
-        row = self.cur.execute("select * from TB_USER_CHATROOM where USER_CR_FROM = ?", (user_cr_from,)).fetchall()
+        row = self.connect().execute("select * from TB_USER_CHATROOM where USER_CR_FROM = ?", (user_cr_from,)).fetchall()
         user_from = row[0]
         return user_from
 
     def find_user_chatroom_by_to(self, user_cr_to):
-        row = self.cur.execute("select * from TB_USER_CHATROOM where USER_CR_TO = ?", (user_cr_to,)).fetchall()
+        row = self.connect().execute("select * from TB_USER_CHATROOM where USER_CR_TO = ?", (user_cr_to,)).fetchall()
         user_cr_to = row[0]
         return user_cr_to
 
+    # todo: 어떤 부분을 삭제할 것인지 더 생각해보기
     def delete_user_chatroom(self, user_cr_to):
-        self.cur.execute("delete from TB_CHATROOM where USER_CR_TO = ?", (user_cr_to,))
+        self.connect().execute("delete from TB_CHATROOM where USER_CR_TO = ?", (user_cr_to,))
         self.commit_db()
 
     ## TB_content ================================================================================ ##
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.cur.execute("insert into TB_CONTENT (CR_ID, USER_ID, CNT_ID, CNT_CONTENT, CNT_SEND_TIME) "
+        self.connect().execute("insert into TB_CONTENT (CR_ID, USER_ID, CNT_ID, CNT_CONTENT, CNT_SEND_TIME) "
                          "values (?, ?, ?, ?, ?)",
                          ("OE_1", data.user_id, 1, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
@@ -280,7 +287,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         print("save complete")
 
     def find_content(self):
-        rows_data = self.cur.execute("select * from TB_CONTENT").fetchall()
+        rows_data = self.connect().execute("select * from TB_CONTENT").fetchall()
         # CR_ID, CR_NM
         if len(rows_data) == 0:
             return None
@@ -318,15 +325,18 @@ class DBConnector:      # DB를 총괄하는 클래스
     def banchat_warning(self):
         pass
 
-
-
-if __name__ == '__main__':
-    db = DBConnector()
-    c = DBConnector.conn
-
-    db.create_tables()
-
-    db.commit_db()
-    db.end_conn()
+    def login(self, data: ReqLogin) -> PerLogin:
+        result: PerLogin = PerLogin(rescode=2, id=data.id, pw=data.password)
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
+        self.connect().execute(sql)
+        row = self.connect().fetchone()
+        if row is None:
+            result.rescode = 0
+        # 입력한 아이디와 비밀번호, db에서 가진 아이디와 비밀번호
+        elif data.id != row[1] or data.password != row[2]:
+            result.rescode = 1
+        else:
+            result.rescode = 2
+        return result
 
 
