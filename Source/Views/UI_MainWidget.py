@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './UI/MainWidget.ui'
+# Form implementation generated from reading ui file 'MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -279,6 +279,9 @@ class Ui_MainWidget(object):
         self.lbl_room_name = QtWidgets.QLabel(self.frame_2)
         self.lbl_room_name.setObjectName("lbl_room_name")
         self.horizontalLayout_5.addWidget(self.lbl_room_name)
+        self.lbl_room_number = QtWidgets.QLabel(self.frame_2)
+        self.lbl_room_number.setObjectName("lbl_room_number")
+        self.horizontalLayout_5.addWidget(self.lbl_room_number)
         spacerItem16 = QtWidgets.QSpacerItem(779, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem16)
         self.btn_single = QtWidgets.QPushButton(self.frame_2)
@@ -538,4 +541,15 @@ class Ui_MainWidget(object):
         self.btn_join.setText(_translate("MainWidget", "회원가입"))
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
+        self.lbl_room_number.setText(_translate("MainWidget", "명"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())

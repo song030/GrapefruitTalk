@@ -61,7 +61,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 채팅방
         self.lbl_room_name.setFont(Font.button(3))
         self.edt_txt.setFont(font_txt_normal)
-        self.splitter.moveSplitter(100, 0)
+        # self.splitter.moveSplitter(100, 0)
+        # print(int(self.splitter.width()*0.8), int(self.splitter.width()*0.2))
+        self.splitter.setSizes([510, 125])
 
     # 화면 위젯 초기화
     def set_ui(self):
@@ -93,7 +95,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join.clicked.connect(self.join_input_check)
 
         # ===== 대화방
-        self.splitter.moveSplitter(100,0)
+        self.splitter.moveSplitter(100, 0)
         self.btn_send.clicked.connect(self.send_message)
 
         # ===== 리스트 메뉴
@@ -151,7 +153,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.layout_talk.addLayout(talkbox.layout)
 
     # 대화 박스 추가
-    def add_talk(self, t_img:int, t_nick:str, t_text:str, t_time:datetime):
+    def add_talk(self, t_img: int, t_nick: str, t_text: str, t_time: datetime):
         talkbox = TalkBox(t_img, t_nick, t_text, t_time)
         self.layout_talk.addLayout(talkbox.layout)
 
@@ -174,7 +176,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             if not self.btn_single.isChecked():
                 self.btn_single.setChecked(True)
             else:
-                self.btn_add.setVisible(False)
+                self.btn_add.setVisible(True)
 
                 # 다른 버튼 체크 비활성
                 self.btn_multi.setChecked(False)
@@ -185,7 +187,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             if not self.btn_multi.isChecked():
                 self.btn_multi.setChecked(True)
             else:
-                self.btn_add.setVisible(False)
+                self.btn_add.setVisible(True)
 
                 # 다른 버튼 체크 비활성
                 self.btn_single.setChecked(False)
@@ -196,20 +198,22 @@ class MainWidget(QWidget, Ui_MainWidget):
             if not self.btn_friend.isChecked():
                 self.btn_friend.setChecked(True)
             else:
-                self.btn_add.setVisible(True)
+                self.btn_add.setVisible(False)
 
                 # 다른 버튼 체크 비활성
                 self.btn_single.setChecked(False)
                 self.btn_multi.setChecked(False)
                 clear_check = True
 
-        # 출력 메뉴가 달라진 경우 레이아웃 비우로 리스트 다시 출력
+        # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
         if clear_check and self.layout_list.count() > 0:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
 
     # 리스트 메뉴 초기화
     def init_list(self, t_type):
+        self.btn_add.setVisible(True)
+
         # 1:1 단톡방
         if t_type == "single":
             # 온라인
@@ -218,9 +222,11 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
 
             for i in range(3):
-                item = ListItem("닉네임", "마지막 메시지 입니다.")
+                item = ListItem(f"single{i}", f"개인방 {i+1}", "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
-                self.layout_list.addLayout(item.layout)
+                self.layout_list.addWidget(item.frame)
+                # --------- 클릭 이벤트 채팅 화면에 출력
+                item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
 
             on_num = self.layout_list.count() - 1
             online.setText(f"온라인 - {on_num}명")
@@ -231,9 +237,11 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(offline)
 
             for i in range(3):
-                item = ListItem("닉네임", "마지막 메시지 입니다.")
+                item = ListItem(f"single{i}", f"개인방 {i+1}", "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
-                self.layout_list.addLayout(item.layout)
+                self.layout_list.addWidget(item.frame)
+                # --------- 클릭 이벤트 채팅 화면에 출력
+                item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
 
             off_num = self.layout_list.count() - 1 - on_num
             offline.setText(f"오프라인 - {off_num}명")
@@ -241,21 +249,24 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 단체방
         elif t_type == "multi":
             for i in range(5):
-                item = ListItem("닉네임", "상태상태상태상태상태상태")
+                item = ListItem(f"multi{i}", f"단체방-{i+1}", "상태상태상태상태상태상태")
                 item.set_info(datetime.now(), i)
-                item.set_member_count(10 - i)
-                self.layout_list.addLayout(item.layout)
+                item.member_cnt = 10 - i
+                self.layout_list.addWidget(item.frame)
+                # --------- 클릭 이벤트 채팅 화면에 출력
+                item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
 
         # 친구 리스트
         elif t_type == "friend":
+            self.btn_add.setVisible(False)
             # 온라인
             online = QLabel()
             online.setFont(Font.button(3))
             self.layout_list.addWidget(online)
 
             for i in range(3):
-                item = ListItem("닉네임", "상태상태상태상태상태상태")
-                self.layout_list.addLayout(item.layout)
+                item = ListItem(f"friend{i}", "닉네임", "상태상태상태상태상태상태")
+                self.layout_list.addWidget(item.frame)
 
             on_num = self.layout_list.count() - 1
             online.setText(f"온라인 - {on_num}명")
@@ -266,13 +277,18 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(offline)
 
             for i in range(3):
-                item = ListItem("닉네임", "상태상태상태상태상태상태")
+                item = ListItem(f"friend{i:53d}", "닉네임", "상태상태상태상태상태상태")
                 self.layout_list.addLayout(item.layout)
 
             off_num = self.layout_list.count() - 1 - on_num
             offline.setText(f"오프라인 - {off_num}명")
 
-        self.delete_list_item(2)
+    def open_chat_room(self, t_room: ListItem):
+        """임시 ID"""
+        if "multi" in t_room.item_id:
+            t_room.no_msg_cnt = 0
+            self.lbl_room_name.setText(f"{t_room.item_nm}")
+            self.lbl_room_number.setText(f"{t_room.member_cnt}")
 
     # 리스트 메뉴에서 원하는 줄 삭제 (가장 위에서 0부터 시작)
     def delete_list_item(self, t_row: int):
@@ -284,9 +300,13 @@ class MainWidget(QWidget, Ui_MainWidget):
             if widget is None and t_row == i:
                 self.clear_layout(item.layout())
 
-    # 현재 열여있는 방 나나기
+    # 현재 열려 있는 방 나가기
     def out_room(self):
-        pass
+        self.dlg_warning.set_dialog_type(2, "test")
+        if self.dlg_warning.exec():
+            self.delete_list_item(1)
+        else:
+            pass
 
     # 방 추가 하기
     def add_room(self):

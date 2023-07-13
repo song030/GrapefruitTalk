@@ -42,5 +42,3 @@ class DateLine:
     @property
     def layout(self):
         return self._layout
-        
-
