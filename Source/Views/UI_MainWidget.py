@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './UI/MainWidget.ui'
+# Form implementation generated from reading ui file 'MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -131,7 +131,8 @@ class Ui_MainWidget(object):
         self.verticalLayout_2.addItem(spacerItem9)
         self.frame = QtWidgets.QFrame(self.page_join)
         self.frame.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;")
+"border-radius:5px;\n"
+"background: #FFF;")
         self.frame.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.frame.setLineWidth(5)
@@ -279,6 +280,10 @@ class Ui_MainWidget(object):
         self.lbl_room_name = QtWidgets.QLabel(self.frame_2)
         self.lbl_room_name.setObjectName("lbl_room_name")
         self.horizontalLayout_5.addWidget(self.lbl_room_name)
+        self.lbl_room_number = QtWidgets.QLabel(self.frame_2)
+        self.lbl_room_number.setText("")
+        self.lbl_room_number.setObjectName("lbl_room_number")
+        self.horizontalLayout_5.addWidget(self.lbl_room_number)
         spacerItem16 = QtWidgets.QSpacerItem(779, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem16)
         self.btn_single = QtWidgets.QPushButton(self.frame_2)
@@ -325,6 +330,27 @@ class Ui_MainWidget(object):
         self.btn_multi.setFlat(True)
         self.btn_multi.setObjectName("btn_multi")
         self.horizontalLayout_5.addWidget(self.btn_multi)
+        self.btn_member = QtWidgets.QPushButton(self.frame_2)
+        self.btn_member.setStyleSheet("QPushButton{\n"
+"border: 1px solid lightgray;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}\n"
+"\n"
+"QPushButton:Checked{\n"
+"border: 1px solid black;\n"
+"border-radius: 5px;\n"
+"padding: 3px;\n"
+"}")
+        self.btn_member.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("../Images/btn_member.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_member.setIcon(icon2)
+        self.btn_member.setIconSize(QtCore.QSize(22, 22))
+        self.btn_member.setCheckable(True)
+        self.btn_member.setFlat(True)
+        self.btn_member.setObjectName("btn_member")
+        self.horizontalLayout_5.addWidget(self.btn_member)
         self.btn_friend = QtWidgets.QPushButton(self.frame_2)
         self.btn_friend.setStyleSheet("QPushButton{\n"
 "border: 1px solid lightgray;\n"
@@ -338,9 +364,10 @@ class Ui_MainWidget(object):
 "padding: 3px;\n"
 "}")
         self.btn_friend.setText("")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap("../../Images/btn_friend.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_friend.setIcon(icon2)
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("../../Images/btn_friend.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_friend.setIcon(icon3)
+
         self.btn_friend.setIconSize(QtCore.QSize(22, 22))
         self.btn_friend.setCheckable(True)
         self.btn_friend.setFlat(True)
@@ -361,13 +388,13 @@ class Ui_MainWidget(object):
         self.frame_room.setObjectName("frame_room")
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.frame_room)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.scrollArea = QtWidgets.QScrollArea(self.frame_room)
+        self.scroll_talk = QtWidgets.QScrollArea(self.frame_room)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy)
-        self.scrollArea.setStyleSheet("QScrollArea {\n"
+        sizePolicy.setHeightForWidth(self.scroll_talk.sizePolicy().hasHeightForWidth())
+        self.scroll_talk.setSizePolicy(sizePolicy)
+        self.scroll_talk.setStyleSheet("QScrollArea {\n"
 "    border: None;\n"
 "    background-color:rgba(100, 100, 100, 100);\n"
 "}\n"
@@ -388,20 +415,25 @@ class Ui_MainWidget(object):
 "    border-radius:8px;\n"
 "\n"
 "}\n"
+"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {\n"
+"height: 0px;\n"
+"}\n"
+"QScrollBar::add-line:vertical {\n"
+"      border: none;\n"
+"      background: none;\n"
+"}\n"
+"\n"
 "QScrollBar::sub-line:vertical {\n"
-"    border: None;\n"
-"    background-color: white;\n"
-"    width:18px;\n"
-"    margin: 0 0 0 0;\n"
-"    border-radius: 0px;\n"
+"      border: none;\n"
+"      background: none;\n"
 "}")
-        self.scrollArea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.scrollArea.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setObjectName("scrollArea")
+        self.scroll_talk.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll_talk.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_talk.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.scroll_talk.setWidgetResizable(True)
+        self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 532, 738))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 531, 738))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -419,8 +451,8 @@ class Ui_MainWidget(object):
         self.verticalLayout_6.addLayout(self.layout_talk)
         spacerItem17 = QtWidgets.QSpacerItem(20, 685, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_6.addItem(spacerItem17)
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.verticalLayout_7.addWidget(self.scrollArea)
+        self.scroll_talk.setWidget(self.scrollAreaWidgetContents)
+        self.verticalLayout_7.addWidget(self.scroll_talk)
         self.layout_input = QtWidgets.QHBoxLayout()
         self.layout_input.setObjectName("layout_input")
         self.edt_txt = QtWidgets.QLineEdit(self.frame_room)
@@ -539,3 +571,13 @@ class Ui_MainWidget(object):
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())

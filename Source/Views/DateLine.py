@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from Source.Views.Font import Font
 
 class DateLine:
-    def __init__(self, t_date:datetime):
+    def __init__(self, t_date: datetime):
         """
         :param t_date: 표시 일자
         """
@@ -42,5 +42,3 @@ class DateLine:
     @property
     def layout(self):
         return self._layout
-        
-
