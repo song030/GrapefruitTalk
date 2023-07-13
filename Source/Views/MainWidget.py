@@ -12,6 +12,7 @@ from Source.Views.DateLine import DateLine
 from Source.Views.ListItem import ListItem
 from Source.Client.Client import Client
 from Source.Client.ReceiveThread import ReceiveThread
+from Source.DataClass import *
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -25,6 +26,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
 
+        self.user_id = "test0"
+        self.room_id = 0
+
         # 이벤트 연결
         self.connect_event()
 
@@ -34,7 +38,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.disconnect()
         else:
             self.receive_thread = ReceiveThread(self.client)
-            self.id = ""
             self.address = self.client.address()
             self.connect_thread_signal()
             self.receive_thread.start()
@@ -183,9 +186,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.edt_txt.setText("")
 
     # 메시지 수신
-    def receive_message(self, data):
+    def receive_message(self, data:ReqChat):
         print("in receive")
-        self.add_talk(0, "받음", data, datetime.now())
+        self.add_talk(0, data.user_id, data.msg, datetime.now())
 
     # ==============================================================================================================
 

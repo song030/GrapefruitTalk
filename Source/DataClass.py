@@ -29,7 +29,9 @@ class ReqLoout:
 
 # 채팅 송신 요청
 class ReqChat:
-    def __init__(self, msg: str): #msg = self.edt_txt.text()
+    def __init__(self, user_id:str, room_id:int, msg: str): #msg = self.edt_txt.text()
+        self.user_id = user_id
+        self.room_id = room_id
         self.msg = msg
 
 # 친구 초대 요청

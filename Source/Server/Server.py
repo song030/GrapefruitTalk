@@ -1,7 +1,7 @@
 import socket
 import pickle
 # from db import DB
-# from dataClass import *
+from Source.DataClass import *
 
 from threading import Thread
 
@@ -9,13 +9,16 @@ class Server:
     def __init__(self, port=1234, listener=1):
         # db 초기화 내용 넣기
 
-        # 접속한 클라이언트 정보 key :(어드레스), value : [소켓, 아이디]
+        # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
+        # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
         self.client : dict[tuple, list[socket.socket, str]] = {}
 
         # 서버 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.bind(('', port))  # 서버의 주소, 포트번호 저장
         self.sock.listen(listener)  # 서버 소켓 연결 요청 대시 상태로 설정
+
+        self.count = 0
 
         print("[ 서버 시작 ]")
 
@@ -30,7 +33,9 @@ class Server:
     def accept(self):
         # 클라이언트 연결시 소켓과 어드레스 반환
         sock, addr = self.sock.accept()
-        self.client[addr] = [sock, ""]
+
+        print("[ 클라이언트 접속 ]")
+        self.client[addr] = [sock, f"test{self.count}"]
 
         return sock, addr
 
@@ -44,14 +49,28 @@ class Server:
 
     # 데이터 전송
     def send(self, sock:socket.socket, data):
-        self.send_all_client(data)
+
+        # 데이터 타입에따른 데이터 전송
+        if type(data) in [ReqChat]:
+            self.send_message(data)
 
     # 접속한 모든 클라이언트에게 전송
     def send_all_client(self, data):
         if self.connected():
-            # 연결된 모든 클라이언트에 데이터 발송
             for client in self.client.values():
                 client[0].sendall(pickle.dumps(data))
+            return True
+        else:
+            return False
+
+    # 발송자를 제외한 나머지 접속자에세 메시지 발송
+    def send_message(self, data:ReqChat):
+        if self.connected():
+            # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
+            # 연결된 모든 클라이언트에 데이터 발송
+            for client in self.client.values():
+                if data.user_id != client[1]:
+                    client[0].sendall(pickle.dumps(data))
             return True
         else:
             return False
@@ -77,9 +96,10 @@ class Server:
             self.disconnect(addr)
             return None
 
+    # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
-        # 받은 데이터에 대한 처리 결과 반환 내용 넣기
-        return data
+        if type(data) == ReqChat:
+            return self.send_message(data)
 
     def handler(self, sock,):
         while True:
@@ -107,6 +127,3 @@ if __name__ == "__main__":
         c_sock, c_addr = server.accept()
         c_thread = Thread(target=server.handler, args=(c_sock,), daemon=True)
         c_thread.start()
-
-        print("클라이언트 접속 :", server.client)
-        print(c_addr)
