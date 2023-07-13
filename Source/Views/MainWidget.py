@@ -43,15 +43,15 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.connect_event()
 
         # 서버 연결
-        self.client = Client()
-        if not self.client.connect():
-            self.disconnect()
-        else:
-            self.receive_thread = ReceiveThread(self.client)
-            self.address = self.client.address()
-            self.connect_thread_signal()
-            self.receive_thread.start()
-            self.client.send(self.user_id)
+        # self.client = Client()
+        # if not self.client.connect():
+        #     self.disconnect()
+        # else:
+        #     self.receive_thread = ReceiveThread(self.client)
+        #     self.address = self.client.address()
+        #     self.connect_thread_signal()
+        #     self.receive_thread.start()
+        #     self.client.send(self.user_id)
 
     # 화면 글꼴 설정
     def set_font(self):
