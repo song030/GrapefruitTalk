@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFontDatabase
 
-from Views.MainWidget import MainWidget
+from Source.Views.MainWidget import MainWidget
 
 def main():
     app = QApplication(sys.argv)
