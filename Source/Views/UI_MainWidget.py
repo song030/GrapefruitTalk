@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWidget.ui'
+# Form implementation generated from reading ui file './UI/MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -144,40 +144,10 @@ class Ui_MainWidget(object):
         self.gridLayout = QtWidgets.QGridLayout()
         self.gridLayout.setSpacing(10)
         self.gridLayout.setObjectName("gridLayout")
-        self.edt_join_nick = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_nick.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_nick.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_nick.setObjectName("edt_join_nick")
-        self.gridLayout.addWidget(self.edt_join_nick, 4, 0, 1, 3)
         self.lbl_join_dot = QtWidgets.QLabel(self.frame)
         self.lbl_join_dot.setStyleSheet("border:solid;")
         self.lbl_join_dot.setObjectName("lbl_join_dot")
         self.gridLayout.addWidget(self.lbl_join_dot, 3, 1, 1, 1)
-        self.btn_join_id = QtWidgets.QPushButton(self.frame)
-        self.btn_join_id.setMinimumSize(QtCore.QSize(90, 30))
-        self.btn_join_id.setStyleSheet("QPushButton{\n"
-"background-color:white;\n"
-"border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"}")
-        self.btn_join_id.setObjectName("btn_join_id")
-        self.gridLayout.addWidget(self.btn_join_id, 0, 3, 1, 1)
-        self.edt_join_id = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_id.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_id.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_id.setObjectName("edt_join_id")
-        self.gridLayout.addWidget(self.edt_join_id, 0, 0, 1, 3)
-        self.edt_join_pwd1 = QtWidgets.QLineEdit(self.frame)
-        self.edt_join_pwd1.setMinimumSize(QtCore.QSize(280, 30))
-        self.edt_join_pwd1.setStyleSheet("border:1px solid lightgray;\n"
-"border-radius:5px;\n"
-"padding:5px;")
-        self.edt_join_pwd1.setObjectName("edt_join_pwd1")
-        self.gridLayout.addWidget(self.edt_join_pwd1, 1, 0, 1, 3)
         self.cb_join_email = QtWidgets.QComboBox(self.frame)
         self.cb_join_email.setMinimumSize(QtCore.QSize(0, 30))
         self.cb_join_email.setStyleSheet("QComboBox{\n"
@@ -198,6 +168,45 @@ class Ui_MainWidget(object):
 "")
         self.cb_join_email.setObjectName("cb_join_email")
         self.gridLayout.addWidget(self.cb_join_email, 3, 2, 1, 1)
+        self.edt_join_nick = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_nick.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_nick.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_nick.setObjectName("edt_join_nick")
+        self.gridLayout.addWidget(self.edt_join_nick, 5, 0, 1, 3)
+        self.btn_join_mail = QtWidgets.QPushButton(self.frame)
+        self.btn_join_mail.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_join_mail.setStyleSheet("QPushButton{\n"
+"background-color:white;\n"
+"border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"}")
+        self.btn_join_mail.setObjectName("btn_join_mail")
+        self.gridLayout.addWidget(self.btn_join_mail, 3, 3, 1, 1)
+        self.btn_join_id = QtWidgets.QPushButton(self.frame)
+        self.btn_join_id.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_join_id.setStyleSheet("QPushButton{\n"
+"background-color:white;\n"
+"border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"}")
+        self.btn_join_id.setObjectName("btn_join_id")
+        self.gridLayout.addWidget(self.btn_join_id, 0, 3, 1, 1)
+        self.edt_join_pwd1 = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_pwd1.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_pwd1.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_pwd1.setObjectName("edt_join_pwd1")
+        self.gridLayout.addWidget(self.edt_join_pwd1, 1, 0, 1, 3)
+        self.edt_join_id = QtWidgets.QLineEdit(self.frame)
+        self.edt_join_id.setMinimumSize(QtCore.QSize(280, 30))
+        self.edt_join_id.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.edt_join_id.setObjectName("edt_join_id")
+        self.gridLayout.addWidget(self.edt_join_id, 0, 0, 1, 3)
         self.edt_join_email = QtWidgets.QLineEdit(self.frame)
         self.edt_join_email.setMinimumSize(QtCore.QSize(0, 30))
         self.edt_join_email.setStyleSheet("border:1px solid lightgray;\n"
@@ -212,15 +221,29 @@ class Ui_MainWidget(object):
 "padding:5px;")
         self.edt_join_pwd2.setObjectName("edt_join_pwd2")
         self.gridLayout.addWidget(self.edt_join_pwd2, 2, 0, 1, 3)
-        self.btn_join_mail = QtWidgets.QPushButton(self.frame)
-        self.btn_join_mail.setMinimumSize(QtCore.QSize(90, 30))
-        self.btn_join_mail.setStyleSheet("QPushButton{\n"
+        self.widget_email = QtWidgets.QWidget(self.frame)
+        self.widget_email.setStyleSheet("border:solid;")
+        self.widget_email.setObjectName("widget_email")
+        self.horizontalLayout_8 = QtWidgets.QHBoxLayout(self.widget_email)
+        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_8.setSpacing(9)
+        self.horizontalLayout_8.setObjectName("horizontalLayout_8")
+        self.lbl_email_num = QtWidgets.QLineEdit(self.widget_email)
+        self.lbl_email_num.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;")
+        self.lbl_email_num.setObjectName("lbl_email_num")
+        self.horizontalLayout_8.addWidget(self.lbl_email_num)
+        self.btn_email_num = QtWidgets.QPushButton(self.widget_email)
+        self.btn_email_num.setMinimumSize(QtCore.QSize(90, 30))
+        self.btn_email_num.setStyleSheet("QPushButton{\n"
 "background-color:white;\n"
 "border:1px solid lightgray;\n"
 "border-radius:5px;\n"
 "}")
-        self.btn_join_mail.setObjectName("btn_join_mail")
-        self.gridLayout.addWidget(self.btn_join_mail, 3, 3, 1, 1)
+        self.btn_email_num.setObjectName("btn_email_num")
+        self.horizontalLayout_8.addWidget(self.btn_email_num)
+        self.gridLayout.addWidget(self.widget_email, 4, 0, 1, 4)
         self.gridLayout.setColumnStretch(0, 2)
         self.horizontalLayout.addLayout(self.gridLayout)
         self.verticalLayout_2.addWidget(self.frame)
@@ -432,7 +455,7 @@ class Ui_MainWidget(object):
         self.scroll_talk.setWidgetResizable(True)
         self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 531, 738))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 532, 738))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -544,7 +567,7 @@ class Ui_MainWidget(object):
         self.verticalLayout.addWidget(self.stack_main)
 
         self.retranslateUi(MainWidget)
-        self.stack_main.setCurrentIndex(2)
+        self.stack_main.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWidget)
 
     def retranslateUi(self, MainWidget):
@@ -558,25 +581,16 @@ class Ui_MainWidget(object):
         self.btn_login.setText(_translate("MainWidget", "로그인"))
         self.lbl_join.setText(_translate("MainWidget", "회원가입"))
         self.lbl_join_title.setText(_translate("MainWidget", "회원가입"))
-        self.edt_join_nick.setPlaceholderText(_translate("MainWidget", "닉네임 (최대20자)"))
         self.lbl_join_dot.setText(_translate("MainWidget", "@"))
+        self.edt_join_nick.setPlaceholderText(_translate("MainWidget", "닉네임 (최대20자)"))
+        self.btn_join_mail.setText(_translate("MainWidget", "인증 메일 발송"))
         self.btn_join_id.setText(_translate("MainWidget", "중복확인"))
-        self.edt_join_id.setPlaceholderText(_translate("MainWidget", "아이디"))
         self.edt_join_pwd1.setPlaceholderText(_translate("MainWidget", "비밀번호 (영대문자,숫자,특수문자 필수,5~16자)"))
+        self.edt_join_id.setPlaceholderText(_translate("MainWidget", "아이디"))
         self.edt_join_email.setPlaceholderText(_translate("MainWidget", "이메일"))
         self.edt_join_pwd2.setPlaceholderText(_translate("MainWidget", "비밀번호 확인"))
-        self.btn_join_mail.setText(_translate("MainWidget", "인증 메일 발송"))
+        self.btn_email_num.setText(_translate("MainWidget", "인증번호 확인"))
         self.btn_join.setText(_translate("MainWidget", "회원가입"))
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWidget = QtWidgets.QWidget()
-    ui = Ui_MainWidget()
-    ui.setupUi(MainWidget)
-    MainWidget.show()
-    sys.exit(app.exec_())
