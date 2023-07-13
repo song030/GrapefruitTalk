@@ -119,6 +119,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
 
+    # 쓰레드 함수 연결
     def connect_thread_signal(self):
         self.receive_thread.res_message.connect(self.receive_message)
 

@@ -5,7 +5,7 @@ from Source.Main.DataClass import *
 
 class DBConnector:      # DB를 총괄하는 클래스
     _instance = None    # 싱글턴 패턴 사용
-    conn = sqlite3.connect("../../Data/data.db", check_same_thread=False)     # db 속
+    conn = sqlite3.connect("../../Data/data.db", check_same_thread=False)
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
