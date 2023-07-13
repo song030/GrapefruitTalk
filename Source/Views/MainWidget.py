@@ -59,15 +59,15 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.connect_event()
 
         # 서버 연결
-        # self.client = Client()
-        # if not self.client.connect():
-        #     self.disconnect()
-        # else:
-        #     self.receive_thread = ReceiveThread(self.client)
-        #     self.address = self.client.address()
-        #     self.connect_thread_signal()
-        #     self.receive_thread.start()
-        #     self.client.send(self.user_id)
+        self.client = Client()
+        if not self.client.connect():
+            self.disconnect()
+        else:
+            self.receive_thread = ReceiveThread(self.client)
+            self.address = self.client.address()
+            self.connect_thread_signal()
+            self.receive_thread.start()
+            self.client.send(self.user_id)
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -103,7 +103,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 채팅방
         self.lbl_room_name.setFont(Font.button(3))
         self.edt_txt.setFont(font_txt_normal)
-        self.splitter.moveSplitter(100, 0)
+        # self.splitter.moveSplitter(100, 0)
 
     # 화면 위젯 초기화
     def set_ui(self):
@@ -120,6 +120,12 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.back.setGeometry(0, 0, 1024, 860)
         self.back.setStyleSheet("background-color: rgba(20, 20, 20, 50);")
         self.back.hide()
+
+    # 테마 색상 설정 > 나중에
+    def set_theme_color(self, t_main: str = "#E6A157", t_room: str = "#FFF3E2"):
+        self.page_login.setStyleSheet(f"background: {t_main}")
+        self.page_join.setStyleSheet(f"background: {t_main}")
+        self.scrollAreaWidgetContents.setStyleSheet(f"background: {t_room}")
 
     # 이벤트 연결
     def connect_event(self):
@@ -359,16 +365,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         if self.join_permission:
             self.dlg_warning.set_dialog_type(2, "회원가입 안내", "※회원가입 완료※ 환영 합니다")
             if self.dlg_warning.exec():
-                # -- 채팅 화면 초기화
-                self.init_talk()
-                self.init_list("multi")
-                # --- 스플리터, 스크롤 위치 보정
-                self.splitter.setSizes([self.splitter.width() - 100, 100])
-                QtTest.QTest.qWait(100)
-                self.edt_txt.setText("")
-                self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
-                # -- 화면 출력
-                self.stack_main.setCurrentWidget(self.page_talk)
+                pass
             else:
                 pass
         else:
@@ -388,16 +385,28 @@ class MainWidget(QWidget, Ui_MainWidget):
         """입력 ID, PASSWORD 확인 함수"""
         print(data.rescode)
         if data.rescode == 0:
-            self.dlg_warning.set_dialog_type(1, '로그인 안내', "※로그인 실패※ \n 존재하지 않는 아이디/비밀번호 입니다. \n 다시 확인해주세요.")
+            self.dlg_warning.set_dialog_type(1, 'no_id_pw')
             self.dlg_warning.exec()
             return False
         elif data.rescode == 1:
-            self.dlg_warning.set_dialog_type(1, '로그인 안내', "※로그인 실패※ \n 잘못된 아이디 또는 패스워드 입니다.")
+            self.dlg_warning.set_dialog_type(1, 'wrong_id_pw')
             self.dlg_warning.exec()
             return False
         else:
-            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.id_}님 로그인 완료")
+            self.dlg_warning.set_dialog_type(1, t_text=f"※로그인 완료※ \n {self.id_}님 로그인 완료")
             self.dlg_warning.exec()
+
+            # -- 채팅 화면 초기화
+            self.init_talk()
+            self.init_list("multi")
+            # --- 스플리터, 스크롤 위치 보정
+            self.splitter.setSizes([self.splitter.width() - 100, 100])
+            QtTest.QTest.qWait(100)
+            self.edt_txt.setText("")
+            self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
+            # -- 화면 출력
+            self.stack_main.setCurrentWidget(self.page_talk)
+
             return True
 
     # ================================================== 대화 화면 ==================================================
@@ -435,7 +444,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 네트워크 발신 내용 추가하기
         text = self.edt_txt.text()
         # widget = self.add_talk(0, "발송", text, datetime.now())
-        if self.client.send(ReqChat(self.user_id, 0, text)):
+        if self.client.send(ReqChat("cr_id", self.user_id, text)):
             print("발송 완료")
             self.add_talk(0, "발송", text, datetime.now())
             pass

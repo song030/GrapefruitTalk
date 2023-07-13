@@ -34,7 +34,7 @@ class DialogWarning(QDialog, Ui_DlgWarning):
     # 다이얼로그 타입 설정
     # bt_cnt : 버튼 수량
     # t_type : 다이얼로그 타입
-    def set_dialog_type(self, bt_cnt: int, t_type: str):
+    def set_dialog_type(self, bt_cnt: int, t_type: str="no_id_pw", t_text=""):
         if bt_cnt == 1:
             self.layout_double.setVisible(False)
             self.btn_single.setVisible(True)
@@ -43,10 +43,13 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.layout_double.setVisible(True)
             self.btn_single.setVisible(False)
 
-        if t_type == 'used_id':
-            self.lbl_text.setText('사용 중인 아이디입니다.')
-        elif t_type == 'user_can_used':
-            self.lbl_text.setText('사용할 수 있는 아이디입니다.')
+        if t_text:
+            self.lbl_text.setText(t_text)
+
+        elif t_type == 'no_id_pw':
+            self.lbl_text.setText("※로그인 실패※ \n 존재하지 않는 아이디/비밀번호 입니다. \n 다시 확인해주세요.")
+        elif t_type == 'wrong_id_pw':
+            self.lbl_text.setText("※로그인 실패※ \n 잘못된 아이디 또는 패스워드 입니다.")
         elif t_type == 'id_len_limited':
             self.lbl_text.setText('아이디는 최대 16자까지 입력 가능합니다.')
         elif t_type == 'pw_alphabet_1':

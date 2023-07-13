@@ -2,7 +2,7 @@ import socket
 import pickle
 import datetime
 
-from Source.Main.DBConnetor import DBConnector
+from Source.Main.DBConnector import DBConnector
 from Source.Main.DataClass import *
 
 from threading import Thread
@@ -137,6 +137,7 @@ class Server:
     def process_data(self, sock, data):
         print("지금 위치는 process_data입니다.")
         print(f"data입니다. : {data}")
+
         if type(data) == ReqChat:
             return data
         elif type(data) == ReqLogin:
