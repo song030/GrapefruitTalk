@@ -10,8 +10,6 @@ from Source.Views.DialogWarning import DialogWarning
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 from Source.Views.ListItem import ListItem
-from Source.Client.Client import Client
-from Source.Client.ReceiveThread import ReceiveThread
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -28,34 +26,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 이벤트 연결
         self.connect_event()
 
-        # 서버 연결
-        self.client = Client()
-        if not self.client.connect():
-            self.disconnect()
-        else:
-            self.receive_thread = ReceiveThread(self.client)
-            self.id = ""
-            self.address = self.client.address()
-            self.connect_thread_signal()
-            self.receive_thread.start()
-
-        # 디비 연결
-        # DB 연결 및 데이터 리스트업
-
-        # conn = sqlite3.connect("../../data/grapefruit_talk.db")
-        conn = sqlite3.connect("C:\\Users\\KDT103\\Desktop\\coding\\0. 프로젝트\\팀프로젝트\\GrapefruitTalk\\data\\grapefruit_talk.db")
-
-        df = pd.read_sql('select * from TB_USER', conn) # 전체 데이터프레임
-        id_df = pd.read_sql("select USER_ID from TB_USER", conn)
-        self.id_list = id_df.values.tolist() # 아이디 리스트
-
-        pwd_df = pd.read_sql("select USER_PW from TB_USER",     conn)
-        self.pwd_list = pwd_df.values.tolist() # 비밀번호 리스트
-
-    def make_talkbox(self, message):
-        self.add_date_line()
-        talkbox = TalkBox("", "자몽자몽", message, datetime.now())
-        self.layout_talk.addLayout(talkbox.layout)
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -74,18 +44,18 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # ===== 회원가입
         self.lbl_join_title.setFont(Font.title(2))
-
+        
         self.edt_join_id.setFont(font_txt_normal)
         self.edt_join_pwd1.setFont(font_txt_normal)
         self.edt_join_pwd2.setFont(font_txt_normal)
         self.edt_join_email.setFont(font_txt_normal)
         self.edt_join_nick.setFont(font_txt_normal)
-
+        
         self.btn_join_id.setFont(font_btn)
         self.btn_join_mail.setFont(Font.button(5))
         self.btn_join.setFont(font_btn)
         self.btn_join_cancel.setFont(font_btn)
-
+        
         self.cb_join_email.setFont(font_txt_normal)
 
         # ===== 채팅방
@@ -123,9 +93,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join.clicked.connect(self.join_input_check)
 
         # ===== 대화방
-        self.splitter.moveSplitter(100, 0)
+        self.splitter.moveSplitter(100,0)
         self.btn_send.clicked.connect(self.send_message)
-        self.edt_txt.returnPressed.connect(self.send_message)
 
         # ===== 리스트 메뉴
         self.btn_single.clicked.connect(lambda: self.list_btn_check("single"))
@@ -134,11 +103,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
 
-    def connect_thread_signal(self):
-        self.receive_thread.res_message.connect(self.receive_message)
-
     # 레이아웃 비우기
-    def clear_layout(self, layout: QLayout):
+    def clear_layout(self, layout:QLayout):
         while layout.count():
             item = layout.takeAt(0)
             widget = item.widget()
@@ -149,34 +115,17 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:
                 self.clear_layout(item.layout())
 
-    def check_id_txt(self):
-        """아이디 중복 확인"""
-        user_id = self.edt_join_id.text()
-        print(user_id, self.id_list)
-        if user_id in self.id_list:
-            self.dlg_warning.set_dialog_type(1, "used_id")
-            return None
-        elif user_id not in self.id_list:
-            self.dlg_warning.set_dialog_type(1, "user_can_used")
-            # return user_id
-
-    # 화면 변화가 일어났을때 대화창 사이즈 변화
-    def resizeEvent(self, a0: QResizeEvent) -> None:
-        self.scrollAreaWidgetContents.setFixedWidth(self.scrollArea.width()-15)
-
-
     # ================================================== 회원가입 ==================================================
 
     # 회원가입 입력확인
     def join_input_check(self):
-        """"""
 
         self.dlg_warning.set_dialog_type(2, "test")
 
         if self.dlg_warning.exec():
             self.stack_main.setCurrentWidget(self.page_talk)
             self.init_talk()
-            self.init_list('multi')
+            self.init_list("multi")
         else:
             pass
 
@@ -202,25 +151,15 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.layout_talk.addLayout(talkbox.layout)
 
     # 대화 박스 추가
-    def add_talk(self, t_img: int, t_nick: str, t_text: str, t_time: datetime):
+    def add_talk(self, t_img:int, t_nick:str, t_text:str, t_time:datetime):
         talkbox = TalkBox(t_img, t_nick, t_text, t_time)
         self.layout_talk.addLayout(talkbox.layout)
 
     # 메시지 발송
     def send_message(self):
         # 네트워크 발신 내용 추가하기
-        text = self.edt_txt.text()
-        if self.client.send(text):
-            print("발송 완료")
-            # self.add_talk(0, "테스트", text, datetime.now())
-            pass
-
-        self.edt_txt.setText("")
-
-    # 메시지 수신
-    def receive_message(self, data):
-        print("in receive")
-        self.add_talk(0, "받음", data, datetime.now())
+        # self.add_talk(0, "자몽자몽", text, datetime.now())
+        pass
 
     # ==============================================================================================================
 
