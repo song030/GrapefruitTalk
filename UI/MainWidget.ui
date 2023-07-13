@@ -348,7 +348,8 @@ border-radius:5px;
           <widget class="QFrame" name="frame">
            <property name="styleSheet">
             <string notr="true">border:1px solid lightgray;
-border-radius:5px;</string>
+border-radius:5px;
+background: #FFF;</string>
            </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
@@ -715,7 +716,7 @@ border-radius:5px;
           <item>
            <widget class="QLabel" name="lbl_room_number">
             <property name="text">
-             <string>명</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -811,6 +812,42 @@ padding: 3px;
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btn_member">
+            <property name="styleSheet">
+             <string notr="true">QPushButton{
+border: 1px solid lightgray;
+border-radius: 5px;
+padding: 3px;
+}
+
+QPushButton:Checked{
+border: 1px solid black;
+border-radius: 5px;
+padding: 3px;
+}</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset>
+              <normaloff>../Images/btn_member.png</normaloff>../Images/btn_member.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>22</width>
+              <height>22</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btn_friend">
             <property name="styleSheet">
              <string notr="true">QPushButton{
@@ -870,7 +907,7 @@ border-radius:5px;
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <widget class="QScrollArea" name="scrollArea">
+            <widget class="QScrollArea" name="scroll_talk">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                <horstretch>0</horstretch>
@@ -899,12 +936,17 @@ QScrollBar::handle:vertical {
     border-radius:8px;
 
 }
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+height: 0px;
+}
+QScrollBar::add-line:vertical {
+      border: none;
+      background: none;
+}
+
 QScrollBar::sub-line:vertical {
-	border: None;
-	background-color: white;
-	width:18px;
-	margin: 0 0 0 0;
-	border-radius: 0px;
+      border: none;
+      background: none;
 }</string>
              </property>
              <property name="verticalScrollBarPolicy">
@@ -924,7 +966,7 @@ QScrollBar::sub-line:vertical {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>532</width>
+                <width>531</width>
                 <height>738</height>
                </rect>
               </property>

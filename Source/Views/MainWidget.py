@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
-from PyQt5.QtGui import QResizeEvent
+from PyQt5 import QtTest
+from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout, QAction
+from PyQt5.QtCore import Qt, pyqtSlot
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
 
@@ -9,6 +10,7 @@ from Source.Views.Font import Font
 from Source.Views.DialogWarning import DialogWarning
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
+from Source.Views.NoticeLine import NoticeLine
 from Source.Views.ListItem import ListItem
 
 
@@ -19,6 +21,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 화면 초기화
         self.set_ui()
+        self.set_theme_color()
 
         # 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
@@ -62,8 +65,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.lbl_room_name.setFont(Font.button(3))
         self.edt_txt.setFont(font_txt_normal)
         # self.splitter.moveSplitter(100, 0)
-        # print(int(self.splitter.width()*0.8), int(self.splitter.width()*0.2))
-        self.splitter.setSizes([510, 125])
 
     # 화면 위젯 초기화
     def set_ui(self):
@@ -80,6 +81,12 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.back.setGeometry(0, 0, 1024, 860)
         self.back.setStyleSheet("background-color: rgba(20, 20, 20, 50);")
         self.back.hide()
+
+    # 테마 색상 설정
+    def set_theme_color(self, t_main: str = "#E6A157", t_room: str = "FFF3E2"):
+        self.page_login.setStyleSheet(f"background: {t_main}")
+        self.page_join.setStyleSheet(f"background: {t_main}")
+        # self.scrollAreaWidgetContents.setStyleSheet(f"background: {t_room}")
 
     # 이벤트 연결
     def connect_event(self):
@@ -101,6 +108,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 리스트 메뉴
         self.btn_single.clicked.connect(lambda: self.list_btn_check("single"))
         self.btn_multi.clicked.connect(lambda: self.list_btn_check("multi"))
+        self.btn_member.clicked.connect(lambda: self.list_btn_check("member"))
         self.btn_friend.clicked.connect(lambda: self.list_btn_check("friend"))
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
@@ -138,6 +146,7 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 대화 방 초기화
     def init_talk(self):
         self.add_date_line()
+        self.add_notice_line("username")
 
         text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
         for i in range(5):
@@ -147,10 +156,22 @@ class MainWidget(QWidget, Ui_MainWidget):
         # talkbox = TalkBox("", "자몽자몽", text, datetime.now())
         # self.layout_talk.addLayout(talkbox.layout)
 
+        # 스플리터 위치 조정
+        self.splitter.setSizes([self.splitter.width()-100, 100])
+
+        # 스크롤 위치 조정
+        _x, _y = 100, 600
+        self.scroll_talk.ensureVisible(_x, _y)
+
     # 일자 표시선 추가
     def add_date_line(self):
         talkbox = DateLine(datetime.now())
         self.layout_talk.addLayout(talkbox.layout)
+
+    # 입퇴장 안내 문구 추가
+    def add_notice_line(self, t_nick: str, t_type: str = "입장"):
+        noticeline = NoticeLine(t_nick, t_type)
+        self.layout_talk.addLayout(noticeline.layout)
 
     # 대화 박스 추가
     def add_talk(self, t_img: int, t_nick: str, t_text: str, t_time: datetime):
@@ -180,6 +201,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
                 # 다른 버튼 체크 비활성
                 self.btn_multi.setChecked(False)
+                self.btn_member.setChecked(False)
                 self.btn_friend.setChecked(False)
                 clear_check = True
 
@@ -191,6 +213,19 @@ class MainWidget(QWidget, Ui_MainWidget):
 
                 # 다른 버튼 체크 비활성
                 self.btn_single.setChecked(False)
+                self.btn_member.setChecked(False)
+                self.btn_friend.setChecked(False)
+                clear_check = True
+
+        elif t_type == "member":
+            if not self.btn_member.isChecked():
+                self.btn_member.setChecked(True)
+            else:
+                self.btn_add.setVisible(False)
+
+                # 다른 버튼 체크 비활성
+                self.btn_single.setChecked(False)
+                self.btn_multi.setChecked(False)
                 self.btn_friend.setChecked(False)
                 clear_check = True
 
@@ -203,6 +238,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 # 다른 버튼 체크 비활성
                 self.btn_single.setChecked(False)
                 self.btn_multi.setChecked(False)
+                self.btn_member.setChecked(False)
                 clear_check = True
 
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
@@ -240,7 +276,6 @@ class MainWidget(QWidget, Ui_MainWidget):
                 item = ListItem(f"single{i}", f"개인방 {i+1}", "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
                 self.layout_list.addWidget(item.frame)
-                # --------- 클릭 이벤트 채팅 화면에 출력
                 item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
 
             off_num = self.layout_list.count() - 1 - on_num
@@ -253,8 +288,39 @@ class MainWidget(QWidget, Ui_MainWidget):
                 item.set_info(datetime.now(), i)
                 item.member_cnt = 10 - i
                 self.layout_list.addWidget(item.frame)
-                # --------- 클릭 이벤트 채팅 화면에 출력
                 item.frame.mousePressEvent = lambda _, v=item: self.open_chat_room(v)
+
+        # 채팅방 멤버 리스트
+        elif t_type == "member":
+            self.btn_add.setVisible(False)
+            # 온라인
+            online = QLabel()
+            online.setFont(Font.button(3))
+            self.layout_list.addWidget(online)
+
+            for i in range(3):
+                item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
+                self.layout_list.addWidget(item.frame)
+                # --- 우클릭 : 친구 추가 메뉴
+                item.frame.setContextMenuPolicy(Qt.ActionsContextMenu)
+                request_action = QAction("친구할까요?", item.frame)
+                request_action.triggered.connect(self.friend_request)
+                item.frame.addAction(request_action)
+
+            on_num = self.layout_list.count() - 1
+            online.setText(f"온라인 - {on_num}명")
+
+            # 오프라인
+            offline = QLabel()
+            offline.setFont(Font.button(3))
+            self.layout_list.addWidget(offline)
+
+            for i in range(3):
+                item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
+                self.layout_list.addWidget(item.frame)
+
+            off_num = self.layout_list.count() - 1 - on_num
+            offline.setText(f"오프라인 - {off_num}명")
 
         # 친구 리스트
         elif t_type == "friend":
@@ -265,7 +331,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
 
             for i in range(3):
-                item = ListItem(f"friend{i}", "닉네임", "상태상태상태상태상태상태")
+                item = ListItem(f"friend{i}", "친구", "상태상태상태상태상태상태")
                 self.layout_list.addWidget(item.frame)
 
             on_num = self.layout_list.count() - 1
@@ -278,7 +344,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i in range(3):
                 item = ListItem(f"friend{i:53d}", "닉네임", "상태상태상태상태상태상태")
-                self.layout_list.addLayout(item.layout)
+                self.layout_list.addWidget(item.frame)
 
             off_num = self.layout_list.count() - 1 - on_num
             offline.setText(f"오프라인 - {off_num}명")
@@ -317,4 +383,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         else:
             pass
 
+    # 친구 추가 신청
+    @pyqtSlot()
+    def friend_request(self):
+        print("친구 신청!")
 # ==============================================================================================================
