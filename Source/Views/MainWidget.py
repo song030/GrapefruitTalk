@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
-from PyQt5.QtGui import QResizeEvent
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
 
@@ -12,7 +11,7 @@ from Source.Views.DateLine import DateLine
 from Source.Views.ListItem import ListItem
 from Source.Client.Client import Client
 from Source.Client.ReceiveThread import ReceiveThread
-from Source.DataClass import *
+from Source.Main.DataClass import *
 
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -41,6 +40,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.address = self.client.address()
             self.connect_thread_signal()
             self.receive_thread.start()
+            self.client.send(self.user_id)
 
     # 화면 글꼴 설정
     def set_font(self):

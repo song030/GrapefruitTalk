@@ -1,11 +1,11 @@
 import sqlite3
 
 from datetime import datetime
-from Source.DataClass import *
+from Source.Main.DataClass import *
 
 class DBConnector:      # DB를 총괄하는 클래스
     _instance = None    # 싱글턴 패턴 사용
-    conn = sqlite3.connect("../Data/data.db")     # db 속
+    conn = sqlite3.connect("../../Data/data.db")     # db 속
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
@@ -271,14 +271,15 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.cur.execute("delete from TB_CHATROOM where USER_CR_TO = ?", (user_cr_to,))
         self.commit_db()
 
-
     ## TB_content ================================================================================ ##
     def insert_content(self, data:ReqChat):
+        print("insert_content")
         self.cur.execute("insert into TB_CONTENT (CR_ID, USER_ID, CNT_ID, CNT_CONTENT, CNT_SEND_TIME) "
                          "values (?, ?, ?, ?, ?)",
                          ("OE_1", data.user_id, 1, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
         self.commit_db()
+        print("save complete")
 
     def find_content(self):
         rows_data = self.cur.execute("select * from TB_CONTENT").fetchall()

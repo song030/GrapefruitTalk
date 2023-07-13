@@ -1,11 +1,11 @@
 import socket
 import pickle
 
-from Source.DBConnetor import DBConnector
-from Source.DataClass import *
+from Source.Main.DBConnetor import DBConnector
+from Source.Main.DataClass import *
 
 from threading import Thread
-from datetime import datetime
+
 
 class Server:
     def __init__(self, port=1234, listener=1):
@@ -37,7 +37,7 @@ class Server:
         sock, addr = self.sock.accept()
 
         print("[ 클라이언트 접속 ]")
-        self.client[addr] = [sock, f"test{self.count}"]
+        self.client[addr] = [sock, ""]
 
         return sock, addr
 
@@ -55,6 +55,9 @@ class Server:
         # 데이터 타입에따른 데이터 전송
         if type(data) in [ReqChat]:
             self.send_message(data)
+        elif type(data) == str:
+            self.client[sock.getpeername()][1] = data
+            print(self.client[sock.getpeername()][1])
 
     # 접속한 모든 클라이언트에게 전송
     def send_all_client(self, data):
@@ -105,6 +108,8 @@ class Server:
         print(type(data))
         if type(data) == ReqChat:
             return data
+        else:
+            return data
 
     def handler(self, sock,):
         while True:
@@ -118,9 +123,9 @@ class Server:
             print(data)
             process_data = self.process_data(sock, data)
 
-            print("[ 결과 발송 ]")
+            print("[ 데이터 처리 ]")
             self.send(sock, process_data)
-            print("발송 완료")
+            print("처리 완료")
 
 
 if __name__ == "__main__":

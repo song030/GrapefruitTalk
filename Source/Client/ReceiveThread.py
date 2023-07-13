@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from Source.Client import Client
-from Source.DataClass import *
+from Source.Main.DataClass import *
 
 class ReceiveThread(QThread):
 
