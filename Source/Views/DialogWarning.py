@@ -43,6 +43,31 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.layout_double.setVisible(True)
             self.btn_single.setVisible(False)
 
-        # type, text 원하는 대로 입력하여 사용하기, 아래는 예시
-        if t_type == "test":
-            self.lbl_text.setText("제품을 선택해주세요.")
+        if t_type == 'used_id':
+            self.lbl_text.setText('사용 중인 아이디입니다.')
+        elif t_type == 'user_can_used':
+            self.lbl_text.setText('사용할 수 있는 아이디입니다.')
+        elif t_type == 'id_len_limited':
+            self.lbl_text.setText('아이디는 최대 16자까지 입력 가능합니다.')
+        elif t_type == 'pw_alphabet_1':
+            self.lbl_text.setText('비밀번호에 최소 영대문자 1글자 이상 포함되어야 합니다.')
+        elif t_type == 'pw_unique_word':
+            self.lbl_text.setText('비밀번호에 최소 특수문자 1글자 이상 포함되어야 합니다.')
+        elif t_type == 'pw_len_limited':
+            self.lbl_text.setText('비밀번호는 최대 16자까지 입력가능합니다.')
+        elif t_type == 'pw_input':
+            self.lbl_text.setText('비밀번호를 입력해주세요')
+        elif t_type == 'pw_not_match':
+            self.lbl_text.setText('비밀번호가 서로 일치하지 않습니다.')
+        elif t_type == 'nick_name_len_limit':
+            self.lbl_text.setText('닉네임은 최대 20자까지 가능합니다.')
+        elif t_type == 'vaild_email_addr':
+            self.lbl_text.setText('유효한 이메일 주소 입니다.')
+        elif t_type == 'not_vaild_email_addr':
+            self.lbl_text.setText('유효한 이메일 주소가 아닙니다.')
+        elif t_type == 'email_send':
+            self.lbl_text.setText('가입을 위한 인증번호 이메일이 발송되었습니다.')
+        elif t_type == 'email_check':
+            self.lbl_text.setText('이메일 인증 완료')
+        elif t_type == 'email_not_check':
+            self.lbl_text.setText('이메일 인증 실패, 확인 후 재입력 해주시기 바랍니다.')

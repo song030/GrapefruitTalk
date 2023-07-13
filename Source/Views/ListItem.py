@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from PyQt5.QtWidgets import QGridLayout, QLabel, QWidget
+from PyQt5.QtWidgets import QGridLayout, QLabel, QWidget, QCheckBox
 from PyQt5.QtCore import Qt
 
 from Source.Views.Font import Font
@@ -104,3 +104,8 @@ class ListItem:
         t_last = t_last.strftime("%H:%M")
         self._lbl_last_date.setText(t_last)
         self._lbl_no_check.set_count(t_no_check)
+
+    def add_checkbox(self):
+        """체크박스 위해 추가했습니다."""
+        check_box = QCheckBox()
+        self._frame.layout().addWidget(check_box, 1, 4, 1, 1, Qt.AlignCenter)
