@@ -59,55 +59,6 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## CREATE TABLES ======================================================================== ##
 
-    # 기본 테이블 생성
-    def create_tables(self):
-        self.conn.executescript("""
-            DROP TABLE IF EXISTS TB_USER;  
-            CREATE TABLE "TB_USER" (
-                "USER_NO" INTEGER UNIQUE,
-                "USER_ID" TEXT NOT NULL,
-                "USER_NM" TEXT NOT NULL,
-                "USER_EMAIL" TEXT NOT NULL,
-                "USER_PW" TEXT NOT NULL,
-                "USER_CREATE_DATE" TEXT NOT NULL,
-                "USER_IMG" INTEGER,
-                "USER_STATE" TEXT,
-                PRIMARY KEY ("USER_NO" AUTOINCREMENT)
-            );
-            DROP TABLE IF EXISTS TB_FRIEND;
-            CREATE TABLE "TB_FRIEND" (
-                "USER_ID" TEXT,
-                "FRD_ID" TEXT,
-                "FRD_ACCEPT" TEXT
-            );
-            DROP TABLE IF EXISTS TB_LOG;
-            CREATE TABLE "TB_LOG" (
-                "USER_ID" TEXT,
-                "LOGIN_TIME" TEXT,
-                "LOGOUT_TIME" TEXT
-            );
-            DROP TABLE IF EXISTS TB_CHATROOM;
-            CREATE TABLE "TB_CHATROOM" (
-                "CR_ID" TEXT,
-                "CR_NM" TEXT,
-                PRIMARY KEY ("CR_ID")
-            );
-            DROP TABLE IF EXISTS TB_USER_CHATROOM;
-            CREATE TABLE "TB_USER_CHATROOM" (
-                "CR_ID" TEXT,
-                "USER_ID" TEXT,
-                FOREIGN KEY ("CR_ID") REFERENCES "TB_CHATROOM" ("CR_ID")
-            );
-            DROP TABLE IF EXISTS TB_READ_CNT;
-            CREATE TABLE "TB_READ_CNT" (
-                "CNT_ID" INTEGER,
-                "USER_ID" TEXT,
-                "IS_READ" INTEGER,
-                FOREIGN KEY ("CNT_ID") REFERENCES "TB_CONTENT" ("CNT_ID")
-            );
-        """)
-        self.commit_db()
-
     # 테이블 초기 설정
     def init_tables(self):
         # 단체 방 정보추가
@@ -291,7 +242,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         print("save complete")
 
 
-    # ------------------------------------------------------- 신규 추가
+    ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
 
 
