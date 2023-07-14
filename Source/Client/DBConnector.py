@@ -218,9 +218,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     ## TB_user_chatroom ================================================================================ ##
 
     # 방 맴버 정보 조회
-    def find_user_chatroom(self, cr_id):
-        df = pd.read_sql(f"select * from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
-        return df
+    def get_chatroom_title(self, cr_id):
+        df = pd.read_sql(f"select CR_NM from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
+        return df["CR_NM"].iloc[0]
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
@@ -243,6 +243,9 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
         print("save complete")
 
+    def get_content(self, cr_id):
+        df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
+        return df
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 

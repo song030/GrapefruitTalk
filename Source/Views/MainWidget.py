@@ -539,10 +539,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         """
         :param t_room_id: ListItem.item_id
         """
+        self.room_id = t_room_id
+
         target_: ListItem = self.current_list[t_room_id]
         target_.no_msg_cnt = 0
         self.lbl_room_name.setObjectName(t_room_id)
         self.lbl_room_name.setText(f"{target_.item_nm}")
+
         # 채팅방 아이디로 조건 분기
         if "OA" in t_room_id:
             self.check_no_msg_cnt("multi")
@@ -552,12 +555,13 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.lbl_room_number.clear()
         # --- 임시 채팅방 데이터 설정
         self.clear_layout(self.layout_talk)
-        self.add_date_line()
-        self.add_notice_line(f"{self.user_id}")
-        num_ = random.randrange(3, 8)
-        text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
-        for i in range(num_):
-            self.add_talk(0, "자몽자몽", text, datetime.now())
+        # self.add_date_line()
+        # self.add_notice_line(f"{self.user_id}")
+        # num_ = random.randrange(3, 8)
+        # text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        chat_data = self.db.get_content(t_room_id)
+        for i, data in chat_data.iterrows():
+            self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
         # --- 스크롤 테스트 중
         self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
@@ -723,12 +727,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 단체방
         elif t_type == "multi":
             for i, data in self.list_info.iterrows():
-                if not i:
-                    item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
-                else:
-                    item = ListItem(f"OA_{i:0>2}", f"단체방-{i}", "마지막 메시지 입니다.")
+                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
-                item.member_cnt = 10 - i
+                item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 self.layout_list.addWidget(item.frame)

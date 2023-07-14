@@ -7,7 +7,7 @@ from Source.Views.Font import Font
 from Source.Views.ProfileImage import ProfileImage
 
 class TalkBox:
-    def __init__(self, t_img:int, t_nick:str, t_talk:str, t_time:datetime):
+    def __init__(self, t_img:int, t_nick:str, t_talk:str, t_time):
         """
         :param t_img: 프로필 타입 → 추 후 수정예정
         :param t_nick: 닉네임
@@ -43,7 +43,8 @@ class TalkBox:
         self._grid_layout.addWidget(self._lbl_talk, 1, 1)
 
         # 발송 시간
-        t_time = t_time.strftime("%H:%M")
+        if type(t_time) == datetime:
+            t_time = t_time.strftime("%H:%M")
         self._lbl_time = QLabel()
         self._lbl_time.setFont(Font.text(5))
         self._lbl_time.setText(t_time)
