@@ -1,6 +1,9 @@
 import sqlite3
 from datetime import datetime
 
+# 정규식 표현
+import re
+
 import pandas as pd
 
 from Source.Main.DataClass import *
@@ -23,6 +26,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"delete from {col_name}")
         self.commit_db()
 
+    # 원하는 테이블의 원하는 정보 가져오기
     def get_table(self, tb_name: str, user_id="", add_where=""):
         sql = f"select * from {tb_name}"
 
@@ -40,6 +44,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(sql, self.conn)
         return df
 
+    # 원하는 데이터에 정도 일괄 추가
     def insert_data(self, tb_name, data: list):
         size = len(data[0])
         column = ""
@@ -53,7 +58,9 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
 
     ## CREATE TABLES ======================================================================== ##
-    def create_tables(self):  # 테이블 생성
+
+    # 기본 테이블 생성
+    def create_tables(self):
         self.conn.executescript("""
             DROP TABLE IF EXISTS TB_USER;  
             CREATE TABLE "TB_USER" (
@@ -63,7 +70,7 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "USER_EMAIL" TEXT NOT NULL,
                 "USER_PW" TEXT NOT NULL,
                 "USER_CREATE_DATE" TEXT NOT NULL,
-                "USER_IMG" TEXT,
+                "USER_IMG" INTEGER,
                 "USER_STATE" TEXT,
                 PRIMARY KEY ("USER_NO" AUTOINCREMENT)
             );
@@ -92,15 +99,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "USER_CR_TO" TEXT,
                 FOREIGN KEY ("CR_ID") REFERENCES "TB_CHATROOM" ("CR_ID")
             );
-            DROP TABLE IF EXISTS TB_CONTENT;
-            CREATE TABLE "TB_CONTENT" (
-                "USER_ID" TEXT,
-                "CNT_ID" INTEGER,
-                "CNT_CONTENT" TEXT,
-                "CNT_SEND_TIME" TEXT,
-                PRIMARY KEY ("CNT_ID" AUTOINCREMENT),
-                FOREIGN KEY ("CR_ID") REFERENCES "TB_CHATROOM" ("CR_ID")
-            );
             DROP TABLE IF EXISTS TB_READ_CNT;
             CREATE TABLE "TB_READ_CNT" (
                 "CNT_ID" INTEGER,
@@ -116,6 +114,26 @@ class DBConnector:      # DB를 총괄하는 클래스
               PRIMARY KEY ("BC_NO" AUTOINCREMENT)
             );
         """)
+        self.commit_db()
+
+    # 테이블 초기 설정
+    def init_tables(self):
+        # 단체 방 정보추가
+        self.conn.execute("insert into TB_CHATROOM values ('PA_1', '[단체방] 자몽톡 가입자');")
+
+        # 단체방 대화 테이블 생성
+        self.conn.executescript("""
+            CREATE TABLE "TB_CONTENT_PA_1" (
+                "USER_ID" TEXT,
+                "CNT_ID" INTEGER,
+                "CNT_CONTENT" TEXT,
+                "CNT_SEND_TIME" TEXT,
+                PRIMARY KEY ("CNT_ID" AUTOINCREMENT) );
+                """)
+
+        # 단체방 관리자 정보 추가
+        self.conn.execute("insert into TB_USER_CHATROOM values ('PA_1', 'admin', 'admin');")
+
         self.commit_db()
 
     # TODO 수정하기 (주양)
@@ -153,6 +171,8 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 회원 ID, PW 결과값 가져오기
     def login(self, data: ReqLogin) -> PerLogin:
+        print("[ login ]")
+        """클라이언트 로그인 요청 -> 서버 로그인 허가 """
         result: PerLogin = PerLogin(rescode=2, id=data.id, pw=data.password)
         sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
         df = pd.read_sql(sql, self.conn)
@@ -166,6 +186,50 @@ class DBConnector:      # DB를 총괄하는 클래스
         #     result.rescode = 1
         else:
             result.rescode = 2
+        return result
+
+    def membership_id_check(self, data: ReqDuplicateCheck) -> PerDuplicateCheck:
+        """클라이언트 중복 아이디 확인 요청 -> 서버 db에서 아이디 중복 여부 응답"""
+        result: PerDuplicateCheck = PerDuplicateCheck(isExisited=True)
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}'"
+        row = pd.read_sql(sql, self.conn)
+
+        if len(row) != 0:
+            result.isExisited = True
+        else:
+            result.isExisited = False
+        return result
+
+    def email_check_1(self, data: ReqEmailSend) -> PerEmailSend:
+        """클라이언트 이메일 전송 요청 -> 서버 이메일 전송완료 응답"""
+        if re.match(r'^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', data.r_email):
+            result = PerEmailSend(True)
+        else:
+            result = PerEmailSend(False)
+        return result
+
+    def email_check_2(self, data: ReqEmailNumber) -> PerEmailNumber:
+        """클라이언트 이메일 인증번호 요청 -> 서버 이메일 인증번호 허가"""
+        if data.num1 == data.num2:
+            result = PerEmailNumber(True)
+        else:
+            result = PerEmailNumber(False)
+        return result
+
+    def regist(self, data: ReqMembership) -> PerRegist:
+        result: PerRegist = PerRegist(True)
+        print(result.__dict__)
+        sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG)" \
+              f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
+        print(sql)
+        try:
+            self.conn.execute(sql)
+            self.conn.commit()
+        except:
+            self.conn.rollback()
+            result.Success = False
+        finally:
+            self.conn.close()
         return result
 
     ## TB_friend ================================================================================ ##
@@ -241,15 +305,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         # 대화 테이블 생성
         self.conn.executescript(f"""
-                DROP TABLE IF EXISTS TB_CONTENT_{_cr_id};
                 CREATE TABLE TB_CONTENT_{_cr_id} (
                     "CR_ID" TEXT,
                     "USER_ID" TEXT,
                     "CNT_ID" INTEGER,
                     "CNT_CONTENT" TEXT,
                     "CNT_SEND_TIME" TEXT,
-                    PRIMARY KEY ("CNT_ID" AUTOINCREMENT),
-                    FOREIGN KEY ("CR_ID") REFERENCES "TB_CHATROOM" ("CR_ID")  """)
+                    PRIMARY KEY ("CNT_ID" AUTOINCREMENT) """)
 
         self.conn.commit()
 
@@ -285,6 +347,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     def find_content(self, cr_id):
         df = pd.read_sql(f"select * from TB_CONTENT_{cr_id}", self.conn)
+        self.commit_db()
         return df
 
     ## TB_read_cnt ================================================================================ ##
@@ -294,9 +357,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     def find_read_cnt(self):
         pass
 
+    def test(self):
+        self.commit_db()
 
-    ## TB_banchat ================================================================================ ##
 
 if __name__ == "__main__":
-    # DBConnector().create_tables()
-    pass
+    DBConnector().test()

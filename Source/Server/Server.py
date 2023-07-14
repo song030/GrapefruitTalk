@@ -1,6 +1,6 @@
 import socket
 import pickle
-import datetime
+from datetime import datetime
 
 from Source.Main.DBConnector import DBConnector
 from Source.Main.DataClass import *
@@ -9,7 +9,7 @@ from threading import Thread
 
 
 class Server:
-    def __init__(self, port=1234, listener=1):
+    def __init__(self, port=1005, listener=1):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -59,27 +59,14 @@ class Server:
         elif type(data) == str:
             self.client[sock.getpeername()][1] = data
             print(self.client[sock.getpeername()][1])
+        elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist]:
+            self.send_client(sock, data)
         elif type(data) in [PerLogin]:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode, data.id, data.pw)
         # elif type(data) in [ReqMembership]:
 
-    # 로그인/로그아웃 내역(시간)을 USER_TABLE에 저장하는 함수
-    def db_log_inout_state_save(self, rescode, id, pw):
-        """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
-        sql_ = ''
-        time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        print(time)
-        print(rescode)
-        print(id)
-        print(pw)
-        if rescode == 2:
-            sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time}' WHERE USER_ID = '{id}'"
-            self.db.connect().execute(sql_)
-            self.db.conn.commit()
-        All_TB_LOG = self.db.connect().execute("SELECT * FROM TB_LOG").fetchall()
-        if not All_TB_LOG:
-            print("예외처리 : TB_LOG에 아무것도 없습니다.")
+
 
     # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):
@@ -135,20 +122,55 @@ class Server:
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
     def process_data(self, sock, data):
-        print("지금 위치는 process_data입니다.")
-        print(f"data입니다. : {data}")
+        print(f"process_data : {data}")
 
+        # 채팅 발송
         if type(data) == ReqChat:
             return data
+
+        # 아이디 중복 확인 요청
+        elif type(data) == ReqDuplicateCheck:
+            perdata: PerDuplicateCheck = self.db.membership_id_check(data)
+
+        # 인증메일 발송 요청
+        elif type(data) == ReqEmailSend:
+            perdata: PerEmailSend = self.db.email_check_1(data)
+
+        # 인증번호 확인 요청
+        elif type(data) == ReqEmailNumber:
+            perdata: PerEmailNumber = self.db.email_check_2(data)
+
+        # 회원가입 요청
+        elif type(data) == ReqMembership:
+            perdata: PerRegist = self.db.regist(data)
+
+        # 로그인 요청
         elif type(data) == ReqLogin:
-            PerData: PerLogin = self.db.login(data)
-            print(f"PerData입니다 : {PerData}")
-            if PerData.rescode == 2:
-                self.client[sock.getpeername()][1] = PerData.id
-                print(f"Perdata.id : {PerData.id}")
-            return PerData
+            perdata: PerLogin = self.db.login(data)
+            if perdata.rescode == 2:
+                self.client[sock.getpeername()][1] = perdata.id
+
         else:
             return data
+
+        print(f"process_data : {perdata}")
+        return perdata
+
+    def db_log_inout_state_save(self, rescode, id, pw):
+        """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
+        sql_ = ''
+        time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        print(time_)
+        print(rescode)
+        print(id)
+        print(pw)
+        if rescode == 2:
+            sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time_}' WHERE USER_ID = '{id}'"
+            self.db.conn.execute(sql_)
+            self.db.conn.commit()
+        All_TB_LOG = self.db.conn.execute("SELECT * FROM TB_LOG").fetchall()
+        if not All_TB_LOG:
+            print("예외처리 : TB_LOG에 아무것도 없습니다.")
 
     def handler(self, sock,):
         while True:

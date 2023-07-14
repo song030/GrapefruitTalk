@@ -21,10 +21,10 @@ class ReqLogin:
 # rescode = 2 ("로그인 한 아이디")
 # rescode = 3 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, id: str, time: str):
+    def __init__(self, rescode: int, id: str, pw: str):
         self.rescode = rescode
         self.id = id
-        self.time = time
+        self.pw = pw
 
 # ==================== 로그아웃
 
@@ -52,19 +52,42 @@ class PerDuplicateCheck:
 
 # 회원가입 요청 : 아이디, 비밀번호, 닉네임, 이메일, 가입일자, 프로필 이미지경로, 상태메세지
 class ReqMembership:
-    def __init__(self, id: str, pw: str, nm: str, email: str, c_date: str, img: str, state: str):
+    def __init__(self, id: str, pw: str, nm: str, email: str, c_date: str, img: str):
         self.id = id
         self.pw = pw
         self.nm = nm
         self.email = email
         self.c_date = c_date
         self.img = img
-        self.state = state
 
 # 회원가입 허가 응답
 class PerRegist:
     def __init__(self, Success: bool):
         self.Success = Success
+
+# 이메일 유효성 확인 및 전송 요청
+class ReqEmailSend:
+    def __init__(self, r_email: str):
+        self.r_email = r_email
+
+# 이메일 전송 응답
+class PerEmailSend:
+    def __init__(self, isSend: bool):
+        self.isSend = isSend
+
+# 이메일 인증번호 확인 요청
+class ReqEmailNumber:
+    def __init__(self, num1: str, num2: str):
+        self.num1 = num1
+        self.num2 = num2
+
+# 이메일 인증번호 일치 여부 응답
+class PerEmailNumber:
+    def __init__(self, ismatch: bool):
+        self.ismatch = ismatch
+
+
+
 
 # ==================== 친구 초대
 

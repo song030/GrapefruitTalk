@@ -491,7 +491,7 @@ border-radius:5px;
 padding:5px;</string>
                 </property>
                 <property name="placeholderText">
-                 <string>비밀번호 (영대문자,숫자,특수문자 필수,5~16자)</string>
+                 <string>비밀번호 (영대문자,특수문자 필수,5~16자)</string>
                 </property>
                </widget>
               </item>
@@ -509,7 +509,7 @@ border-radius:5px;
 padding:5px;</string>
                 </property>
                 <property name="placeholderText">
-                 <string>아이디</string>
+                 <string>아이디 (5~16자)</string>
                 </property>
                </widget>
               </item>
@@ -1363,6 +1363,34 @@ padding: 3px;</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>edt_join_id</tabstop>
+  <tabstop>btn_join_id</tabstop>
+  <tabstop>edt_join_pwd1</tabstop>
+  <tabstop>edt_join_pwd2</tabstop>
+  <tabstop>edt_join_email</tabstop>
+  <tabstop>cb_join_email</tabstop>
+  <tabstop>btn_join_mail</tabstop>
+  <tabstop>lbl_email_num</tabstop>
+  <tabstop>btn_email_num</tabstop>
+  <tabstop>edt_join_nick</tabstop>
+  <tabstop>btn_join</tabstop>
+  <tabstop>btn_join_cancel</tabstop>
+  <tabstop>edt_login_id</tabstop>
+  <tabstop>edt_login_pwd</tabstop>
+  <tabstop>btn_login</tabstop>
+  <tabstop>btn_single</tabstop>
+  <tabstop>btn_multi</tabstop>
+  <tabstop>btn_member</tabstop>
+  <tabstop>btn_friend</tabstop>
+  <tabstop>scroll_talk</tabstop>
+  <tabstop>edt_txt</tabstop>
+  <tabstop>btn_emoticon</tabstop>
+  <tabstop>btn_send</tabstop>
+  <tabstop>btn_out</tabstop>
+  <tabstop>btn_add</tabstop>
+  <tabstop>btn_setting</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
