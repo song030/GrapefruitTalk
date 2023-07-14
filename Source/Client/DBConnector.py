@@ -10,9 +10,10 @@ from Source.Main.DataClass import *
 
 class DBConnector:      # DB를 총괄하는 클래스
     def __init__(self):
-        self.host = ''
-        self.port = 1234
         self.conn = sqlite3.connect("../Client/data.db", check_same_thread=False)
+
+    def set_user_id(self, user_id):
+        self.user_id = user_id
 
     def end_conn(self):  # db 종료
         self.conn.close()
@@ -104,13 +105,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "USER_ID" TEXT,
                 "IS_READ" INTEGER,
                 FOREIGN KEY ("CNT_ID") REFERENCES "TB_CONTENT" ("CNT_ID")
-            );
-            DROP TABLE IF EXISTS TB_BANCHAT;
-            CREATE TABLE "TB_BANCHAT" (
-              "BC_NO" INTEGER,
-              "BC_TYPE" TEXT,
-              "BC_CONTENT" TEXT,
-              PRIMARY KEY ("BC_NO" AUTOINCREMENT)
             );
         """)
         self.commit_db()
@@ -345,21 +339,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
         print("save complete")
 
-    def find_content(self, cr_id):
-        df = pd.read_sql(f"select * from TB_CONTENT_{cr_id}", self.conn)
-        self.commit_db()
-        return df
-
-    ## TB_read_cnt ================================================================================ ##
-    def insert_read_cnt(self, cnt_id, user_id, is_read):
-        pass
-
-    def find_read_cnt(self):
-        pass
-
-    def test(self):
-        self.commit_db()
-
 
 if __name__ == "__main__":
-    DBConnector().test()
+    pass

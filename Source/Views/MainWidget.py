@@ -41,7 +41,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.dlg_warning = DialogWarning()
         self.dlg_add_chat = AddChat()
 
-        self.user_id = "test0"
+        self.user_id = ""
         self.room_id = "PA_1"
 
         # DB연결
@@ -74,7 +74,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.address = self.client.address()
             self.connect_thread_signal()
             self.receive_thread.start()
-            self.client.send(self.user_id)
 
 
     # 화면 글꼴 설정
@@ -287,8 +286,6 @@ class MainWidget(QWidget, Ui_MainWidget):
     def check_nickname_condition(self):
         """닉네임 최대 20자 조건 확인 : 20자 이하의 한글/영문/숫자 조합"""
         insert_nickname = self.edt_join_nick.text()
-        print(insert_nickname)
-        print(len(insert_nickname))
 
         if len(insert_nickname) > 20:
             txt = "nick_name_len_limit"
@@ -300,7 +297,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             return True, ''
 
     def check_email(self):
-        print(self.btn_email_num.isEnabled())
         if self.btn_email_num.isEnabled():
             return False
         else:
@@ -393,7 +389,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         server.login(self.s_email, self.s_pwd)
         # 이메일 발송
         try:
-            print("login try")
             server.sendmail(self.s_email, self.r_email, self.email_content().as_string())
             self.dlg_warning.set_dialog_type(1, "email_send")
             print("이메일 전송 성공")
@@ -414,8 +409,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def email_check_or_not(self, data: PerEmailNumber):
         """qt check : 발송한 인증번호 / 입력한 인증번호의 일치 여부 확인"""
-        print("email_check_or_not")
-        print(data.ismatch)
         if data.ismatch:
             self.dlg_warning.set_dialog_type(1, "email_check")
             self.dlg_warning.exec()
@@ -441,7 +434,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         email = self.r_email
         c_date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         img = '../../Images/img_profile.png'
-        print("check_membership")
 
         # 아이디 확인
         if not self.check_id_condition():
@@ -474,15 +466,15 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.dlg_warning.exec()
 
         else:
+            self.user_id = id
             self.client.send(ReqMembership(id, pwd, nm, email, c_date, img))
 
     def join_input_check(self, data: PerRegist):
         """회원가입 정보 입력 , 서버 허가 요청 송신"""
-        print("join_input_check")
-        print(data.Success)
         if data.Success:
             self.dlg_warning.set_dialog_type(2, "success_join_membership")
             if self.dlg_warning.exec():
+                self.db.set_user_id(self.user_id)
                 self.set_page_talk()
         else:
             self.dlg_warning.set_dialog_type(2, "failed_join_membership")
@@ -500,7 +492,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
-        print(data.rescode)
         if data.rescode == 0:
             self.dlg_warning.set_dialog_type(1, '로그인 안내', "※로그인 실패※ \n 존재하지 않는 아이디/비밀번호 입니다. \n 다시 확인해주세요.")
             self.dlg_warning.exec()
@@ -519,6 +510,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 채팅 화면 최초 출력
     def set_page_talk(self):
+        print("user_id :", self.user_id)
         # -- 채팅 화면 초기화
         self.init_list("single")
         self.clear_layout(self.layout_list)
@@ -578,7 +570,6 @@ class MainWidget(QWidget, Ui_MainWidget):
     def send_message(self):
         # 네트워크 발신 내용 추가하기
         text = self.edt_txt.text()
-        self.text_color_change(text)
 
         if self.check_banchat():
             # widget = self.add_talk(0, "발송", text, datetime.now())
@@ -599,29 +590,17 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 금칙어 체크
     def check_banchat(self):
         text = self.edt_txt.text()
-        print(text)
 
-        banchat_df = pd.read_sql("select BC_CONTENT from TB_BANCHAT", self.db.conn)
+        banchat_df = self.db.get_table("TB_BANCHAT")
 
         for i, banchat in banchat_df.iterrows():
-            print(f"욕설 : {banchat_df.BC_CONTENT[i]}")
             if text == banchat_df.BC_CONTENT[i]:
                 print("금칙어 사용!!!!")
                 return False
         return True
 
-    # 채팅창에 텍스트가 없을 시 텍스트 색상 초기화
-    def text_color_change(self, t):
-        if t == '':
-            # print("텍스트가 들어있지 않습니다.")
-            self.edt_txt.setStyleSheet("")
-        else:
-            # print("텍스트가 들어있습니다.")
-            pass
-
     # 메시지 수신
     def receive_message(self, data: ReqChat):
-        print("in receive")
         self.add_talk(0, data.user_id, data.msg, datetime.now())
 
     # ==============================================================================================================
@@ -685,10 +664,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         if clear_check and self.layout_list.count() > 0:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
-
-    # def set_list_item(self, t_type):
-    #     self.clear_layout(self.layout_list)
-    #     self.init_list(t_type)
 
     # 리스트 메뉴 초기화
     def init_list(self, t_type):
@@ -776,10 +751,10 @@ class MainWidget(QWidget, Ui_MainWidget):
             # --- 친구 신청
             request_ = QLabel()
             request_.setFont(Font.button(3))
-            self.layout_request.addWidget(request_)
+            self.layout_list.addWidget(request_)
             item = ListItem(f"request0", "친구 후보", '')
             item.set_button_box(self.add_friend)
-            self.layout_request.addWidget(item.frame)
+            self.layout_list.addWidget(item.frame)
             reque_num = self.layout_list.count() - 1
             request_.setText(f"친구 요청 - {reque_num}명")
 
@@ -883,18 +858,20 @@ class MainWidget(QWidget, Ui_MainWidget):
         :param t_member: 채팅방 참여멤버 (현재는 객체로 받고 있음 → DB 연결시 id로 수정)
         :return:
         """
-        self.list_btn_check(f"{t_type}")
-        item = ListItem(f"{t_type}{self.layout_list.count()}", f"{t_name}", "")
+        if t_type == "single":
+            self.btn_single.setChecked(True)
+            self.list_btn_check("single")
+            item = ListItem(f"OE_{len(self.current_list):0>2}", f"{t_name}", "")
+        elif t_type == "multi":
+            self.btn_multi.setChecked(True)
+            self.list_btn_check("multi")
+            item = ListItem(f"OA_{len(self.current_list):0>2}", f"{t_name}", "")
         item.member_cnt = len(t_member)
         item.set_info(datetime.now(), 0)
         item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
+        self.current_list[item.item_id] = item
         self.layout_list.addWidget(item.frame)
-
-        # 새 채팅방 열기
-        self.init_talk(item.item_id)
-        self.clear_layout(self.layout_talk)
-        self.add_date_line()
-        self.add_notice_line(f"{self.user_id}")
+        self.init_talk(item.item_id)    # 새 채팅방으로 이동
 
     # 친구 요청 수락/거절
     def add_friend(self, t_type):
@@ -917,7 +894,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         """
         :param t_friend
         """
-        self.init_list("single")
+        self.btn_single.setChecked(True)
+        self.list_btn_check("single")
         for value_ in self.current_list.values():
             if value_.item_nm == t_friend.item_nm:
                 self.init_talk(value_.item_id)

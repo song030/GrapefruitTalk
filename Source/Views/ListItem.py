@@ -75,7 +75,10 @@ class ListItem:
 
     @property
     def item_nm(self):
-        return self._lbl_nick.text()
+        nm_ = self._lbl_nick.text()
+        nm_ = nm_.lstrip("[ ")
+        nm_ = nm_.rstrip(" ]")
+        return nm_
 
     @property
     def member_cnt(self):

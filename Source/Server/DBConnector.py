@@ -105,13 +105,6 @@ class DBConnector:      # DB를 총괄하는 클래스
                 "IS_READ" INTEGER,
                 FOREIGN KEY ("CNT_ID") REFERENCES "TB_CONTENT" ("CNT_ID")
             );
-            DROP TABLE IF EXISTS TB_BANCHAT;
-            CREATE TABLE "TB_BANCHAT" (
-              "BC_NO" INTEGER,
-              "BC_TYPE" TEXT,
-              "BC_CONTENT" TEXT,
-              PRIMARY KEY ("BC_NO" AUTOINCREMENT)
-            );
         """)
         self.commit_db()
 
