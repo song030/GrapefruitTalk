@@ -76,3 +76,5 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.lbl_text.setText('이메일 인증 실패, 확인 후 재입력 해주시기 바랍니다.')
         elif t_type == 'exit_chat_room':
             self.lbl_text.setText('대화 내용이 모두 삭제됩니다.\n정말 채팅방을 나가시겠습니까?')
+        elif t_type == 'cannot_exit_room':
+            self.lbl_text.setText('[전체방]은 나갈 수 없습니다.')

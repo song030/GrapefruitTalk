@@ -23,7 +23,7 @@
    <item>
     <widget class="QStackedWidget" name="stack_main">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_login">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
@@ -759,6 +759,15 @@ border-radius:5px;
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QLabel" name="lbl_room_name">
             <property name="text">
@@ -768,6 +777,9 @@ border-radius:5px;
           </item>
           <item>
            <widget class="QLabel" name="lbl_room_number">
+            <property name="styleSheet">
+             <string notr="true">padding-left: 8px;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -787,9 +799,27 @@ border-radius:5px;
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_single">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_single" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_single">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -800,35 +830,50 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_single.png</normaloff>../Images/btn_single.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_single.png</normaloff>../Images/btn_single.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_multi">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_multi" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_multi">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -839,35 +884,50 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_multi.png</normaloff>../Images/btn_multi.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_multi.png</normaloff>../Images/btn_multi.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_member">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_member" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_member">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -878,32 +938,47 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_member.png</normaloff>../Images/btn_member.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_member.png</normaloff>../Images/btn_member.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_friend">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_friend" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_friend">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -914,26 +989,29 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_friend.png</normaloff>../Images/btn_friend.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_friend.png</normaloff>../Images/btn_friend.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>

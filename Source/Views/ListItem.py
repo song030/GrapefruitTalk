@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from PyQt5.QtWidgets import QGridLayout, QLabel, QWidget, QCheckBox
+from PyQt5.QtWidgets import QGridLayout, QLabel, QWidget, QCheckBox, QPushButton, QAction, QHBoxLayout
 from PyQt5.QtCore import Qt
 
 from Source.Views.Font import Font
@@ -104,6 +104,46 @@ class ListItem:
         t_last = t_last.strftime("%H:%M")
         self._lbl_last_date.setText(t_last)
         self._lbl_no_check.set_count(t_no_check)
+
+    def set_button_box(self, t_func):
+        # 수락/거절 버튼
+        _btn_yes = QPushButton()
+        _btn_yes.setText("수락")
+        _btn_yes.setFont(Font.text(3))
+        _btn_yes.clicked.connect(lambda _: t_func(1))
+
+        _btn_no = QPushButton()
+        _btn_no.setText("거절")
+        _btn_no.setFont(Font.text(3))
+        _btn_yes.clicked.connect(lambda _: t_func(0))
+
+        _box_layout = QHBoxLayout()
+        _box_layout.addWidget(_btn_yes)
+        _box_layout.addWidget(_btn_no)
+        _layout: QGridLayout = self._frame.layout()
+        _layout.addLayout(_box_layout, 1, 2, 1, 2, Qt.AlignVCenter)
+
+        self._frame.setStyleSheet("QPushButton {"
+                                  "border: None;"
+                                  "background: rgb(248,228,208);"
+                                  "padding: 6px 8px;"
+                                  "border-radius: 6px;"
+                                  "}")
+
+    def set_context_menu(self, t_act_nm: str, t_func, t_para=None):
+        """
+        :param t_act_nm: 메뉴 이름
+        :param t_func: 메뉴 함수
+        :param t_para: 함수에 파라미터가 필요한 경우
+        """
+        self._frame.setContextMenuPolicy(Qt.ActionsContextMenu)
+        context_action = QAction(f"{t_act_nm}", self._frame)
+        if t_para:
+            context_action.triggered.connect(lambda: t_func(t_para))
+        else:
+            context_action.triggered.connect(t_func)
+        self._frame.addAction(context_action)
+        self._frame.setStyleSheet("QMenu::item::selected{color: rgb(248,228,208);}")
 
     def add_checkbox(self):
         """체크박스 위해 추가했습니다."""
