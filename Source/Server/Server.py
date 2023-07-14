@@ -8,7 +8,7 @@ from threading import Thread
 
 
 class Server:
-    def __init__(self, port=1005, listener=1):
+    def __init__(self, port=1005, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -64,8 +64,6 @@ class Server:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode, data.id, data.pw)
         # elif type(data) in [ReqMembership]:
-
-
 
     # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):

@@ -95,8 +95,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             DROP TABLE IF EXISTS TB_USER_CHATROOM;
             CREATE TABLE "TB_USER_CHATROOM" (
                 "CR_ID" TEXT,
-                "USER_CR_FROM" TEXT,
-                "USER_CR_TO" TEXT,
+                "USER_ID" TEXT,
                 FOREIGN KEY ("CR_ID") REFERENCES "TB_CHATROOM" ("CR_ID")
             );
             DROP TABLE IF EXISTS TB_READ_CNT;
@@ -112,11 +111,11 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 테이블 초기 설정
     def init_tables(self):
         # 단체 방 정보추가
-        self.conn.execute("insert into TB_CHATROOM values ('PA_1', '[단체방] 자몽톡 가입자');")
+        self.conn.execute("insert into CTB_CHATROOM values ('PA_1', '[단체방] 자몽톡 가입자');")
 
         # 단체방 대화 테이블 생성
         self.conn.executescript("""
-            CREATE TABLE "TB_CONTENT_PA_1" (
+            CREATE TABLE "CTB_CONTENT_PA_1" (
                 "USER_ID" TEXT,
                 "CNT_ID" INTEGER,
                 "CNT_CONTENT" TEXT,
@@ -125,30 +124,11 @@ class DBConnector:      # DB를 총괄하는 클래스
                 """)
 
         # 단체방 관리자 정보 추가
-        self.conn.execute("insert into TB_USER_CHATROOM values ('PA_1', 'admin', 'admin');")
+        self.conn.execute("insert into CTB_USER_CHATROOM values ('PA_1', 'admin');")
 
         self.commit_db()
 
-    # TODO 수정하기 (주양)
     ## TB_USER ================================================================================ ##
-    # 회원 정보 테이블 값 입력
-    def insert_user(self, user_id, user_name, user_email, user_pw,
-                    user_create_date, user_img, user_state):
-        self.conn.execute("insert into TB_USER (USER_ID, USER_NAME, USER_EMAIL, USER_PW, USER_CRATE_DATE, "
-                  "USER_IMG, USER_STATE) values (?, ?, ?, ?, ?, ?, ?)",
-                  (user_id, user_name, user_email, user_pw, user_create_date, user_img, user_state))
-        self.commit_db()
-
-    # 회원 정보 테이블 전체 조회
-    def find_user(self):
-        rows_data = self.conn.execute("select * from TB_USER").fetchall()
-        if len(rows_data) == 0:
-            return None
-
-        find_result_list = list()
-        for row in rows_data:
-            find_result_list.append(row)
-        return rows_data
 
     # user_id를 기준으로 행 조회
     def find_user_by_id(self, user_id: str):
@@ -181,34 +161,6 @@ class DBConnector:      # DB를 총괄하는 클래스
             result.rescode = 2
         return result
 
-    def membership_id_check(self, data: ReqDuplicateCheck) -> PerDuplicateCheck:
-        """클라이언트 중복 아이디 확인 요청 -> 서버 db에서 아이디 중복 여부 응답"""
-        result: PerDuplicateCheck = PerDuplicateCheck(isExisited=True)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}'"
-        row = pd.read_sql(sql, self.conn)
-
-        if len(row) != 0:
-            result.isExisited = True
-        else:
-            result.isExisited = False
-        return result
-
-    def email_check_1(self, data: ReqEmailSend) -> PerEmailSend:
-        """클라이언트 이메일 전송 요청 -> 서버 이메일 전송완료 응답"""
-        if re.match(r'^[a-zA-Z0-9+-_.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', data.r_email):
-            result = PerEmailSend(True)
-        else:
-            result = PerEmailSend(False)
-        return result
-
-    def email_check_2(self, data: ReqEmailNumber) -> PerEmailNumber:
-        """클라이언트 이메일 인증번호 요청 -> 서버 이메일 인증번호 허가"""
-        if data.num1 == data.num2:
-            result = PerEmailNumber(True)
-        else:
-            result = PerEmailNumber(False)
-        return result
-
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
         try:
@@ -216,7 +168,7 @@ class DBConnector:      # DB를 총괄하는 클래스
                   f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', 'admin', '{data.id}');")
+            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
 
             self.conn.commit()
         except:
@@ -266,6 +218,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         return rows_data
 
     ## TB_chatroom ================================================================================ ##
+    # 채팅방 테이블 조회
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
@@ -295,7 +248,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         # 채팅 맴버 추가
         for member in data.member:
-            self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?, ?)", (_cr_id, data.user_id, member))
+            self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
         self.conn.executescript(f"""
@@ -320,12 +273,12 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
-        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_CR_TO = {user_id}", self.conn)
+        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}", self.conn)
         return df
 
     # 채팅방 나가기
     def delete_chatroom_member(self, cr_id: str, user_id):
-        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_CR_TO", (cr_id,user_id))
+        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
         self.commit_db()
 
     ## TB_content ================================================================================ ##
@@ -340,5 +293,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         print("save complete")
 
 
+    # ------------------------------------------------------- 신규 추가
+
+
+
 if __name__ == "__main__":
+    DBConnector().init_tables()
     pass

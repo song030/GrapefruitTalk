@@ -75,7 +75,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.connect_thread_signal()
             self.receive_thread.start()
 
-
     # 화면 글꼴 설정
     def set_font(self):
         font_txt_normal = Font.text(3)
@@ -487,8 +486,10 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.id_ = self.edt_login_id.text()
         self.pwd_ = self.edt_login_pwd.text()
         self.client.send(ReqLogin(self.id_, self.pwd_))
+
         # --- UI 확인을 위한 채팅 화면 임시 호출
-        self.set_page_talk()
+        # self.set_page_talk()
+        # ------------------------------------------------ 지우기
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
@@ -606,6 +607,22 @@ class MainWidget(QWidget, Ui_MainWidget):
     # ==============================================================================================================
 
     # ================================================== 리스트 메뉴 ==================================================
+
+    def get_list_info(self, t_type):
+        if t_type == "single":
+            "select cr_id, CR_MEMBER from CTB_CHATROOM NATURAL JOIN TB_USER_CHATROOM where cr_ID like '_E%' group by cr_id;"
+
+        elif t_type == "multi":
+            "select cr_id, cr_nm, count(user_id) from CTB_CHATROOM NATURAL JOIN TB_USER_CHATROOM where cr_ID like '_A%' group by cr_id;"
+
+        elif t_type == "member":
+            tb_name = "TB_USER_CHATROOM"
+            f"select tb_friend frd_id, user_nm, user_img, user_state from Ctb_friend left join tb_user on tb_friend.frd_id = tb_user.user_id where tb_freiend.user_id={self.user_id};"
+
+        elif t_type == "friend":
+            f"select tb_friend.frd_id, tb_user.user_nm, tb_user.user_img, tb_user.user_state from Ctb_friend left join tb_user on tb_friend.frd_id = tb_user.user_id where tb_freiend.user_id='{self.user_id}';"
+
+            tb_name = "TB_FRIEND"
 
     # 리스트 메뉴는 반드시 하나가 노출 되어야 하기 때문에
     # 활성화 버튼 한번 더 클릭 할 경우 화면 변화가 없도록 하기 위해 예외처리 추가
