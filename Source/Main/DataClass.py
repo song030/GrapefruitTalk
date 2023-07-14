@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pandas
 
-
 # 클래스 이름 시작 단어 기준으로 구분
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트

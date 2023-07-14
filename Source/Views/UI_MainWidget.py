@@ -306,6 +306,7 @@ class Ui_MainWidget(object):
         self.lbl_room_name.setObjectName("lbl_room_name")
         self.horizontalLayout_5.addWidget(self.lbl_room_name)
         self.lbl_room_number = QtWidgets.QLabel(self.frame_2)
+        self.lbl_room_number.setStyleSheet("padding-left: 8px;")
         self.lbl_room_number.setText("")
         self.lbl_room_number.setObjectName("lbl_room_number")
         self.horizontalLayout_5.addWidget(self.lbl_room_number)
@@ -545,8 +546,10 @@ class Ui_MainWidget(object):
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.layout_menu = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
         self.layout_menu.setContentsMargins(9, 9, 9, 9)
+        self.layout_menu.setSpacing(0)
         self.layout_menu.setObjectName("layout_menu")
         self.layout_list = QtWidgets.QVBoxLayout()
+        self.layout_list.setContentsMargins(-1, -1, -1, 0)
         self.layout_list.setSpacing(15)
         self.layout_list.setObjectName("layout_list")
         self.layout_menu.addLayout(self.layout_list)
@@ -649,3 +652,13 @@ class Ui_MainWidget(object):
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())

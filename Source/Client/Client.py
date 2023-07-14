@@ -3,6 +3,7 @@ import pickle
 
 class Client:
     # "10.10.20.117"
+    #10.10.20.104
     # "121.148.180.97"
     def __init__(self, server_ip="10.10.20.117", server_port=1005):
         self.server_ip = server_ip

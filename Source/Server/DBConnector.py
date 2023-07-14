@@ -12,8 +12,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def __init__(self):
         self.host = ''
         self.port = 1234
-        self.conn = sqlite3.connect("../../Data/data.db", check_same_thread=False)
-        # self.conn = self.conn.connsor()
+        self.conn = sqlite3.connect("data.db", check_same_thread=False)
 
     def end_conn(self):  # db 종료
         self.conn.close()
@@ -218,12 +217,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
-        print(result.__dict__)
-        sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG)" \
-              f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
-        print(sql)
         try:
+            sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG)" \
+                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
             self.conn.execute(sql)
+
+            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', 'admin', '{data.id}');")
+
             self.conn.commit()
         except:
             self.conn.rollback()

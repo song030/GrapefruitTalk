@@ -1,8 +1,7 @@
 import socket
 import pickle
-from datetime import datetime
 
-from Source.Main.DBConnector import DBConnector
+from Source.Server.DBConnector import DBConnector
 from Source.Main.DataClass import *
 
 from threading import Thread
