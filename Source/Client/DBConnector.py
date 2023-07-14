@@ -199,7 +199,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"delete from TB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
         self.commit_db()
 
-    # TODO 수정하기
     ## TB_log ================================================================================ ##
     # LOG 정보 테이블 값 입력
     def insert_log(self, user_id, login_time, logout_time):
@@ -218,7 +217,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         return rows_data
 
     ## TB_chatroom ================================================================================ ##
-    # 채팅방 테이블 조회
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):

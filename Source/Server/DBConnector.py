@@ -10,8 +10,6 @@ from Source.Main.DataClass import *
 
 class DBConnector:      # DB를 총괄하는 클래스
     def __init__(self):
-        self.host = ''
-        self.port = 1234
         self.conn = sqlite3.connect("data.db", check_same_thread=False)
 
     def end_conn(self):  # db 종료
@@ -124,11 +122,10 @@ class DBConnector:      # DB를 총괄하는 클래스
                 """)
 
         # 단체방 관리자 정보 추가
-        self.conn.execute("insert into TB_USER_CHATROOM values ('PA_1', 'admin', 'admin');")
+        self.conn.execute("insert into TB_USER_CHATROOM values ('PA_1', 'admin');")
 
         self.commit_db()
 
-    # TODO 수정하기 (주양)
     ## TB_USER ================================================================================ ##
     # 회원 정보 테이블 값 입력
     def insert_user(self, user_id, user_name, user_email, user_pw,
@@ -215,7 +212,7 @@ class DBConnector:      # DB를 총괄하는 클래스
                   f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', 'admin', '{data.id}');")
+            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
 
             self.conn.commit()
         except:
@@ -246,7 +243,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"delete from TB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
         self.commit_db()
 
-    # TODO 수정하기
     ## TB_log ================================================================================ ##
     # LOG 정보 테이블 값 입력
     def insert_log(self, user_id, login_time, logout_time):
@@ -294,7 +290,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         # 채팅 맴버 추가
         for member in data.member:
-            self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?, ?)", (_cr_id, data.user_id, member))
+            self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
         self.conn.executescript(f"""
@@ -319,12 +315,12 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
-        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_CR_TO = {user_id}", self.conn)
+        df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}", self.conn)
         return df
 
     # 채팅방 나가기
     def delete_chatroom_member(self, cr_id: str, user_id):
-        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_CR_TO", (cr_id,user_id))
+        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
         self.commit_db()
 
     ## TB_content ================================================================================ ##
@@ -343,16 +339,5 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
         return df
 
-    ## TB_read_cnt ================================================================================ ##
-    def insert_read_cnt(self, cnt_id, user_id, is_read):
-        pass
-
-    def find_read_cnt(self):
-        pass
-
-    def test(self):
-        self.commit_db()
-
-
 if __name__ == "__main__":
-    DBConnector().test()
+    pass
