@@ -21,10 +21,10 @@ class ReqLogin:
 # rescode = 2 ("로그인 한 아이디")
 # rescode = 3 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, id: str, time: str):
+    def __init__(self, rescode: int, id: str, pw: str):
         self.rescode = rescode
         self.id = id
-        self.time = time
+        self.pw = pw
 
 # ==================== 로그아웃
 

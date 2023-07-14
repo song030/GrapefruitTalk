@@ -34,7 +34,7 @@ class DialogWarning(QDialog, Ui_DlgWarning):
     # 다이얼로그 타입 설정
     # bt_cnt : 버튼 수량
     # t_type : 다이얼로그 타입
-    def set_dialog_type(self, bt_cnt: int, t_type: str):
+    def set_dialog_type(self, bt_cnt: int, t_type: str, text=""):
         if bt_cnt == 1:
             self.layout_double.setVisible(False)
             self.btn_single.setVisible(True)
@@ -42,8 +42,9 @@ class DialogWarning(QDialog, Ui_DlgWarning):
         elif bt_cnt == 2:
             self.layout_double.setVisible(True)
             self.btn_single.setVisible(False)
-
-        if t_type == 'used_id':
+        if text:
+            self.lbl_text.setText(text)
+        elif t_type == 'used_id':
             self.lbl_text.setText('사용 중인 아이디입니다.')
         elif t_type == 'user_can_use_id':
             self.lbl_text.setText('사용할 수 있는 아이디입니다.')

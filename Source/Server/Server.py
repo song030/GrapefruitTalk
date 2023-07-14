@@ -1,6 +1,6 @@
 import socket
 import pickle
-import datetime
+from datetime import datetime
 
 from Source.Main.DBConnector import DBConnector
 from Source.Main.DataClass import *
@@ -156,20 +156,19 @@ class Server:
         print(f"process_data : {perdata}")
         return perdata
 
-
     def db_log_inout_state_save(self, rescode, id, pw):
         """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
         sql_ = ''
-        time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        print(time)
+        time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        print(time_)
         print(rescode)
         print(id)
         print(pw)
         if rescode == 2:
-            sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time}' WHERE USER_ID = '{id}'"
-            self.db.connect().execute(sql_)
+            sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time_}' WHERE USER_ID = '{id}'"
+            self.db.conn.execute(sql_)
             self.db.conn.commit()
-        All_TB_LOG = self.db.connect().execute("SELECT * FROM TB_LOG").fetchall()
+        All_TB_LOG = self.db.conn.execute("SELECT * FROM TB_LOG").fetchall()
         if not All_TB_LOG:
             print("예외처리 : TB_LOG에 아무것도 없습니다.")
 
