@@ -2,6 +2,8 @@ import sqlite3
 
 from datetime import datetime
 import random
+
+import pandas
 import pandas as pd
 
 #이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
@@ -43,6 +45,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         self.user_id = ""
         self.room_id = "PA_1"
+        self.user_info:pandas.DataFrame
 
         # DB연결
         self.db = DBConnector()
@@ -473,7 +476,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         if data.Success:
             self.dlg_warning.set_dialog_type(2, "success_join_membership")
             if self.dlg_warning.exec():
-                self.db.set_user_id(self.user_id)
                 self.set_page_talk()
         else:
             self.dlg_warning.set_dialog_type(2, "failed_join_membership")
@@ -483,13 +485,16 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def check_login_info(self):
         """send : 로그인 정보"""
-        self.id_ = self.edt_login_id.text()
-        self.pwd_ = self.edt_login_pwd.text()
-        self.client.send(ReqLogin(self.id_, self.pwd_))
+        self.user_id = self.edt_login_id.text()
+        pwd_ = self.edt_login_pwd.text()
 
-        # --- UI 확인을 위한 채팅 화면 임시 호출
-        # self.set_page_talk()
-        # ------------------------------------------------ 지우기
+        self.client.send(ReqLogin(self.user_id, pwd_))
+
+        # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
+        self.db.set_user_id(self.user_id)
+        self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
+        print(self.user_info)
+
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
@@ -502,7 +507,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.dlg_warning.exec()
             return False
         else:
-            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.id_}님 로그인 완료")
+            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.user_id}님 로그인 완료")
             self.dlg_warning.exec()
             self.set_page_talk()
             return True
@@ -574,9 +579,11 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.check_banchat():
             # widget = self.add_talk(0, "발송", text, datetime.now())
-            if self.client.send(ReqChat("cr_id", self.user_id, text)):
+            chat = ReqChat(self.room_id, self.user_id, text)
+            if self.client.send(chat):
+                self.db.insert_content(chat)
                 print("발송 완료")
-                self.add_talk(0, "발송", text, datetime.now())
+                self.add_talk(self.user_info["USER_IMG"], self.user_info["USER_NM"], text, datetime.now())
                 pass
 
             QtTest.QTest.qWait(100)
@@ -592,7 +599,7 @@ class MainWidget(QWidget, Ui_MainWidget):
     def check_banchat(self):
         text = self.edt_txt.text()
 
-        banchat_df = self.db.get_table("TB_BANCHAT")
+        banchat_df = self.db.get_table("CTB_BANCHAT")
 
         for i, banchat in banchat_df.iterrows():
             if text == banchat_df.BC_CONTENT[i]:
@@ -602,27 +609,15 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 메시지 수신
     def receive_message(self, data: ReqChat):
-        self.add_talk(0, data.user_id, data.msg, datetime.now())
+        self.add_talk(self, data.user_id, data.msg, datetime.now())
 
     # ==============================================================================================================
 
     # ================================================== 리스트 메뉴 ==================================================
 
     def get_list_info(self, t_type):
-        if t_type == "single":
-            "select cr_id, CR_MEMBER from CTB_CHATROOM NATURAL JOIN TB_USER_CHATROOM where cr_ID like '_E%' group by cr_id;"
-
-        elif t_type == "multi":
-            "select cr_id, cr_nm, count(user_id) from CTB_CHATROOM NATURAL JOIN TB_USER_CHATROOM where cr_ID like '_A%' group by cr_id;"
-
-        elif t_type == "member":
-            tb_name = "TB_USER_CHATROOM"
-            f"select tb_friend frd_id, user_nm, user_img, user_state from Ctb_friend left join tb_user on tb_friend.frd_id = tb_user.user_id where tb_freiend.user_id={self.user_id};"
-
-        elif t_type == "friend":
-            f"select tb_friend.frd_id, tb_user.user_nm, tb_user.user_img, tb_user.user_state from Ctb_friend left join tb_user on tb_friend.frd_id = tb_user.user_id where tb_freiend.user_id='{self.user_id}';"
-
-            tb_name = "TB_FRIEND"
+        df = self.db.get_list_menu_info(t_type)
+        pass
 
     # 리스트 메뉴는 반드시 하나가 노출 되어야 하기 때문에
     # 활성화 버튼 한번 더 클릭 할 경우 화면 변화가 없도록 하기 위해 예외처리 추가
@@ -680,6 +675,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
         if clear_check and self.layout_list.count() > 0:
             self.clear_layout(self.layout_list)
+            self.get_list_info(t_type)
             self.init_list(t_type)
 
     # 리스트 메뉴 초기화

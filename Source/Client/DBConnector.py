@@ -11,8 +11,10 @@ from Source.Main.DataClass import *
 class DBConnector:      # DB를 총괄하는 클래스
     def __init__(self):
         self.conn = sqlite3.connect("../Client/data.db", check_same_thread=False)
+        self.user_id = ""
 
     def set_user_id(self, user_id):
+        print("db class set user_id", user_id)
         self.user_id = user_id
 
     def end_conn(self):  # db 종료
@@ -115,11 +117,11 @@ class DBConnector:      # DB를 총괄하는 클래스
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
         try:
-            sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG)" \
-                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
+            sql = f"INSERT INTO CTB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
+                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
+            self.conn.execute(f"insert into CTB_USER_CHATROOM values ('PA_1', '{data.id}');")
 
             self.conn.commit()
         except:
@@ -234,9 +236,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 대화 추가
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id} (CR_ID, USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
-                         "values (?, ?, ?, ?)",
-                         (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
+        self.conn.execute(f"insert into CTB_CONTENT_{data.cr_id} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
+                          "values (?, ?, ?)",
+                          (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
         self.commit_db()
         print("save complete")
@@ -244,8 +246,26 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
+    def get_list_menu_info(self, t_type):
+        if t_type == "single":
+            sql = "select cr_id, CR_NM from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_E%' group by cr_id;"
+
+        elif t_type == "multi":
+            sql = "select cr_id, cr_nm, count(user_id) from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_A%' group by cr_id;"
+
+        elif t_type == "member":
+            tb_name = "TB_USER_CHATROOM"
+            sql = f"select frd_id, user_nm, user_img, user_state from Ctb_friend left join ctb_user on ctb_friend.frd_id = ctb_user.user_id where ctb_friend.user_id='{self.user_id}';"
+
+        elif t_type == "friend":
+            sql = f"select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_FRIEND left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.USER_ID = '{self.user_id}';"
+        else:
+            return False
+
+        df = pd.read_sql(sql, self.conn)
+        return df
 
 
 if __name__ == "__main__":
-    DBConnector().init_tables()
+    # DBConnector().init_tables()
     pass

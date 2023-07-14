@@ -158,8 +158,8 @@ class DBConnector:      # DB를 총괄하는 클래스
     def regist(self, data: ReqMembership) -> PerRegist:
         result: PerRegist = PerRegist(True)
         try:
-            sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG)" \
-                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0)"
+            sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
+                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
             self.conn.execute(sql)
 
             self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
@@ -277,8 +277,8 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 대화 추가
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id} (CR_ID, USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
-                         "values (?, ?, ?, ?)",
+        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
+                         "values (?, ?, ?)",
                          (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
         self.commit_db()

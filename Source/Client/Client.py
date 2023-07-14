@@ -3,9 +3,9 @@ import pickle
 
 class Client:
     # "10.10.20.117"
-    #10.10.20.104
+    # 10.10.20.104
     # "121.148.180.97"
-    def __init__(self, server_ip="10.10.20.104", server_port=1005):
+    def __init__(self, server_ip="121.148.180.97", server_port=1005):
         self.server_ip = server_ip
         self.server_port = server_port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
