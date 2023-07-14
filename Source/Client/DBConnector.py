@@ -246,16 +246,15 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
-    def get_list_menu_info(self, t_type):
+    def get_list_menu_info(self, t_type, cr_id="PA_1"):
         if t_type == "single":
-            sql = "select cr_id, CR_NM from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_E%' group by cr_id;"
+            sql = "select CR_ID, CR_NM from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_E%' group by cr_id;"
 
         elif t_type == "multi":
-            sql = "select cr_id, cr_nm, count(user_id) from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_A%' group by cr_id;"
+            sql = "select CR_ID, CR_NM, count(USER_ID) from CTB_CHATROOM NATURAL JOIN CTB_USER_CHATROOM where cr_ID like '_A%' group by cr_id;"
 
         elif t_type == "member":
-            tb_name = "TB_USER_CHATROOM"
-            sql = f"select frd_id, user_nm, user_img, user_state from Ctb_friend left join ctb_user on ctb_friend.frd_id = ctb_user.user_id where ctb_friend.user_id='{self.user_id}';"
+            sql = f"select CTB_USER.USER_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_USER_CHATROOM left join CTB_USER on CTB_USER_CHATROOM.USER_ID = CTB_USER.USER_ID WHERE CTB_USER_CHATROOM.CR_ID = '{cr_id}';"
 
         elif t_type == "friend":
             sql = f"select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_FRIEND left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.USER_ID = '{self.user_id}';"

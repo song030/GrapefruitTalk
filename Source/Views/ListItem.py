@@ -27,7 +27,7 @@ class ListItem:
         _grid_layout.setContentsMargins(0, 0, 0, 0)
 
         # 프로필 이미지
-        self._lbl_profile = ProfileImage()
+        self._lbl_profile = ProfileImage(t_img_type)
         _grid_layout.addWidget(self._lbl_profile.image, 0, 0, 2, 1, Qt.AlignTop)
 
         # 닉네임

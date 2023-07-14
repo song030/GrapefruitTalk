@@ -35,24 +35,25 @@ class MainWidget(QWidget, Ui_MainWidget):
         super().__init__()
         self.setupUi(self)
 
-        # 화면 초기화
+        # ----- 화면 초기화
         self.set_ui()
         self.set_theme_color()
 
-        # 변수 및 위젯 선언
+        # ----- 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
         self.dlg_add_chat = AddChat()
 
+        # 유저정보
         self.user_id = ""
         self.room_id = "PA_1"
         self.user_info:pandas.DataFrame
 
-        # DB연결
-        self.db = DBConnector()
-
+        # ----- UI 관련 변수
         # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
+        self.list_info:pandas.DataFrame
         self.current_list = dict()
 
+        # ----- 회원가입 관련 변수
         # 회원가입 요건 충족
         self.r_email = ''
         self.v_num = ''
@@ -66,6 +67,9 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 이벤트 연결
         self.connect_event()
+
+        # DB연결
+        self.db = DBConnector()
 
         # 서버 연결
         self.client = Client()
@@ -615,10 +619,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # ================================================== 리스트 메뉴 ==================================================
 
-    def get_list_info(self, t_type):
-        df = self.db.get_list_menu_info(t_type)
-        pass
-
     # 리스트 메뉴는 반드시 하나가 노출 되어야 하기 때문에
     # 활성화 버튼 한번 더 클릭 할 경우 화면 변화가 없도록 하기 위해 예외처리 추가
     def list_btn_check(self, t_type):
@@ -675,12 +675,19 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
         if clear_check and self.layout_list.count() > 0:
             self.clear_layout(self.layout_list)
-            self.get_list_info(t_type)
             self.init_list(t_type)
 
     # 리스트 메뉴 초기화
     def init_list(self, t_type):
         self.btn_add.setVisible(True)
+
+        if t_type == "member":
+            self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
+        else:
+            self.list_info = self.db.get_list_menu_info(t_type)
+        print("read db - list info")
+        print(self.list_info)
+
         self.current_list = dict()  # dict 초기화
         # 1:1 갠톡방
         if t_type == "single":
@@ -691,8 +698,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             offline_items = list()
 
             # ListItem 객체 생성 : 접속 중 상태 확인 후 online 이면 바로 addwidget 아니면 offline 지역변수에 임보
-            for i in range(7):
-                item = ListItem(f"OE_{i:0>2}", f"개인방 {i+1}", "마지막 메시지 입니다.")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
@@ -715,9 +722,9 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 단체방
         elif t_type == "multi":
-            for i in range(5):
+            for i, data in self.list_info.iterrows():
                 if not i:
-                    item = ListItem(f"PA_1", f"전체방", "마지막 메시지 입니다.")
+                    item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
                 else:
                     item = ListItem(f"OA_{i:0>2}", f"단체방-{i}", "마지막 메시지 입니다.")
                 item.set_info(datetime.now(), i)
@@ -735,8 +742,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
             offline_items = list()
 
-            for i in range(6):
-                item = ListItem(f"member{i}", "멤버", "상태상태상태상태상태상태")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
                 # self.current_list[item.item_id] = item
                 if i < 4:
@@ -777,8 +784,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(online)
             offline_items = list()
 
-            for i in range(6):
-                item = ListItem(f"friend{i}", "친구", "상태상태상태상태상태상태")
+            for i, data in self.list_info.iterrows():
+                item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("1:1 대화", self.move_single_chat, item)
                 # self.current_list[item.item_id] = item
                 if i < 3:       # --------- 접속 중 구분 조건문 → 추후 수정
