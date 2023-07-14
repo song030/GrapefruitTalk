@@ -23,7 +23,7 @@
    <item>
     <widget class="QStackedWidget" name="stack_main">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_login">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
@@ -491,7 +491,7 @@ border-radius:5px;
 padding:5px;</string>
                 </property>
                 <property name="placeholderText">
-                 <string>비밀번호 (영대문자,숫자,특수문자 필수,5~16자)</string>
+                 <string>비밀번호 (영대문자,특수문자 필수,5~16자)</string>
                 </property>
                </widget>
               </item>
@@ -509,7 +509,7 @@ border-radius:5px;
 padding:5px;</string>
                 </property>
                 <property name="placeholderText">
-                 <string>아이디</string>
+                 <string>아이디 (5~16자)</string>
                 </property>
                </widget>
               </item>
@@ -759,6 +759,15 @@ border-radius:5px;
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QLabel" name="lbl_room_name">
             <property name="text">
@@ -787,9 +796,27 @@ border-radius:5px;
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_single">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_single" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_single">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -800,35 +827,50 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_single.png</normaloff>../Images/btn_single.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>false</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_single.png</normaloff>../Images/btn_single.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_multi">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_multi" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_multi">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -839,35 +881,50 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_multi.png</normaloff>../Images/btn_multi.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_multi.png</normaloff>../Images/btn_multi.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_member">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_member" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_member">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -878,32 +935,47 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_member.png</normaloff>../Images/btn_member.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_member.png</normaloff>../Images/btn_member.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_friend">
-            <property name="styleSheet">
-             <string notr="true">QPushButton{
+           <widget class="QWidget" name="box_friend" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_friend">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
 border: 1px solid lightgray;
 border-radius: 5px;
 padding: 3px;
@@ -914,26 +986,29 @@ border: 1px solid black;
 border-radius: 5px;
 padding: 3px;
 }</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset>
-              <normaloff>../Images/btn_friend.png</normaloff>../Images/btn_friend.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>22</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="checkable">
-             <bool>true</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset>
+                 <normaloff>../Images/btn_friend.png</normaloff>../Images/btn_friend.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -1285,6 +1360,34 @@ padding: 3px;</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>edt_join_id</tabstop>
+  <tabstop>btn_join_id</tabstop>
+  <tabstop>edt_join_pwd1</tabstop>
+  <tabstop>edt_join_pwd2</tabstop>
+  <tabstop>edt_join_email</tabstop>
+  <tabstop>cb_join_email</tabstop>
+  <tabstop>btn_join_mail</tabstop>
+  <tabstop>lbl_email_num</tabstop>
+  <tabstop>btn_email_num</tabstop>
+  <tabstop>edt_join_nick</tabstop>
+  <tabstop>btn_join</tabstop>
+  <tabstop>btn_join_cancel</tabstop>
+  <tabstop>edt_login_id</tabstop>
+  <tabstop>edt_login_pwd</tabstop>
+  <tabstop>btn_login</tabstop>
+  <tabstop>btn_single</tabstop>
+  <tabstop>btn_multi</tabstop>
+  <tabstop>btn_member</tabstop>
+  <tabstop>btn_friend</tabstop>
+  <tabstop>scroll_talk</tabstop>
+  <tabstop>edt_txt</tabstop>
+  <tabstop>btn_emoticon</tabstop>
+  <tabstop>btn_send</tabstop>
+  <tabstop>btn_out</tabstop>
+  <tabstop>btn_add</tabstop>
+  <tabstop>btn_setting</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

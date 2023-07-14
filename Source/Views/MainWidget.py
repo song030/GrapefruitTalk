@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime
 import random
 
-# 이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
+#이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -50,10 +50,11 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.v_num = ''
         self.join_permission = False
         self.list_v_nums = []
+        self.use_id_check = False
 
         # 인증메일 송신자
         self.s_email = 'rhrnaka@gmail.com'
-        self.s_pwd = 'jqlhqjmuddnptivj'
+        self.s_pwd = 'sxrrxnbbfstqniee'
 
         # 이벤트 연결
         self.connect_event()
@@ -61,7 +62,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 서버 연결
         self.client = Client()
         if not self.client.connect():
-            self.disconnect()
+            print("연결 불가능")
         else:
             self.receive_thread = ReceiveThread(self.client)
             self.address = self.client.address()
@@ -113,6 +114,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.stack_main.setCurrentWidget(self.page_login)
 
         # ===== 회원가입
+        self.widget_email.setVisible(False)
         self.cb_join_email.setView(QListView())
         self.cb_join_email.addItems(["naver.com", "gmail.com", "nate.com", "hanmail.com"])
 
@@ -138,11 +140,16 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_login.clicked.connect(self.check_login_info)
 
         # ===== 회원가입
-        self.btn_join_id.clicked.connect(self.check_id_txt)
-        self.btn_join.clicked.connect(self.join_input_check)
-        self.btn_join_cancel.clicked.connect(lambda: self.stack_main.setCurrentWidget(self.page_login))
-        self.btn_join_mail.clicked.connect(self.send_membership_email)
+        self.btn_join_id.clicked.connect(self.check_duplicate_id)
+        self.edt_join_id.textEdited.connect(self.check_id_condition)
+
+        #비밀번호
+        #닉네임
+
+        self.btn_join_mail.clicked.connect(self.check_email_info)
         self.btn_email_num.clicked.connect(self.check_varify_number)
+        self.btn_join.clicked.connect(self.check_membership_info)
+        self.btn_join_cancel.clicked.connect(lambda: self.stack_main.setCurrentWidget(self.page_login))
 
         # ===== 대화방
         self.splitter.moveSplitter(100, 0)
@@ -159,8 +166,17 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 쓰레드 함수 연결
     def connect_thread_signal(self):
+        # 메세지 발송
         self.receive_thread.res_message.connect(self.receive_message)
+
+        # 로그인
         self.receive_thread.res_login.connect(self.check_login)
+
+        # 회원가입
+        self.receive_thread.res_regist.connect(self.join_input_check)
+        self.receive_thread.res_duplicate_id_check.connect(self.check_id_txt)
+        self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
+        self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -179,97 +195,117 @@ class MainWidget(QWidget, Ui_MainWidget):
     # ================================================== 회원가입 ==================================================
 
     def check_duplicate_id(self):
-        membership_id = self.edt_join_id.text()
-        self.client.send(ReqMembership(membership_id))
+        """send : 아이디 중복 확인"""
+        insert_id = self.edt_join_id.text()
+        self.client.send(ReqDuplicateCheck(insert_id))
 
-    def check_id_txt(self):
-        """아이디 중복 확인"""
-        user_id = self.edt_join_id.text()
-        print(user_id, self.id_list)
-        if user_id in self.id_list:
-            self.dlg_warning.set_dialog_type(1, "로그인 안내", "사용 중인 아이디입니다.")
+    def check_id_txt(self, data: PerDuplicateCheck):
+        """qt check : 아이디 중복 확인"""
+        if data.isExisited:
+            self.dlg_warning.set_dialog_type(1, 'used_id')
             self.join_permission = True
-        elif user_id not in self.id_list:
-            self.dlg_warning.set_dialog_type(1, "로그인 안내", "사용가능한 아이디입니다.")
+        else:
+            self.dlg_warning.set_dialog_type(1, 'user_can_use_id')
+            self.use_id_check = True
             self.join_permission = False
+        self.dlg_warning.exec()
 
     def check_id_condition(self):
-        """아이디 최대 16자 조건 확인"""
-        if len(self.create_id.text()) >= 16:
-            self.dlg_warning.set_dialog_type(1, "로그인 안내", "아이디는 최대 16자까지 입력 가능합니다.")
-            self.join_permission = False
+        """아이디 5~16자 조건 확인"""
+        if 5 <= len(self.edt_join_id.text()) <= 16:
+            return True
+        else:
+            return False
 
     def check_pwd_condition(self):
         """비밀번호 조건 확인 함수 : 영대문자(1), 특수문자(1) 필수포함 및 최대 16자"""
 
         insert_pwd = self.edt_join_pwd1.text()
-        REGEX_PASSWORD = '^(?=.*[\d])(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{5,16}$'
-        if not re.fullmatch(REGEX_PASSWORD, insert_pwd):
-            self.dlg_warning.set_dialog_type(1, "비밀번호를 확인하세요. 최소 1개 이상의 소문자, 대문자, 숫자, 특수문자, 길이는 5~16자리 이어야 합니다.")
-            self.join_permission = False
 
-        # num_ = 0
-        # upper_ = 0
-        # special_ = 0
-        # list_special = ['!', '@', '#', '$', '%', '^', '&', '*']
-        #
-        # for word in insert_pwd:
-        #     if word.isupper():
-        #         upper_ += 1
-        #     if word.isdecimal():
-        #         num_ += 1
-        #     if word in list_special:
-        #         special_ += 1
-        #
-        # if upper_ == 0:
-        #     self.dlg_warning.set_dialog_type(1, "비밀번호 필수 포함", "비밀번호에 최소 영대문자 1글자 이상 포함되어야 합니다.")
-        #     self.join_permission = False
-        # elif special_ == 0:
-        #     self.dlg_warning.set_dialog_type(1, "비밀번호 필수 포함", "최소 특수문자 1글자 이상 포함되어야 합니다.")
-        #     self.join_permission = False
-        # elif len(insert_pwd) >= 17:
-        #     self.dlg_warning.set_dialog_type(1, "비밀번호 글자 수 제한", "비밀번호는 최대 16자까지 입력가능합니다.")
-        #     self.join_permission = False
-        # elif insert_pwd == '':
-        #     self.dlg_warning.set_dialog_type(1, "비밀번호 입력없음", "비밀번호를 입력해주세요")
-        #     self.join_permission = False
-        # else:
-        #     self.join_permission = True
+        # 영대문자
+        upper_mathct = re.match('.*[A-Z]+.*', insert_pwd)
+        # 특수문자
+        special_mark = re.findall('[`~!@#$%^&*(),<.>/?]+', insert_pwd)
+
+        check = True
+        if not upper_mathct:
+            txt = "pw_alphabet_1"
+            check = False
+        elif not special_mark:
+            txt = "pw_unique_word"
+            check = False
+        elif len(insert_pwd) < 5 or len(insert_pwd) > 16:
+            check = False
+            txt = "pw_len_limited"
+
+        if not check:
+            return check, txt
+
+        all_condition = '^(?=.*[A-Z])(?=.*[!@#$%^&*()])[\w\d!@#$%^&*()]{5,16}$'
+        if re.match(all_condition, insert_pwd):
+            return True, ''
 
     def check_between_pwd(self):
         """비밀번호1, 2 일치 확인"""
         insert_pwd_1 = self.edt_join_pwd1.text()
         insert_pwd_2 = self.edt_join_pwd2.text()
 
+        if insert_pwd_1 == '':
+            txt = "pw_input"
+        elif insert_pwd_2 == '':
+            txt = "pw_input"
+
         if insert_pwd_1 != insert_pwd_2:
-            self.dlg_warning.set_dialog_type(1, "비밀번호 일치 오류", "비밀번호가 서로 일치하지 않습니다.")
-            self.join_permission = False
+            txt = "pw_not_match"
+            return False, txt
         else:
-            self.join_permission = True
+            return True, ''
 
     def check_nickname_condition(self):
         """닉네임 최대 20자 조건 확인 : 20자 이하의 한글/영문/숫자 조합"""
         insert_nickname = self.edt_join_nick.text()
+        print(insert_nickname)
+        print(len(insert_nickname))
+
         if len(insert_nickname) > 20:
-            self.dlg_warning.set_dialog_type(1, "닉네임 글자 수 제한", "닉네임은 최대 20자까지 가능합니다.")
-            self.join_permission = False
+            txt = "nick_name_len_limit"
+            return False, txt
+        elif len(insert_nickname) == 0:
+            txt = "nick_name_no_input"
+            return False, txt
         else:
-            self.join_permission = True
+            return True, ''
 
-    def check_email_condition(self):
+    def check_email(self):
+        print(self.btn_email_num.isEnabled())
+        if self.btn_email_num.isEnabled():
+            return False
+        else:
+            return True
+
+    def check_email_info(self):
+        if len(self.edt_join_email.text()) == 0:
+            self.dlg_warning.set_dialog_type(1, 'email_no_input')
+            self.dlg_warning.exec()
+        else:
+            self.widget_email.setVisible(True)
+
+            """send : 클라이언트 이메일 정보"""
+            email_addr = self.cb_join_email.currentText()
+            self.r_email = self.edt_join_email.text() + '@' + email_addr
+            self.client.send(ReqEmailSend(self.r_email))
+
+    def check_email_condition(self, data: PerEmailSend):
         """이메일 형식 유효성 확인"""
-        email_addr = self.cb_join_email.currentText()
-        self.r_email = self.edt_join_email.text()
-        # reg = '([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+'
-        reg = "^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$"
-        if bool(re.match(reg, self.r_email)):
-            self.dlg_warning.set_dialog_type(1, "이메일 유효 검사", "유효한 이메일 주소 입니다.")
+        if data.isSend:
+            # 형식 유효 시 별도의 팝업은 뜨지 않고 이메일 전송.
+            self.send_membership_email()
             self.join_permission = True
         else:
-            self.dlg_warning.set_dialog_type(1, "이메일 유효 검사", "유효한 이메일 주소가 아닙니다.")
+            self.dlg_warning.set_dialog_type(1, "not_vaild_email_addr")
             self.join_permission = False
 
-    def make_email_content(self):
+    def email_content(self):
         """인증메일 html 리턴"""
 
         verify_num = random.sample(range(0, 10), k=4)
@@ -302,7 +338,7 @@ class MainWidget(QWidget, Ui_MainWidget):
              <title>{title}</title>
          </head>
          <body>
-             <h4>안녕하세요. {self.name}님. </h4>
+             <h4>안녕하세요. [자몽톡 가입요청자] 님. </h4>
              <p style="padding:5px 0 0 0;">{e_content_1} </p>
              <p style="padding:5px 0 0 0;">{e_content_2} </p>
              <p style="padding:5px 0 0 0;">{e_content_3} </p>
@@ -332,11 +368,11 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 서버 로그인
         server.login(self.s_email, self.s_pwd)
-
         # 이메일 발송
         try:
-            server.sendmail(self.s_email, self.r_email, self.make_email_content().as_string())
-            self.dlg_warning.set_dialog_type(1, "이메일 발송", "가입을 위한 인증번호 이메일이 발송되었습니다.")
+            print("login try")
+            server.sendmail(self.s_email, self.r_email, self.email_content().as_string())
+            self.dlg_warning.set_dialog_type(1, "email_send")
             print("이메일 전송 성공")
         except:
             print("이메일 전송 실패")
@@ -345,13 +381,27 @@ class MainWidget(QWidget, Ui_MainWidget):
         server.quit()
 
     def check_varify_number(self):
-        """발송한 인증번호 / 입력한 인증번호의 일치 여부 확인"""
-        insert_v_num = self.lbl_email_num.text()
-        if self.v_num == insert_v_num:
-            self.dlg_warning.set_dialog_type(1, "인증번호 확인", "이메일 인증 완료")
+        if len(self.edt_join_email.text()) == 0:
+            self.dlg_warning.set_dialog_type(1, 'email_num_no_input')
+            self.dlg_warning.exec()
+        else:
+            """send : 발송 인증번호, 입력 인증번호"""
+            insert_email_num = self.lbl_email_num.text()
+            self.client.send(ReqEmailNumber(insert_email_num, self.v_num))
+
+    def email_check_or_not(self, data: PerEmailNumber):
+        """qt check : 발송한 인증번호 / 입력한 인증번호의 일치 여부 확인"""
+        print("email_check_or_not")
+        print(data.ismatch)
+        if data.ismatch:
+            self.dlg_warning.set_dialog_type(1, "email_check")
+            self.dlg_warning.exec()
+            self.btn_join_mail.setEnabled(False)
+            self.btn_email_num.setEnabled(False)
             self.join_permission = True
         else:
-            self.dlg_warning.set_dialog_type(1, "인증번호 확인", "이메일 인증 실패, 확인 후 재입력 해주시기 바랍니다.")
+            self.dlg_warning.set_dialog_type(1, "email_not_check")
+            self.dlg_warning.exec()
             self.join_permission = False
 
     def assign_random_image(self):
@@ -360,40 +410,84 @@ class MainWidget(QWidget, Ui_MainWidget):
         img = f'./Images/{num}.png'
         return img
 
-    def join_input_check(self):
-        """회원가입 정보 입력 , 서버 허가 요청 송신"""
-        if self.join_permission:
-            self.dlg_warning.set_dialog_type(2, "회원가입 안내", "※회원가입 완료※ 환영 합니다")
-            if self.dlg_warning.exec():
-                pass
-            else:
-                pass
+    def check_membership_info(self):
+        """send: 회원가입 입력 정보"""
+        id = self.edt_join_id.text()
+        pwd = self.edt_join_pwd2.text()
+        nm = self.edt_join_nick.text()
+        email = self.r_email
+        c_date = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        img = '../../Images/img_profile.png'
+        print("check_membership")
+
+        # 아이디 확인
+        if not self.check_id_condition():
+            self.dlg_warning.set_dialog_type(1, 'id_len_limited')
+            self.dlg_warning.exec()
+
+        # 비밀번호 확인
+        elif not self.check_pwd_condition()[0]:
+            self.dlg_warning.set_dialog_type(1, self.check_pwd_condition()[1])
+            self.dlg_warning.exec()
+
+        # 비밀번호+비밀번호확인 확인
+        elif not self.check_between_pwd()[0]:
+            self.dlg_warning.set_dialog_type(1, self.check_between_pwd()[1])
+            self.dlg_warning.exec()
+
+        # # 이메일 인증 확인
+        elif not self.check_email():
+            self.dlg_warning.set_dialog_type(1, "email_no_check")
+            self.dlg_warning.exec()
+
+        # 닉네임 확인
+        elif not self.check_nickname_condition()[0]:
+            self.dlg_warning.set_dialog_type(1, self.check_nickname_condition()[1])
+            self.dlg_warning.exec()
+
+        # 아이디 중복확인 진행 여부
+        elif not self.use_id_check:
+            self.dlg_warning.set_dialog_type(1, "used_id_no_check")
+            self.dlg_warning.exec()
+
         else:
-            self.dlg_warning.set_dialog_type(2, "회원가입 안내", "※회원가입실패※ 잘못된 정보 입력")
+            self.client.send(ReqMembership(id, pwd, nm, email, c_date, img))
+
+    def join_input_check(self, data: PerRegist):
+        """회원가입 정보 입력 , 서버 허가 요청 송신"""
+        print("join_input_check")
+        print(data.Success)
+        if data.Success:
+            self.dlg_warning.set_dialog_type(2, "success_join_membership")
+            if self.dlg_warning.exec():
+                self.stack_main.setCurrentWidget(self.page_talk)
+                self.init_talk()
+                self.init_list("multi")
+        else:
+            self.dlg_warning.set_dialog_type(2, "failed_join_membership")
             self.dlg_warning.exec()
 
     # ==================================================== 로그인 ==================================================
 
-    # 서버 쪽으로 보낼 정보만 담고 있는 함수
     def check_login_info(self):
+        """send : 로그인 정보"""
         self.id_ = self.edt_login_id.text()
         self.pwd_ = self.edt_login_pwd.text()
         self.client.send(ReqLogin(self.id_, self.pwd_))
 
-    # 로그인 요청에 대한 결과 함수
     def check_login(self, data: PerLogin):
-        """입력 ID, PASSWORD 확인 함수"""
+        """qt : 입력 ID, PASSWORD 확인 함수"""
         print(data.rescode)
         if data.rescode == 0:
-            self.dlg_warning.set_dialog_type(1, 'no_id_pw')
+            self.dlg_warning.set_dialog_type(1, '로그인 안내', "※로그인 실패※ \n 존재하지 않는 아이디/비밀번호 입니다. \n 다시 확인해주세요.")
             self.dlg_warning.exec()
             return False
         elif data.rescode == 1:
-            self.dlg_warning.set_dialog_type(1, 'wrong_id_pw')
+            self.dlg_warning.set_dialog_type(1, '로그인 안내', "※로그인 실패※ \n 잘못된 아이디 또는 패스워드 입니다.")
             self.dlg_warning.exec()
             return False
         else:
-            self.dlg_warning.set_dialog_type(1, t_text=f"※로그인 완료※ \n {self.id_}님 로그인 완료")
+            self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.id_}님 로그인 완료")
             self.dlg_warning.exec()
 
             # -- 채팅 화면 초기화
