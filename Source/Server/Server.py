@@ -42,9 +42,12 @@ class Server:
         return sock, addr
 
     # 클라이언트 연결 종료
-    def disconnect(self, addr):
+    def disconnect(self, sock):
         # 접속 종료한 클라이언트의 정보가 존재한다면
+        addr = sock.getpeername()
         if addr in self.client:
+            # 로그아웃 정보 발송
+            self.send_exclude_sender(sock, LoginInfo([self.client[addr][1]], False))
 
             # 클라이언트 정보 삭제
             del self.client[addr]
@@ -97,8 +100,11 @@ class Server:
     def send_message(self, data: ReqChat):
         if self.connected():
             member = self.db.find_user_chatroom(data.cr_id_)
+            print("sende message")
+            print("member :", member)
 
             for idx, client in enumerate(self.client.values()):
+                print("-", client[1])
                 if data.user_id_ != client[1] and client[1] in member:
                     client[0].sendall(pickle.dumps(data))
                     # self.db.insert_content(data)
@@ -124,8 +130,6 @@ class Server:
     # 데이터 수신
     def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
-        addr = sock.getpeername()
-
         try:
             receive_bytes = sock.recv(4096)
 
@@ -138,8 +142,8 @@ class Server:
             return data
 
         except:
+            self.disconnect(sock)
             sock.close()
-            self.disconnect(addr)
             return None
 
     # 받은 데이터에 대한 처리 결과 반환 내용 넣기
