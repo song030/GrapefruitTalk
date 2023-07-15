@@ -197,10 +197,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(sql, self.conn)
         return df
 
-    def get_last_content(self, cr_id):
-        df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)
-        return df
-
     def get_friend_list(self):
         # 친구 목록
         sql1 = f"""select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
@@ -215,6 +211,11 @@ class DBConnector:      # DB를 총괄하는 클래스
         df2 = pd.read_sql(sql2, self.conn)
 
         return df1, df2
+
+    def get_last_content(self, cr_id):
+        df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)
+        return df
+
 
 if __name__ == "__main__":
     DBConnector().create_chatroom("")
