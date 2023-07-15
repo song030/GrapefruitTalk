@@ -170,6 +170,7 @@ class Ui_DialogSetting(object):
         self.verticalLayout_4.setObjectName("verticalLayout_4")
         self.widget_6 = QtWidgets.QWidget(self.page_profile)
         self.widget_6.setMinimumSize(QtCore.QSize(0, 43))
+        self.widget_6.setStyleSheet("background: #FFF;")
         self.widget_6.setObjectName("widget_6")
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout(self.widget_6)
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
@@ -227,7 +228,8 @@ class Ui_DialogSetting(object):
         self.lbl_img_profile.setMinimumSize(QtCore.QSize(50, 100))
         self.lbl_img_profile.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
-"padding:5px;")
+"padding:5px;\n"
+"background: #FFF;")
         self.lbl_img_profile.setText("")
         self.lbl_img_profile.setScaledContents(False)
         self.lbl_img_profile.setAlignment(QtCore.Qt.AlignCenter)
@@ -239,7 +241,10 @@ class Ui_DialogSetting(object):
         font.setFamily("Malgun Gothic")
         font.setPointSize(12)
         self.lineEdit_nickname.setFont(font)
-        self.lineEdit_nickname.setStyleSheet("border: None;")
+        self.lineEdit_nickname.setStyleSheet("border:1px solid lightgray;\n"
+"border-radius:5px;\n"
+"padding:5px;\n"
+"background: #FFF;")
         self.lineEdit_nickname.setAlignment(QtCore.Qt.AlignCenter)
         self.lineEdit_nickname.setObjectName("lineEdit_nickname")
         self.verticalLayout_6.addWidget(self.lineEdit_nickname)
@@ -270,7 +275,8 @@ class Ui_DialogSetting(object):
         self.lineEdit_state.setMinimumSize(QtCore.QSize(235, 120))
         self.lineEdit_state.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
-"padding:5px;")
+"padding:5px;\n"
+"background: #FFF;")
         self.lineEdit_state.setAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignTop)
         self.lineEdit_state.setObjectName("lineEdit_state")
         self.horizontalLayout_4.addWidget(self.lineEdit_state)
@@ -293,14 +299,16 @@ class Ui_DialogSetting(object):
         self.btn_img_edit.setMinimumSize(QtCore.QSize(170, 50))
         self.btn_img_edit.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
-"padding:5px;")
+"padding:5px;\n"
+"background: #FFF;")
         self.btn_img_edit.setObjectName("btn_img_edit")
         self.horizontalLayout_5.addWidget(self.btn_img_edit)
         self.btn_profile_save = QtWidgets.QPushButton(self.widget_8)
         self.btn_profile_save.setMinimumSize(QtCore.QSize(170, 50))
         self.btn_profile_save.setStyleSheet("border:1px solid lightgray;\n"
 "border-radius:5px;\n"
-"padding:5px;")
+"padding:5px;\n"
+"background: #FFF;")
         self.btn_profile_save.setObjectName("btn_profile_save")
         self.horizontalLayout_5.addWidget(self.btn_profile_save)
         self.verticalLayout_4.addWidget(self.widget_8)
@@ -313,6 +321,7 @@ class Ui_DialogSetting(object):
         self.verticalLayout_7.setObjectName("verticalLayout_7")
         self.widget_9 = QtWidgets.QWidget(self.page_img_choice)
         self.widget_9.setMinimumSize(QtCore.QSize(0, 43))
+        self.widget_9.setStyleSheet("background: #FFF;")
         self.widget_9.setObjectName("widget_9")
         self.horizontalLayout_10 = QtWidgets.QHBoxLayout(self.widget_9)
         self.horizontalLayout_10.setObjectName("horizontalLayout_10")
@@ -825,7 +834,7 @@ class Ui_DialogSetting(object):
         self.verticalLayout.addWidget(self.stack_setting)
 
         self.retranslateUi(DialogSetting)
-        self.stack_setting.setCurrentIndex(1)
+        self.stack_setting.setCurrentIndex(0)
         self.btn_profile_save.clicked.connect(DialogSetting.accept) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(DialogSetting)
 

@@ -69,6 +69,9 @@ class Server:
         elif type(data) in [PerDuplicateCheck, PerEmailSend, PerEmailNumber, PerRegist]:
             self.send_client(sock, data)
 
+        elif type(data) in [PerAcceptFriend]:
+            self.send_friend(sock, data)
+
         # 클라이언트 로그인 요청 → 두 방식으로 발송해야해서 따로 나눔
         elif type(data) in [PerLogin]:
             # 요청자에게 로그인 결과 발송
@@ -82,9 +85,26 @@ class Server:
                 self.send_exclude_sender(sock, LoginInfo(data.user_id_))
         # elif type(data) in [ReqMembership]:
 
+    def send_friend(self, sock:socket.socket, data:PerAcceptFriend):
+        if self.connected():
+            user_id = self.client[sock.getpeername()][1]
+
+            # 친구 요청
+            if user_id == data.user_id_:
+                send_id = data.user_id_
+
+            # 요청 답변
+            else:
+                send_id = data.frd_id_
+
+            for client in self.client.values():
+                if client[1] == send_id:
+                    client[0].sendall(pickle.dumps(data))
+                    break
+
     # 요청한 클라이언트에게만 전송
     def send_client(self, sock: socket.socket, data):
-        if self.connected:
+        if self.connected():
             sock.sendall(pickle.dumps(data))
             return True
         else:
@@ -187,6 +207,38 @@ class Server:
             user_id = self.client[sock.getpeername()][1]
             self.client[sock.getpeername()][1] = ""
             perdata: LoginInfo([user_id], False)
+
+        # 중간 과정 없이 바로 진행 하는 data
+        # 친구 요청, 친구 수락/거절
+        elif type(data) == ReqSuggetsFriend:
+            # 요청 유저 아이디
+            req_user_id = self.client[sock.getpeername()][1]
+            login_list = self.get_login_list()
+            perdata = data
+
+            # 친구 요청
+            if req_user_id == data.user_id_:
+                self.db.insert_friend(data)
+
+                # 요청 받은 친구가 접속중인 경우
+                if data.frd_id_ in login_list:
+                    perdata:PerAcceptFriend(data.user_id_, data.frd_id_)
+
+            # 친구 요청 결과 발송
+            elif req_user_id == data.frd_id_:
+                # 수락
+                if data.result == 1:
+                    self.db.update_friend(data)
+
+                    if data.user_id_ in login_list:
+                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+
+                # 거절
+                else:
+                    self.db.delete_friend(data)
+
+                    if data.user_id_ in login_list:
+                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         else:
             return data

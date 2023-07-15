@@ -40,7 +40,6 @@ class ReqLoout:
         self.id_ = id_
 
 
-
 # ==================== 회원가입
 
 # 회원가입 중복 아이디 체크 요청 : 아이디
@@ -89,9 +88,6 @@ class PerEmailNumber:
     def __init__(self, ismatch: bool):
         self.ismatch = ismatch
 
-
-
-
 # ==================== 친구 초대
 
 # 친구 초대 요청
@@ -99,21 +95,14 @@ class ReqSuggetsFriend:
     def __init__(self, user_id_: str, frd_id_: str, result=False):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
-        self.result = False
+        self.result = result
 
 # 친구 수락 허가 응답
 class PerAcceptFriend:
-    def __init__(self, user_id_: str, frd_id_: str):
+    def __init__(self, user_id_: str, frd_id_: str, result=False):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
-        self.result = False
-
-# 친구 수락 요청
-class ReqAcceptFriend:
-    def __init__(self, user_id_: str, frd_id_: str):
-        self.user_id_ = user_id_
-        self.frd_id_ = frd_id_
-        self.result = False
+        self.result = result
 
 # ==================== 채팅방 개설
 

@@ -106,7 +106,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute("delete from TB_USER where USER_ID = ?", (user_id,))
         self.commit_db()
 
-
     # 회원 ID, PW 결과값 가져오기
     def login(self, data: ReqLogin) -> PerLogin:
         print("[ login ]")
@@ -173,23 +172,18 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data:ReqSuggetsFriend):
+    def insert_friend(self, data: ReqSuggetsFriend):
         self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
         self.commit_db()
 
-    # 친구 목록 가져오기
-    def get_all_friend(self, user_id):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}'", self.conn)
-        return df
-
-    # 수락/거절 조건에 따른 친구 조회
-    def get_accept_friend(self, user_id, accept=True):
-        df = pd.read_sql(f"select * from TB_FRIEND where USER_ID = '{user_id}' and FRD_ACCEPT = {accept}", self.conn)
-        return df
+    # 친구 요청 결과 적용
+    def update_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
+        self.commit_db()
 
     # 친구 삭제
-    def delete_friend(self, user_id, frd_id: str):
-        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
+    def delete_friend(self, data: ReqSuggetsFriend):
+        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} FRD_ID = {data.frd_id_}")
         self.commit_db()
 
     ## TB_log ================================================================================ ##

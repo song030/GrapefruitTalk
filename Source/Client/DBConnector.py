@@ -98,19 +98,14 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data:ReqSuggetsFriend):
+    def insert_friend(self, data):
         self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
         self.commit_db()
 
-    # 친구 목록 가져오기
-    def get_all_friend(self, user_id):
-        df = pd.read_sql(f"select * from CTB_FRIEND where USER_ID = '{user_id}'", self.conn)
-        return df
-
-    # 수락/거절 조건에 따른 친구 조회
-    def get_accept_friend(self, user_id, accept=True):
-        df = pd.read_sql(f"select * from CTB_FRIEND where USER_ID = '{user_id}' and FRD_ACCEPT = {accept}", self.conn)
-        return df
+    # 친구 요청 결과 적용
+    def update_friend(self, data):
+        self.conn.execute("update ctb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
+        self.commit_db()
 
     # 친구 삭제
     def delete_friend(self, user_id, frd_id: str):
@@ -192,11 +187,15 @@ class DBConnector:      # DB를 총괄하는 클래스
             sql = f"select CTB_USER.USER_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_USER_CHATROOM left join CTB_USER on CTB_USER_CHATROOM.USER_ID = CTB_USER.USER_ID WHERE CTB_USER_CHATROOM.CR_ID = '{cr_id}';"
 
         elif t_type == "friend":
-            sql = f"select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_FRIEND left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.USER_ID = '{self.user_id}';"
+            sql = f"select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.USER_ID = '{self.user_id}';"
         else:
             return False
 
         df = pd.read_sql(sql, self.conn)
+        return df
+
+    def get_last_content(self, cr_id):
+        df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)
         return df
 
 

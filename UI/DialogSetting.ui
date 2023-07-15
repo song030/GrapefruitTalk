@@ -347,6 +347,9 @@ background: #FFF;</string>
            <height>43</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background: #FFF;</string>
+         </property>
          <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
            <widget class="QPushButton" name="btn_back_1">
@@ -492,7 +495,8 @@ background: #FFF;</string>
               <property name="styleSheet">
                <string notr="true">border:1px solid lightgray;
 border-radius:5px;
-padding:5px;</string>
+padding:5px;
+background: #FFF;</string>
               </property>
               <property name="text">
                <string/>
@@ -520,7 +524,10 @@ padding:5px;</string>
                </font>
               </property>
               <property name="styleSheet">
-               <string notr="true">border: None;</string>
+               <string notr="true">border:1px solid lightgray;
+border-radius:5px;
+padding:5px;
+background: #FFF;</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -608,7 +615,8 @@ padding:5px;</string>
             <property name="styleSheet">
              <string notr="true">border:1px solid lightgray;
 border-radius:5px;
-padding:5px;</string>
+padding:5px;
+background: #FFF;</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -669,7 +677,8 @@ padding:5px;</string>
             <property name="styleSheet">
              <string notr="true">border:1px solid lightgray;
 border-radius:5px;
-padding:5px;</string>
+padding:5px;
+background: #FFF;</string>
             </property>
             <property name="text">
              <string>프로필 이미지 편집</string>
@@ -687,7 +696,8 @@ padding:5px;</string>
             <property name="styleSheet">
              <string notr="true">border:1px solid lightgray;
 border-radius:5px;
-padding:5px;</string>
+padding:5px;
+background: #FFF;</string>
             </property>
             <property name="text">
              <string>프로필 저장</string>
@@ -723,6 +733,9 @@ padding:5px;</string>
            <width>0</width>
            <height>43</height>
           </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background: #FFF;</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>

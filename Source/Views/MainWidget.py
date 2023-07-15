@@ -48,9 +48,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.login_list = list()
 
         # ----- UI 관련 변수
-        # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
+        # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : key : item_id , value : ListItem
         self.list_info = pandas.DataFrame
-        self.current_list = dict()
 
         # ----- 회원가입 관련 변수
         # 회원가입 요건 충족
@@ -174,9 +173,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join_id.clicked.connect(self.check_duplicate_id)
         self.edt_join_id.textEdited.connect(self.check_id_condition)
 
-        # 비밀번호
-        # 닉네임
-
         self.btn_join_mail.clicked.connect(self.check_email_info)
         self.btn_email_num.clicked.connect(self.check_varify_number)
         self.btn_join.clicked.connect(self.check_membership_info)
@@ -212,6 +208,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_duplicate_id_check.connect(self.check_id_txt)
         self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
+        self.receive_thread.res_friend.connect(self.request_friend)
 
         # 서버 정보 업데이트
         self.receive_thread.login_info_updata.connect(self.login_info_update)
@@ -573,27 +570,23 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.lbl_room_name.setText(f"{target_.item_nm}")
 
         # 채팅방 아이디로 조건 분기
-        if "OA" in t_room_id:
+        if "OA" in t_room_id or t_room_id == "PA_1":
             self.check_no_msg_cnt("multi")
             self.lbl_room_number.setText(f"{target_.member_cnt}")
         elif "OE" in t_room_id:
             self.check_no_msg_cnt("single")
             self.lbl_room_number.clear()
-        # --- 임시 채팅방 데이터 설정
+
         self.clear_layout(self.layout_talk)
-        # self.add_date_line()
-        # self.add_notice_line(f"{self.user_id}")
-        # num_ = random.randrange(3, 8)
-        # text = "말풍선선선선~~~~\n 말풍선!!\nzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
             self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
-        # --- 스크롤 테스트 중
+
         self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
     # 일자 표시선 추가
-    def add_date_line(self):
-        talkbox = DateLine(datetime.now())
+    def add_date_line(self, text_ = datetime.now()):
+        talkbox = DateLine(text_)
         self.layout_talk.addLayout(talkbox.layout)
 
     # 입퇴장 안내 문구 추가
@@ -643,7 +636,12 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 메시지 수신
     def receive_message(self, data: ReqChat):
-        self.add_talk(self, data.user_id_, data.msg, datetime.now())
+        # 현재 보고있는 화면과 같은 화면 일때만 보기
+        if data.cr_id_ == self.room_id:
+            self.add_talk(self, data.user_id_, data.msg, datetime.now())
+
+        # 수신메시지 DB에 저장
+        self.db.insert_content(data)
 
     # ==============================================================================================================
 
@@ -703,7 +701,8 @@ class MainWidget(QWidget, Ui_MainWidget):
                 clear_check = True
 
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
-        if clear_check and self.layout_list.count() > 0:
+        # if clear_check and self.layout_list.count() > 0:
+        if clear_check:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
 
@@ -713,122 +712,144 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if t_type == "member":
             self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
+            friend_df = self.db.get_all_friend(self.user_id)
+            print("친구목록 ", friend_df)
         else:
             self.list_info = self.db.get_list_menu_info(t_type)
 
         self.current_list = dict()  # dict 초기화
-        # 1:1 갠톡방
+
+        # === 1:1 갠톡방
         if t_type == "single":
-            # 온라인
-            online = QLabel()
-            online.setFont(Font.button(3))
-            self.layout_list.addWidget(online)
+            # 접속 중 구분
+            online_items = list()
             offline_items = list()
 
-            # ListItem 객체 생성 : 접속 중 상태 확인 후 online 이면 바로 addwidget 아니면 offline 지역변수에 임보
             for i, data in self.list_info.iterrows():
-                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
+                last_msg = self.db.get_last_content(data["CR_ID"])
+                item = ListItem(data["CR_ID"], data["CR_NM"], "")
                 item.set_info(datetime.now(), i)
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
-                if i < 4:       # --------- 접속 중 구분 조건문 → 추후 수정
-                    self.layout_list.addWidget(item.frame)
+                if item.item_id in self.login_list:
+                    online_items.append(item)
                 else:
                     offline_items.append(item)
 
-            on_num = self.layout_list.count() - 1
-            online.setText(f"온라인 - {on_num}명")
+            # --- 온라인
+            if online_items:
+                online = QLabel()
+                online.setFont(Font.button(3))
+                self.layout_list.addWidget(online)
+                online.setText(f"온라인 - {len(online_items)}명")
+                for item_ in online_items:
+                    self.layout_list.addWidget(item_.frame)
 
-            # 오프라인
-            offline = QLabel()
-            offline.setFont(Font.button(3))
-            self.layout_list.addWidget(offline)
-            off_num = len(offline_items)
-            offline.setText(f"오프라인 - {off_num}명")
-            for item in offline_items:
-                self.layout_list.addWidget(item.frame)
+            # --- 오프라인
+            if offline_items:
+                offline = QLabel()
+                offline.setFont(Font.button(3))
+                self.layout_list.addWidget(offline)
+                offline.setText(f"오프라인 - {len(offline_items)}명")
+                for item_ in offline_items:
+                    self.layout_list.addWidget(item_.frame)
 
-        # 단체방
+        # === 단체방
         elif t_type == "multi":
             for i, data in self.list_info.iterrows():
-                item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
+                last_msg = self.db.get_last_content(data["CR_ID"])
+                if last_msg.empty:
+                    last_msg = ''
+                else:
+                    last_msg = last_msg.iat[0, 0]
+                item = ListItem(data["CR_ID"], data["CR_NM"], last_msg)
                 item.set_info(datetime.now(), i)
                 item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 self.layout_list.addWidget(item.frame)
 
-        # 채팅방 멤버 리스트
+        # === 채팅방 멤버 리스트
         elif t_type == "member":
             self.btn_add.setVisible(False)
-            # 온라인
-            online = QLabel()
-            online.setFont(Font.button(3))
-            self.layout_list.addWidget(online)
+
+            # 접속 중 구분
+            online_items = list()
             offline_items = list()
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
-                # self.current_list[item.item_id] = item
-                if i < 4:
-                    self.layout_list.addWidget(item.frame)
+                self.current_list[item.item_id] = item
+                if item.item_id in self.login_list:
+                    online_items.append(item)
                 else:
                     offline_items.append(item)
 
-            on_num = self.layout_list.count() - 1
-            online.setText(f"온라인 - {on_num}명")
+            # --- 온라인
+            if online_items:
+                online = QLabel()
+                online.setFont(Font.button(3))
+                online.setText(f"온라인 - {len(online_items)}명")
+                self.layout_list.addWidget(online)
+                for item_ in online_items:
+                    self.layout_list.addWidget(item_.frame)
 
-            # 오프라인
-            offline = QLabel()
-            offline.setFont(Font.button(3))
-            self.layout_list.addWidget(offline)
-            off_num = len(offline_items)
-            offline.setText(f"오프라인 - {off_num}명")
+            # --- 오프라인
+            if offline_items:
+                offline = QLabel()
+                offline.setFont(Font.button(3))
+                offline.setText(f"오프라인 - {len(offline_items)}명")
+                self.layout_list.addWidget(offline)
+                for item_ in offline_items:
+                    self.layout_list.addWidget(item_.frame)
 
-            for item in offline_items:
-                self.layout_list.addWidget(item.frame)
-
-        # 친구 리스트
+        # === 친구 리스트
         elif t_type == "friend":
             self.btn_add.setVisible(False)
 
-            # --- 친구 신청
-            request_ = QLabel()
-            request_.setFont(Font.button(3))
-            self.layout_list.addWidget(request_)
-            item = ListItem(f"request0", "친구 후보", '')
-            item.set_button_box(self.add_friend)
-            self.layout_list.addWidget(item.frame)
-            reque_num = self.layout_list.count() - 1
-            request_.setText(f"친구 요청 - {reque_num}명")
-
-            # 온라인
-            online = QLabel()
-            online.setFont(Font.button(3))
-            self.layout_list.addWidget(online)
+            req_items = list()
+            online_items = list()
             offline_items = list()
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                item.set_context_menu("1:1 대화", self.move_single_chat, item)
-                # self.current_list[item.item_id] = item
-                if i < 3:       # --------- 접속 중 구분 조건문 → 추후 수정
-                    self.layout_list.addWidget(item.frame)
+                if not data["FRD_ACCEPT"]:  # 친구 수락 대기 중
+                    item.set_button_box(self.add_friend)
+                    req_items.append(item)
                 else:
-                    offline_items.append(item)
+                    item.set_context_menu("1:1 대화", self.move_single_chat, item)
+                    # 온라인 접속 중인 친구
+                    if item.item_id in self.login_list:
+                        online_items.append(item)
+                    else:
+                        offline_items.append(item)
+            # --- 요청 수락 대기 중
+            if req_items:
+                request_ = QLabel()
+                request_.setFont(Font.button(3))
+                request_.setText(f"친구 요청 - {len(req_items)}명")
+                self.layout_list.addWidget(request_)
+                for item_ in req_items:
+                    self.layout_list.addWidget(item_.frame)
 
-            on_num = self.layout_list.count() - 1
-            online.setText(f"온라인 - {on_num}명")
+            # --- 온라인
+            if online_items:
+                online = QLabel()
+                online.setFont(Font.button(3))
+                online.setText(f"온라인 - {len(online_items)}명")
+                self.layout_list.addWidget(online)
+                for item_ in online_items:
+                    self.layout_list.addWidget(item_.frame)
 
-            # 오프라인
-            offline = QLabel()
-            offline.setFont(Font.button(3))
-            self.layout_list.addWidget(offline)
-            off_num = len(offline_items)
-            offline.setText(f"오프라인 - {off_num}명")
-            for item in offline_items:
-                self.layout_list.addWidget(item.frame)
+            # --- 오프라인
+            if offline_items:
+                offline = QLabel()
+                offline.setFont(Font.button(3))
+                offline.setText(f"오프라인 - {len(offline_items)}명")
+                self.layout_list.addWidget(offline)
+                for item in offline_items:
+                    self.layout_list.addWidget(item.frame)
 
         self.check_no_msg_cnt(t_type)
 
@@ -874,12 +895,14 @@ class MainWidget(QWidget, Ui_MainWidget):
         target_id = self.lbl_room_name.objectName()
         if target_id == "PA_1":
             self.dlg_warning.set_dialog_type(1, "cannot_exit_room")
-            return
+            self.dlg_warning.exec()
         else:
             self.dlg_warning.set_dialog_type(2, "exit_chat_room")
-        if self.dlg_warning.exec():
-            self.current_list[target_id]: ListItem.frame.deleter
-            del self.current_list[target_id]
+            if self.dlg_warning.exec():
+                layout_ = self.current_list[target_id].layout
+                self.clear_layout(layout_)
+                # ------------------------------------------------------- 채팅방 DB 삭제
+                del self.current_list[target_id]
 
     # 방 추가 버튼 클릭 시 다이얼로그 연결
     def add_room(self):
@@ -921,7 +944,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.init_talk(item.item_id)    # 새 채팅방으로 이동
 
     # 친구 요청 수락/거절
-    def add_friend(self, t_type):
+    def add_friend(self, t_type, t_id):
         self.delete_list_item(0)
         self.delete_list_item(1)
         if t_type:
@@ -930,10 +953,37 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.current_list[item.item_id] = item
             self.layout_list.addWidget(item.frame)
 
+            print(f"친구 수락! : {t_id}")
+            self.client.send(ReqSuggetsFriend(self.user_id, t_id, 1))
+            self.db.update_friend(self.user_id, t_id, 1)
+        else:
+            print(f"친구 거절! : {t_id}")
+            self.client.send(ReqSuggetsFriend(self.user_id, t_id, 0))
+            self.db.delete_friend(self.user_id, t_id)
+
     # 친구 추가 신청보내기
     @pyqtSlot()
-    def friend_request(self):
-        print("친구 신청!")
+    def friend_request(self, frd_id):
+        print(f"친구 신청! : {frd_id}")
+        self.client.send(ReqSuggetsFriend(self.user_id, frd_id))
+        self.dlg_warning.set_dialog_type(1, "ReqSuggetsFriend")
+        self.dlg_warning.exec()
+
+    # 친구 요청 관련 서버 응답
+    def request_friend(self, data:PerAcceptFriend):
+        # 친구 요청 결과
+        if self.user_id == data.user_id_:
+            # 친구 요청 수락
+            if data.result:
+                self.db.update_friend(data)
+
+            # 친구 요청 거절
+            else:
+                self.db.delete_friend(data.user_id_, data.frd_id_)
+
+        # 친구 요청 받음
+        else:
+            self.db.insert_friend(data)
 
     # 친구와 1:1 대화하기
     @pyqtSlot()
@@ -964,10 +1014,11 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 설정 다이얼로그
     def open_setting(self):
+        self.dlg_setting.set_profile_page(self.user_info["USER_NM"], self.user_info["USER_IMG"], self.user_info["USER_STATE"])
 
         if self.dlg_setting.exec():
             """프로필 편집 완료 버튼 클릭 시"""
-            pass
+            print(self.dlg_setting.return_profile_data())
 
         if not self.dlg_setting.notice_setting:
             self.badge_single.setVisible(False)
