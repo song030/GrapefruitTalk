@@ -2,14 +2,14 @@
 import re
 import random
 
-#이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
+# 이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
 import smtplib
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout, QCompleter, QAction
+from PyQt5.QtWidgets import QWidget, QListView, QLabel, QLayout
 from PyQt5 import QtTest
 
 from Source.Views.UI_MainWidget import Ui_MainWidget
@@ -24,7 +24,6 @@ from Source.Views.NoticeLine import NoticeLine
 from Source.Views.ListItem import ListItem
 from Source.Client.Client import Client
 from Source.Client.ReceiveThread import ReceiveThread
-from Source.Main.DataClass import *
 from Source.Client.DBConnector import *
 
 class MainWidget(QWidget, Ui_MainWidget):
@@ -44,13 +43,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 유저정보
         self.user_id = ""
         self.room_id = "PA_1"
-        self.user_info:pandas.DataFrame
+        self.user_info = pandas.DataFrame
 
         self.login_list = list()
 
         # ----- UI 관련 변수
         # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
-        self.list_info: pandas.DataFrame
+        self.list_info = pandas.DataFrame
         self.current_list = dict()
 
         # ----- 회원가입 관련 변수
@@ -175,8 +174,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_join_id.clicked.connect(self.check_duplicate_id)
         self.edt_join_id.textEdited.connect(self.check_id_condition)
 
-        #비밀번호
-        #닉네임
+        # 비밀번호
+        # 닉네임
 
         self.btn_join_mail.clicked.connect(self.check_email_info)
         self.btn_email_num.clicked.connect(self.check_varify_number)
@@ -458,7 +457,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def check_membership_info(self):
         """send: 회원가입 입력 정보"""
-        id = self.edt_join_id.text()
+        id_ = self.edt_join_id.text()
         pwd = self.edt_join_pwd2.text()
         nm = self.edt_join_nick.text()
         email = self.r_email
@@ -496,8 +495,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.dlg_warning.exec()
 
         else:
-            self.user_id = id
-            self.client.send(ReqMembership(id, pwd, nm, email, c_date, img))
+            self.user_id = id_
+            self.client.send(ReqMembership(id_, pwd, nm, email, c_date, img))
 
     def join_input_check(self, data: PerRegist):
         """회원가입 정보 입력 , 서버 허가 요청 송신"""
@@ -517,7 +516,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         pwd_ = self.edt_login_pwd.text()
 
         self.client.send(ReqLogin(self.user_id, pwd_))
-
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
@@ -754,7 +752,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         elif t_type == "multi":
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
-                item.set_info(datetime.now(), data["count(USER_ID)"])
+                item.set_info(datetime.now(), i)
+                item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 self.layout_list.addWidget(item.frame)
@@ -838,7 +837,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         if not self.dlg_setting.notice_setting:
             return
 
-        target_ = None
         if t_type == "single":
             target_ = self.badge_single
         elif t_type == "multi":

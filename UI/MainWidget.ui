@@ -770,6 +770,9 @@ border-radius:5px;
           </property>
           <item>
            <widget class="QLabel" name="lbl_room_name">
+            <property name="styleSheet">
+             <string notr="true">padding-right: 6px;</string>
+            </property>
             <property name="text">
              <string>방이름</string>
             </property>

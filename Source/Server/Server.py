@@ -1,5 +1,6 @@
 import socket
 import pickle
+import queue
 
 from Source.Server.DBConnector import DBConnector
 from Source.Main.DataClass import *
@@ -7,7 +8,7 @@ from Source.Main.DataClass import *
 from threading import Thread
 
 class Server:
-    def __init__(self, port=1234, listener=10):
+    def __init__(self, port=1989, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -16,7 +17,9 @@ class Server:
 
         # 서버 소켓 생성
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind(('', port))  # 서버의 주소, 포트번호 저장
+        # 서버 소켓 닫을 때 포트 닫아주는 설정
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind(("", port))  # 서버의 주소, 포트번호 저장
         self.sock.listen(listener)  # 서버 소켓 연결 요청 대시 상태로 설정
 
         self.count = 0
@@ -218,7 +221,7 @@ class Server:
         if not All_TB_LOG:
             print("예외처리 : TB_LOG에 아무것도 없습니다.")
 
-    def handler(self, sock,):
+    def handler(self, sock, queue_: queue.Queue):
         while True:
             data = self.recevie(sock)
 
@@ -228,18 +231,30 @@ class Server:
             print("[ 데이터 수신 ]")
             # 수신된 데이터에 따른 결과 반환값을 클라이언트로 보내주기
             print(data)
-            process_data = self.process_data(sock, data)
+            # 클라이언트에게 받은 데이터를 Queue에 추가
+            queue_.put(data)
 
-            print("[ 데이터 처리 ]")
-            self.send(sock, process_data)
-            print("처리 완료")
+            while True:
+                try:
+                    # Queue에서 데이터 얻기
+                    get_data = queue_.get(block=False)
+                    process_data = self.process_data(sock, get_data)
+                    print("[ 데이터 처리 ]")
+                    self.send(sock, process_data)
+                    print("처리 완료")
+                    queue_.task_done()
+                except:
+                    break
+
 
 if __name__ == "__main__":
     server = Server()
+    # 데이터를 받을 Queue 추가
+    data_queue = queue.Queue()
 
     while True:
         print("대기중...")
 
         c_sock, c_addr = server.accept()
-        c_thread = Thread(target=server.handler, args=(c_sock,), daemon=True)
+        c_thread = Thread(target=server.handler, args=(c_sock, data_queue), daemon=True)
         c_thread.start()
