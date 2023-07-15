@@ -25,6 +25,10 @@ class DialogSetting(QDialog, Ui_DialogSetting):
         self.setResult(1)
         self.close()
 
+    def reject(self) -> None:
+        self.setResult(0)
+        self.close()
+
     # 이벤트 연결
     def connect_event(self):
         self.btn_close_1.clicked.connect(self.close)

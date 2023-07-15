@@ -531,6 +531,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
+            # ---- 여기서 호출
             # print(self.user_info)
 
             self.login_list = data.login_info.copy()
@@ -717,6 +718,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
             friend_df = self.db.get_all_friend(self.user_id)
             print("친구목록 ", friend_df)
+        elif t_type == "friend":
+            self.list_info = self.db.get_friend_list()
         else:
             self.list_info = self.db.get_list_menu_info(t_type)
 
@@ -815,7 +818,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             online_items = list()
             offline_items = list()
 
-            for i, data in self.list_info.iterrows():
+            for i, data in self.list_info[0].iterrows():
                 item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 if not data["FRD_ACCEPT"]:  # 친구 수락 대기 중
                     item.set_button_box(self.add_friend)

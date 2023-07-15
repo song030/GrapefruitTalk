@@ -191,8 +191,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         elif t_type == "member":
             sql = f"select CTB_USER.USER_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE FROM CTB_USER_CHATROOM left join CTB_USER on CTB_USER_CHATROOM.USER_ID = CTB_USER.USER_ID WHERE CTB_USER_CHATROOM.CR_ID = '{cr_id}';"
 
-        elif t_type == "friend":
-            sql = f"select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.USER_ID = '{self.user_id}';"
         else:
             return False
 
@@ -203,6 +201,20 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)
         return df
 
+    def get_friend_list(self):
+        # 친구 목록
+        sql1 = f"""select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
+                    left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID 
+                    WHERE ( CTB_FRIEND.FRD_ID = '{self.user_id}' or CTB_FRIEND.USER_ID = '{self.user_id}') and CTB_FRIEND.FRD_ACCEPT=1;"""
+
+        # 친구 수락 대기
+        sql2 = f"""select CTB_FRIEND.FRD_ID, CTB_USER.USER_NM, CTB_USER.USER_IMG, CTB_USER.USER_STATE, CTB_FRIEND.FRD_ACCEPT FROM CTB_FRIEND 
+                    left join CTB_USER on CTB_FRIEND.FRD_ID = CTB_USER.USER_ID WHERE CTB_FRIEND.FRD_ID = '{self.user_id}' and CTB_FRIEND.FRD_ACCEPT=0;"""
+
+        df1 = pd.read_sql(sql1, self.conn)
+        df2 = pd.read_sql(sql2, self.conn)
+
+        return df1, df2
 
 if __name__ == "__main__":
     DBConnector().create_chatroom("")
