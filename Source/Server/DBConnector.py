@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 
 # 정규식 표현
 import re
@@ -112,8 +111,8 @@ class DBConnector:      # DB를 총괄하는 클래스
     def login(self, data: ReqLogin) -> PerLogin:
         print("[ login ]")
         """클라이언트 로그인 요청 -> 서버 로그인 허가 """
-        result: PerLogin = PerLogin(rescode=2)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
+        result: PerLogin = PerLogin(rescode=2, user_id_=data.id_)
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}' AND USER_PW = '{data.password}'"
         df = pd.read_sql(sql, self.conn)
         row = len(df)
         print("row",row)
@@ -121,7 +120,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         if row in [None, 0]:
             result.rescode = 0
         # 입력한 아이디와 비밀번호, db에서 가진 아이디와 비밀번호
-        # elif data.id != row[1] or data.password != row[2]:
+        # elif data.id_ != row[1] or data.password != row[2]:
         #     result.rescode = 1
         else:
             result.rescode = 2
@@ -130,7 +129,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def membership_id_check(self, data: ReqDuplicateCheck) -> PerDuplicateCheck:
         """클라이언트 중복 아이디 확인 요청 -> 서버 db에서 아이디 중복 여부 응답"""
         result: PerDuplicateCheck = PerDuplicateCheck(isExisited=True)
-        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}'"
+        sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}'"
         row = pd.read_sql(sql, self.conn)
 
         if len(row) != 0:
@@ -159,10 +158,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         result: PerRegist = PerRegist(True)
         try:
             sql = f"INSERT INTO TB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
-                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
+                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id}');")
+            self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id_}');")
 
             self.conn.commit()
         except:
@@ -241,7 +240,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"insert into TB_CHATROOM values (?, ?)", (_cr_id, data.title))
 
         # 방장 추가
-        self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id))
+        self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
         for member in data.member:
             self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
@@ -279,9 +278,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 대화 추가
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
+        self.conn.execute(f"insert into TB_CONTENT_{data.cr_id_} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
                          "values (?, ?, ?)",
-                         (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
+                         (data.user_id_, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")) )
 
         self.commit_db()
         print("save complete")

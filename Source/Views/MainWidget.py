@@ -234,14 +234,15 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 로그인 유저 정보 업데이트
     def login_info_update(self, data:LoginInfo):
         # 로그인 중이고 보유중인 로그인 리스트에 정보가 없을 경우 유저 정보 추가
-        if data.login and data.id not in self.login_list:
-            self.login_list.append(data.id)
-            print(f"{data.id} 로그인")
+        print(get_data_tuple((data)))
+        if data.login and data.id_ not in self.login_list:
+            self.login_list.append(data.id_)
+            print(f"{data.id_} 로그인")
 
         # 로그아웃 했고, 보유중인 리스트에 정보가 있을 경우 유저 정보 삭제
-        elif not data.login and data.id in self.login_list:
-            self.login_list.remove(data.id)
-            print(f"{data.id} 로그아웃")
+        elif not data.login and data.id_ in self.login_list:
+            self.login_list.remove(data.id_)
+            print(f"{data.id_} 로그아웃")
 
     # ================================================== 회원가입 ==================================================
 
@@ -535,9 +536,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-            print(self.user_info)
+            # print(self.user_info)
 
-            self.login_list = data.login_info
+            self.login_list = data.login_info.copy()
             print("접속중 유저 :", self.login_list)
 
             self.set_page_talk()
@@ -644,7 +645,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 메시지 수신
     def receive_message(self, data: ReqChat):
-        self.add_talk(self, data.user_id, data.msg, datetime.now())
+        self.add_talk(self, data.user_id_, data.msg, datetime.now())
 
     # ==============================================================================================================
 
@@ -716,8 +717,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
         else:
             self.list_info = self.db.get_list_menu_info(t_type)
-        print("read db - list info")
-        print(self.list_info)
 
         self.current_list = dict()  # dict 초기화
         # 1:1 갠톡방

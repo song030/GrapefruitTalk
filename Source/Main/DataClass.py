@@ -10,8 +10,8 @@ import pandas
 
 # 로그인 요청 : 아이디, 비밀번호
 class ReqLogin:
-    def __init__(self, id:str, pw:str):
-        self.id = id
+    def __init__(self, id_:str, pw:str):
+        self.id_ = id_
         self.password = pw
 
 # 로그인 허가 응답 : 허가번호, 아이디
@@ -19,25 +19,25 @@ class ReqLogin:
 # rescode = 1 ("비밀번호 존재하지 않음")
 # rescode = 2 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, login_info=[]):
+    def __init__(self, rescode: int, user_id_:str, login_info=[]):
         self.rescode = rescode
-        self.id = id
+        self.user_id_ = user_id_
         self.login_info = login_info
 
 # 로그인 유저 정보 발송
 # len(list)=1: 신규로 로그인/로그아웃 발행할때 발송용
 # len(list)>1: 전체 로그인 유저 정보 발송용
 class LoginInfo:
-    def __init__(self, id: list, login=True):
-        self.id = id
+    def __init__(self, id_: list, login=True):
+        self.id_ = id_
         self.login = login
 
 # ==================== 로그아웃
 
 # 로그아웃 요청 : 아이디, 시간
 class ReqLoout:
-    def __init__(self, id: str):
-        self.id = id
+    def __init__(self, id_: str):
+        self.id_ = id_
 
 
 
@@ -45,8 +45,8 @@ class ReqLoout:
 
 # 회원가입 중복 아이디 체크 요청 : 아이디
 class ReqDuplicateCheck:
-    def __init__(self, id:str):
-        self.id = id
+    def __init__(self, id_:str):
+        self.id_ = id_
 
 # 아이디 중복 체크 응답 : True(중복), False(중복아님)
 class PerDuplicateCheck:
@@ -55,8 +55,8 @@ class PerDuplicateCheck:
 
 # 회원가입 요청 : 아이디, 비밀번호, 닉네임, 이메일, 가입일자, 프로필 이미지경로, 상태메세지
 class ReqMembership:
-    def __init__(self, id: str, pw: str, nm: str, email: str, c_date: str, img: str):
-        self.id = id
+    def __init__(self, id_: str, pw: str, nm: str, email: str, c_date: str, img: str):
+        self.id_ = id_
         self.pw = pw
         self.nm = nm
         self.email = email
@@ -96,39 +96,39 @@ class PerEmailNumber:
 
 # 친구 초대 요청
 class ReqSuggetsFriend:
-    def __init__(self, user_id: str, frd_id: str, result=False):
-        self.user_id = user_id
-        self.frd_id = frd_id
+    def __init__(self, user_id_: str, frd_id_: str, result=False):
+        self.user_id_ = user_id_
+        self.frd_id_ = frd_id_
         self.result = False
 
 # 친구 수락 허가 응답
 class PerAcceptFriend:
-    def __init__(self, user_id: str, frd_id: str):
-        self.user_id = user_id
-        self.frd_id = frd_id
+    def __init__(self, user_id_: str, frd_id_: str):
+        self.user_id_ = user_id_
+        self.frd_id_ = frd_id_
         self.result = False
 
 # 친구 수락 요청
 class ReqAcceptFriend:
-    def __init__(self, user_id: str, frd_id: str):
-        self.user_id = user_id
-        self.frd_id = frd_id
+    def __init__(self, user_id_: str, frd_id_: str):
+        self.user_id_ = user_id_
+        self.frd_id_ = frd_id_
         self.result = False
 
 # ==================== 채팅방 개설
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id: str, member: list, title:str):
-        self.user_id = user_id
+    def __init__(self, user_id_: str, member: list, title:str):
+        self.user_id_ = user_id_
         self.member = member
         self.title = title
 
 # 채팅방 나가기
 class OutChat:
-    def __init__(self, cr_id: str, user_id: str):
-        self.cr_id = cr_id
-        self.user_id = user_id
+    def __init__(self, cr_id_: str, user_id_: str):
+        self.cr_id_ = cr_id_
+        self.user_id_ = user_id_
 
 def get_data_tuple(t_class):
     data_dict = t_class.__dict__
@@ -139,12 +139,12 @@ def get_data_tuple(t_class):
 
 # 채팅 송수신
 class ReqChat:
-    def __init__(self, cr_id:str, user_id:str, msg: str): #msg = self.edt_txt.text()
-        self.cr_id = cr_id
-        self.user_id = user_id
+    def __init__(self, cr_id_:str, user_id_:str, msg: str): #msg = self.edt_txt.text()
+        self.cr_id_ = cr_id_
+        self.user_id_ = user_id_
         self.msg = msg
 
 class ReadChat:
-    def __init__(self, cr_id:str):
-        self.cr_id = cr_id
+    def __init__(self, cr_id_:str):
+        self.cr_id_ = cr_id_
         self.msg:pandas.DataFrame

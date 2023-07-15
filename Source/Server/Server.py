@@ -7,7 +7,7 @@ from Source.Main.DataClass import *
 from threading import Thread
 
 class Server:
-    def __init__(self, port=1005, listener=10):
+    def __init__(self, port=1234, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -63,7 +63,7 @@ class Server:
         elif type(data) in [PerLogin]:
             # 요청자에게 로그인 결과 발송
             self.send_client(sock, data)
-            self.db_log_inout_state_save(data.rescode, data.id, data.pw)
+            self.db_log_inout_state_save(data.rescode)
 
             # 로그인 성공시
             # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
@@ -91,15 +91,16 @@ class Server:
 
     # 발송자를 제외한 나머지 접속자에게 발송
     def send_exclude_sender(self, sock: socket.socket, data):
+        print("send_exclude_sender")
         if self.connected():
             # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
             for idx, client in enumerate(self.client.values()):
-                print(data.user_id, client[1])
-                if sock.getpeername() != client[0]:
+                print(self.client[sock.getpeername()][1], client[1])
+                if self.client[sock.getpeername()][1] != client[1]:
                     client[0].sendall(pickle.dumps(data))
-
-                if idx == 0:
-                    self.db.insert_content(data)
+                #
+                # if idx == 0:
+                #     self.db.insert_content(data)
             return True
         else:
             return False
@@ -155,7 +156,7 @@ class Server:
         elif type(data) == ReqLogin:
             perdata: PerLogin = self.db.login(data)
             if perdata.rescode == 2:
-                self.client[sock.getpeername()][1] = perdata.id
+                self.client[sock.getpeername()][1] = perdata.user_id_
                 perdata.login_info = self.get_login_list()
 
         # 로그 아웃
@@ -176,21 +177,19 @@ class Server:
         login_list = list()
         for client in self.client.values():
             if client[1] != "":
-                login_list.append(client)
+                login_list.append(client[1])
 
         print("login info")
         print(login_list)
 
         return login_list
 
-    def db_log_inout_state_save(self, rescode, id, pw):
+    def db_log_inout_state_save(self, rescode):
         """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
         sql_ = ''
         time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         print(time_)
         print(rescode)
-        print(id)
-        print(pw)
         if rescode == 2:
             sql_ = f"UPDATE TB_LOG SET LOGIN_TIME = '{time_}' WHERE USER_ID = '{id}'"
             self.db.conn.execute(sql_)
