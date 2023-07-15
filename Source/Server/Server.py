@@ -177,6 +177,10 @@ class Server:
         for client in self.client.values():
             if client[1] != "":
                 login_list.append(client)
+
+        print("login info")
+        print(login_list)
+
         return login_list
 
     def db_log_inout_state_save(self, rescode, id, pw):

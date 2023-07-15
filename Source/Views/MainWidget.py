@@ -46,6 +46,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.room_id = "PA_1"
         self.user_info:pandas.DataFrame
 
+        self.login_list = list()
+
         # ----- UI 관련 변수
         # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
         self.list_info: pandas.DataFrame
@@ -213,7 +215,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
 
         # 서버 정보 업데이트
-        self.receive_thread.login_info_updata.connect(self.login_info_update())
+        self.receive_thread.login_info_updata.connect(self.login_info_update)
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -229,8 +231,17 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:
                 self.clear_layout(item.layout())
 
-    def login_info_update(self):
-        pass
+    # 로그인 유저 정보 업데이트
+    def login_info_update(self, data:LoginInfo):
+        # 로그인 중이고 보유중인 로그인 리스트에 정보가 없을 경우 유저 정보 추가
+        if data.login and data.id not in self.login_list:
+            self.login_list.append(data.id)
+            print(f"{data.id} 로그인")
+
+        # 로그아웃 했고, 보유중인 리스트에 정보가 있을 경우 유저 정보 삭제
+        elif not data.login and data.id in self.login_list:
+            self.login_list.remove(data.id)
+            print(f"{data.id} 로그아웃")
 
     # ================================================== 회원가입 ==================================================
 
@@ -525,6 +536,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
             print(self.user_info)
+
+            self.login_list = data.login_info
+            print("접속중 유저 :", self.login_list)
 
             self.set_page_talk()
             return True
