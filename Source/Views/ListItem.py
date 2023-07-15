@@ -76,8 +76,8 @@ class ListItem:
     @property
     def item_nm(self):
         nm_ = self._lbl_nick.text()
-        nm_ = nm_.lstrip("[ ")
-        nm_ = nm_.rstrip(" ]")
+        # nm_ = nm_.lstrip("[ ")
+        # nm_ = nm_.rstrip(" ]")
         return nm_
 
     @property

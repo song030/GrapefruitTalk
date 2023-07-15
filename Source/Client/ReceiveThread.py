@@ -13,6 +13,8 @@ class ReceiveThread(QThread):
     res_regist = pyqtSignal(PerRegist)
     res_login = pyqtSignal(PerLogin)
 
+    login_info_updata = pyqtSignal(LoginInfo)
+
     def __init__(self, client:Client):
         super().__init__()
         self.client = client
@@ -49,3 +51,6 @@ class ReceiveThread(QThread):
             # 로그인 결과
             elif type(data) == PerLogin:
                 self.res_login.emit(data)
+
+            elif type(data) == LoginInfo:
+                self.login_info_updata.emit(data)

@@ -112,7 +112,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def login(self, data: ReqLogin) -> PerLogin:
         print("[ login ]")
         """클라이언트 로그인 요청 -> 서버 로그인 허가 """
-        result: PerLogin = PerLogin(rescode=2, id=data.id, pw=data.password)
+        result: PerLogin = PerLogin(rescode=2)
         sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id}' AND USER_PW = '{data.password}'"
         df = pd.read_sql(sql, self.conn)
         row = len(df)

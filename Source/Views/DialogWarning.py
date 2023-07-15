@@ -92,3 +92,5 @@ class DialogWarning(QDialog, Ui_DlgWarning):
             self.lbl_text.setText('[전송 불가] 욕설,비방은 자몽톡에서 금지됩니다.')
         elif t_type == 'cannot_exit_room':
             self.lbl_text.setText('[전체방]은 나갈 수 없습니다.')
+        elif t_type == 'cannot_service':
+            self.lbl_text.setText('현재 서버가 오프라인 상태입니다.')

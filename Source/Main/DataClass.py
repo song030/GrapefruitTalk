@@ -17,13 +17,20 @@ class ReqLogin:
 # 로그인 허가 응답 : 허가번호, 아이디
 # rescode = 0 ("아이디 존재하지 않음")
 # rescode = 1 ("비밀번호 존재하지 않음")
-# rescode = 2 ("로그인 한 아이디")
-# rescode = 3 ("로그인 허가 완료")
+# rescode = 2 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, id: str, pw: str):
+    def __init__(self, rescode: int, login_info=[]):
         self.rescode = rescode
         self.id = id
-        self.pw = pw
+        self.login_info = login_info
+
+# 로그인 유저 정보 발송
+# len(list)=1: 신규로 로그인/로그아웃 발행할때 발송용
+# len(list)>1: 전체 로그인 유저 정보 발송용
+class LoginInfo:
+    def __init__(self, id: list, login=True):
+        self.id = id
+        self.login = login
 
 # ==================== 로그아웃
 
@@ -32,10 +39,7 @@ class ReqLoout:
     def __init__(self, id: str):
         self.id = id
 
-# 로그아웃 허가 응답
-class PerLogout:
-    def __init__(self):
-        pass
+
 
 # ==================== 회원가입
 

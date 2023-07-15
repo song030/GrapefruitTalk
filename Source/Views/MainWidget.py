@@ -1,10 +1,6 @@
-import sqlite3
 
-from datetime import datetime
+import re
 import random
-
-import pandas
-import pandas as pd
 
 #이메일 전송을 위한 SMTP프로토콜 접근 지원을 위한 라이브러리
 import smtplib
@@ -21,6 +17,7 @@ from Source.Views.UI_MainWidget import Ui_MainWidget
 from Source.Views.Font import Font
 from Source.Views.DialogWarning import DialogWarning
 from Source.Views.AddChat import AddChat
+from Source.Views.DialogSetting import DialogSetting
 from Source.Views.TalkBox import TalkBox
 from Source.Views.DateLine import DateLine
 from Source.Views.NoticeLine import NoticeLine
@@ -42,6 +39,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ----- 변수 및 위젯 선언
         self.dlg_warning = DialogWarning()
         self.dlg_add_chat = AddChat()
+        self.dlg_setting = DialogSetting()
 
         # 유저정보
         self.user_id = ""
@@ -50,7 +48,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # ----- UI 관련 변수
         # 현재 리스트 화면에 노출되는 리스트 아이템 ListItem dict : self.chat_room["item_id"] = ListItem
-        self.list_info:pandas.DataFrame
+        self.list_info: pandas.DataFrame
         self.current_list = dict()
 
         # ----- 회원가입 관련 변수
@@ -74,6 +72,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # 서버 연결
         self.client = Client()
         if not self.client.connect():
+            self.dlg_warning.set_dialog_type(1, 'cannot_service')
             self.dlg_warning.exec()
             print("연결 불가능")
         else:
@@ -152,16 +151,19 @@ class MainWidget(QWidget, Ui_MainWidget):
         return badge_
 
     # 테마(색상) 설정 기능 > 나중에
-    def set_theme_color(self, t_main: str = "#E6A157", t_room: str = "#FFF3E2"):
+    def set_theme_color(self, t_main: str = "#EB8242", t_room: str = "#FFF3E2", t_sub: str = "#D2E9E9"):
         self.page_login.setStyleSheet(f"background: {t_main}")
         self.page_join.setStyleSheet(f"background: {t_main}")
         self.scrollAreaWidgetContents.setStyleSheet(f"background: {t_room}")
+        # self.layout_menu.setStyleSheet(f"background: {t_frame}")
 
     # 이벤트 연결
     def connect_event(self):
         # ===== 공통
         self.dlg_warning.showEvent = lambda e: self.back.show()
         self.dlg_warning.closeEvent = lambda e: self.back.hide()
+        self.dlg_setting.showEvent = lambda e: self.back.show()
+        self.dlg_setting.closeEvent = lambda e: self.back.hide()
 
         # ===== 메인 (로그인)
         self.lbl_join.mousePressEvent = lambda e: self.stack_main.setCurrentWidget(self.page_join)
@@ -191,6 +193,10 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.btn_friend.clicked.connect(lambda: self.list_btn_check("friend"))
         self.btn_out.clicked.connect(self.out_room)
         self.btn_add.clicked.connect(self.add_room)
+        self.btn_setting.clicked.connect(self.open_setting)
+
+        # ===== 설정 다이얼로그
+        self.dlg_setting.set_logout_event(self.logout)
 
     # 쓰레드 함수 연결
     def connect_thread_signal(self):
@@ -206,6 +212,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
 
+        # 서버 정보 업데이트
+        self.receive_thread.login_info_updata.connect(self.login_info_update())
+
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
         if layout is None:
@@ -219,6 +228,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 아이템이 레이아웃일 경우 재귀 호출로 레이아웃 내의 위젯 삭제
             else:
                 self.clear_layout(item.layout())
+
+    def login_info_update(self):
+        pass
 
     # ================================================== 회원가입 ==================================================
 
@@ -494,11 +506,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         self.client.send(ReqLogin(self.user_id, pwd_))
 
-        # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
-        self.db.set_user_id(self.user_id)
-        self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-        print(self.user_info)
-
 
     def check_login(self, data: PerLogin):
         """qt : 입력 ID, PASSWORD 확인 함수"""
@@ -513,6 +520,12 @@ class MainWidget(QWidget, Ui_MainWidget):
         else:
             self.dlg_warning.set_dialog_type(1, '로그인 안내', f"※로그인 완료※ \n {self.user_id}님 로그인 완료")
             self.dlg_warning.exec()
+
+            # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
+            self.db.set_user_id(self.user_id)
+            self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
+            print(self.user_info)
+
             self.set_page_talk()
             return True
 
@@ -728,8 +741,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         elif t_type == "multi":
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["CR_ID"], data["CR_NM"], "마지막 메시지 입니다.")
-                item.set_info(datetime.now(), i)
-                item.member_cnt = data["count(USER_ID)"]
+                item.set_info(datetime.now(), data["count(USER_ID)"])
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 self.layout_list.addWidget(item.frame)
@@ -810,6 +822,9 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 안읽은 메시지 배지 갱신
     def check_no_msg_cnt(self, t_type: str):
+        if not self.dlg_setting.notice_setting:
+            return
+
         target_ = None
         if t_type == "single":
             target_ = self.badge_single
@@ -871,9 +886,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             elif member_cnt > 1:     # 단체방 추가
                 self.new_chat_room("multi", chat_name, chat_mem)
 
+    # 채팅방 개설
     def new_chat_room(self, t_type: str, t_name: str, t_member: list):
         """
-        새 채팅방 생성 함수
         :param t_type: single / multi
         :param t_name: 채팅방 이름
         :param t_member: 채팅방 참여멤버 (현재는 객체로 받고 있음 → DB 연결시 id로 수정)
@@ -922,5 +937,29 @@ class MainWidget(QWidget, Ui_MainWidget):
                 self.init_talk(value_.item_id)
                 return
         self.new_chat_room("single", t_friend.item_nm, [t_friend])
+
+    # 로그아웃 버튼 클릭 시
+    def logout(self):
+        # 로그인 정보 초기화
+        self.user_id = ""
+        self.room_id = "PA_1"
+        self.edt_login_id.clear()
+        self.edt_login_pwd.clear()
+        # 화면 갱신
+        self.dlg_setting.reject()
+        self.stack_main.setCurrentWidget(self.page_login)
+        # 서버 로그아웃 요청
+        self.client.send(ReqLoout(self.user_id))
+
+    # 설정 다이얼로그
+    def open_setting(self):
+
+        if self.dlg_setting.exec():
+            """프로필 편집 완료 버튼 클릭 시"""
+            pass
+
+        if not self.dlg_setting.notice_setting:
+            self.badge_single.setVisible(False)
+            self.badge_multi.setVisible(False)
 
 # ==============================================================================================================
