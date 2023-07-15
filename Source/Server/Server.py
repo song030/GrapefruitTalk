@@ -51,8 +51,12 @@ class Server:
 
     # 데이터 타입에따른 데이터 전송
     def send(self, sock:socket.socket, data):
+        # 접속중인 방 멤버에게만 메시지 발송
+        if type(data) in [ReqChat]:
+            self.send_message(data)
+
         # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
-        if type(data) in [ReqChat, LoginInfo]:
+        if type(data) in [LoginInfo]:
             self.send_exclude_sender(sock, data)
 
         # 요청한 클라이언트에게 회신
@@ -68,8 +72,8 @@ class Server:
             # 로그인 성공시
             # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
             if data.rescode == 2:
-                self.client[sock.getpeername()][1] = data.id
-                self.send_exclude_sender(sock, LoginInfo(data.id))
+                self.client[sock.getpeername()][1] = data.user_id_
+                self.send_exclude_sender(sock, LoginInfo(data.user_id_))
         # elif type(data) in [ReqMembership]:
 
     # 요청한 클라이언트에게만 전송
@@ -89,18 +93,30 @@ class Server:
         else:
             return False
 
+    # 발송자를 제외한 나머지 접속자에게 메시지 발송
+    def send_message(self, data: ReqChat):
+        if self.connected():
+            member = self.db.find_user_chatroom(data.cr_id_)
+
+            for idx, client in enumerate(self.client.values()):
+                if data.user_id_ != client[1] and client[1] in member:
+                    client[0].sendall(pickle.dumps(data))
+                    # self.db.insert_content(data)
+
+                # 메시지 발송내역은 한번만 저장
+                if idx == 0:
+                    self.db.insert_content(data)
+            return True
+        else:
+            return False
+
     # 발송자를 제외한 나머지 접속자에게 발송
-    def send_exclude_sender(self, sock: socket.socket, data):
+    def send_exclude_sender(self, sock: socket.socket, data: LoginInfo):
         print("send_exclude_sender")
         if self.connected():
-            # {('10.10.20.117', 57817): [<socket.socket fd=384, family=2, type=1, proto=0, laddr=('10.10.20.117', 1234), raddr=('10.10.20.117', 57817)>, '']}
             for idx, client in enumerate(self.client.values()):
-                print(self.client[sock.getpeername()][1], client[1])
                 if self.client[sock.getpeername()][1] != client[1]:
                     client[0].sendall(pickle.dumps(data))
-                #
-                # if idx == 0:
-                #     self.db.insert_content(data)
             return True
         else:
             return False

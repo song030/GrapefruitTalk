@@ -262,7 +262,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 방 맴버 정보 조회
     def find_user_chatroom(self, cr_id):
         df = pd.read_sql(f"select * from TB_USER_CHATROOM where cr_id = '{cr_id}'", self.conn)
-        return df
+        return df["USER_ID"].values
 
     # 유저의 방 정보 조회
     def find_user_chatroom_by_to(self, user_id):
@@ -291,4 +291,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         return df
 
 if __name__ == "__main__":
+    # df = DBConnector().find_user_chatroom("PA_1")
+    # print()
     pass
