@@ -83,10 +83,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         result: PerRegist = PerRegist(True)
         try:
             sql = f"INSERT INTO CTB_USER (USER_ID, USER_PW, USER_NM, USER_EMAIL, USER_CREATE_DATE, USER_IMG, USER_STATE)" \
-                  f"VALUES ('{data.id}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
+                  f"VALUES ('{data.id_}','{data.pw}','{data.nm}','{data.email}','{data.c_date}',0, 0)"
             self.conn.execute(sql)
 
-            self.conn.execute(f"insert into CTB_USER_CHATROOM values ('PA_1', '{data.id}');")
+            self.conn.execute(f"insert into CTB_USER_CHATROOM values ('PA_1', '{data.id_}');")
 
             self.conn.commit()
         except:
@@ -147,7 +147,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.conn.execute(f"insert into CTB_CHATROOM values (?, ?)", (_cr_id, data.title))
 
         # 방장 추가
-        self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id))
+        self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
         for member in data.member:
             self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, member))
@@ -168,9 +168,9 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 대화 추가
     def insert_content(self, data:ReqChat):
         print("insert_content")
-        self.conn.execute(f"insert into CTB_CONTENT_{data.cr_id} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
+        self.conn.execute(f"insert into CTB_CONTENT_{data.cr_id_} (USER_ID, CNT_CONTENT, CNT_SEND_TIME) "
                           "values (?, ?, ?)",
-                          (data.user_id, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                          (data.user_id_, data.msg, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
         self.commit_db()
         print("save complete")
