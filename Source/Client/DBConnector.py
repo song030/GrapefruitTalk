@@ -109,8 +109,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 친구 삭제
     def delete_friend(self, user_id, frd_id: str):
-        self.conn.execute(f"delete from CTB_FRIEND where USER_ID = {user_id} FRD_ID = {frd_id}")
+        self.conn.execute(f"delete from CTB_FRIEND where USER_ID = '{user_id}' and FRD_ID = '{frd_id}'")
         self.commit_db()
+
+    # 친구 목록 가져오기
+    def get_all_friend(self, user_id):
+        df = pd.read_sql(f"select * from CTB_FRIEND where USER_ID = '{user_id}'", self.conn)
+        return df
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):

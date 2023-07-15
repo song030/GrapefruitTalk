@@ -559,6 +559,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 채팅방 초기화 (입장)
     def init_talk(self, t_room_id):
+
         """
         :param t_room_id: ListItem.item_id
         """
@@ -581,6 +582,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
             self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
+
+        QtTest.QTest.qWait(100)
 
         self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
@@ -779,7 +782,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                item.set_context_menu("친구 추가 요청", self.friend_request)  # 우클릭 메뉴
+                item.set_context_menu("친구 추가 요청", self.friend_request, item.item_id)  # 우클릭 메뉴
                 self.current_list[item.item_id] = item
                 if item.item_id in self.login_list:
                     online_items.append(item)
@@ -945,27 +948,35 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 친구 요청 수락/거절
     def add_friend(self, t_type, t_id):
-        self.delete_list_item(0)
-        self.delete_list_item(1)
+        print("add friend")
+        print(t_type, t_id)
+
         if t_type:
-            item = ListItem(f"friend{self.layout_list.count()-2}", "새 친구", "신선한 상태")
+            item = ListItem(self.current_list[t_id].item_id, self.current_list[t_id].item_nm, self.current_list[t_id].item_state)
             item.set_context_menu("1:1 대화", self.move_single_chat, item)
             self.current_list[item.item_id] = item
             self.layout_list.addWidget(item.frame)
 
             print(f"친구 수락! : {t_id}")
             self.client.send(ReqSuggetsFriend(self.user_id, t_id, 1))
-            self.db.update_friend(self.user_id, t_id, 1)
+            self.db.update_friend(ReqSuggetsFriend(self.user_id, t_id, 1))
         else:
             print(f"친구 거절! : {t_id}")
             self.client.send(ReqSuggetsFriend(self.user_id, t_id, 0))
             self.db.delete_friend(self.user_id, t_id)
 
+        layout_ = self.current_list[t_id].layout
+        self.clear_layout(layout_)
+        # ------------------------------------------------------- 채팅방 DB 삭제
+        del self.current_list[t_id]
+
     # 친구 추가 신청보내기
     @pyqtSlot()
     def friend_request(self, frd_id):
         print(f"친구 신청! : {frd_id}")
-        self.client.send(ReqSuggetsFriend(self.user_id, frd_id))
+        suggets_friend = ReqSuggetsFriend(self.user_id, frd_id)
+        self.client.send(suggets_friend)
+        self.db.insert_friend(suggets_friend)
         self.dlg_warning.set_dialog_type(1, "ReqSuggetsFriend")
         self.dlg_warning.exec()
 
