@@ -183,7 +183,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        self.create_tb_read_cnt(data)
+        self.create_tb_read_cnt(_cr_id)
 
         return _cr_id
 

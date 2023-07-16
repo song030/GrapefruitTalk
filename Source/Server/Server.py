@@ -8,7 +8,7 @@ from Source.Main.DataClass import *
 from threading import Thread
 
 class Server:
-    def __init__(self, port=1989, listener=10):
+    def __init__(self, port=1234, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
