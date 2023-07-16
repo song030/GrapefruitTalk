@@ -840,7 +840,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                     last_msg = ''
                 else:
                     last_msg = last_msg.iat[0, 0]
-                item = ListItem(data["CR_ID"], data["CR_NM"], last_msg, data["CR_IMG"])
+                item = ListItem(data["CR_ID"], data["CR_NM"], last_msg, 0)
                 item.set_info(datetime.now(), self.db.count_not_read_chatnum(data["CR_ID"], self.user_id))
                 item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)

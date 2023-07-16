@@ -327,7 +327,7 @@ class Server:
 if __name__ == "__main__":
     server = Server()
     # 데이터를 받을 Queue 추가
-    data_queue = queue.Queue()
+    data_queue = queue.Queue(maxsize=100)
 
     while True:
         print("대기중...")
