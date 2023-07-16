@@ -1141,9 +1141,10 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.dlg_setting.exec():
             data = self.dlg_setting.return_profile_data()
-            state = ReqStateChange(self.user_id, data[2], data[1])
-            self.db.change_user_state(state)
-            self.client.send(state)
+            if data is not None:
+                state = ReqStateChange(self.user_id, data[2], data[1])
+                self.db.change_user_state(state)
+                self.client.send(state)
 
         if not self.dlg_setting.notice_setting:
             self.badge_single.setVisible(False)

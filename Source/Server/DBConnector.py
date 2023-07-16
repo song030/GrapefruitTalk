@@ -172,14 +172,13 @@ class DBConnector:      # DB를 총괄하는 클래스
         return result
 
     def change_user_state(self, data:ReqStateChange):
-        if 'Images' in data.user_state:
-            sql = f"UPDATE TB_USER SET USER_IMG = {data.user_state} WHERE USER_ID = '{data.user_id}'"
-            self.conn.execute(sql)
-        if '상태' in data.user_state:
-            sql = f"UPDATE TB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
-            self.conn.execute(sql)
+        sql = f"UPDATE TB_USER SET USER_IMG = {data.user_img} WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
+        sql = f"UPDATE TB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
 
         self.conn.commit()
+        return data
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
