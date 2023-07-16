@@ -992,6 +992,9 @@ class MainWidget(QWidget, Ui_MainWidget):
                 delete_table = DeleteTable(self.room_id, self.user_id, self.user_info["USER_NM"])
                 self.client.send(delete_table)
                 self.db.delete_my_table(delete_table)
+                self.btn_multi.setChecked(True)
+                self.list_btn_check("multi")
+                self.init_talk("PA_1")
 
     # 타유저 채팅방 나가기
     def delete_talbe(self, data:DeleteTable):
