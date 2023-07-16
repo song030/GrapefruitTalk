@@ -224,6 +224,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 채팅방 생성
         self.receive_thread.join_chat.connect(self.join_chat_room)
+        self.receive_thread.res_delete_table.connect(self.delete_table)
+
 
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
@@ -976,8 +978,17 @@ class MainWidget(QWidget, Ui_MainWidget):
             if self.dlg_warning.exec():
                 layout_ = self.current_list[target_id].layout
                 self.clear_layout(layout_)
-                # ------------------------------------------------------- 채팅방 DB 삭제
                 del self.current_list[target_id]
+
+                delete_table = DeleteTable(self.room_id, self.user_id, self.user_info["USER_NM"])
+                self.client.send(delete_table)
+                self.db.delete_my_table(delete_table)
+
+    # 타유저 채팅방 나가기
+    def delete_talbe(self, data:DeleteTable):
+        text = ", ".join(data.my_name) + "님이 퇴장했습니다."
+        self.add_notice_line(text)
+        self.db.delete_my_table(data)
 
     # 방 추가 버튼 클릭 시 다이얼로그 연결
     def add_room(self):

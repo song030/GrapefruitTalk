@@ -260,15 +260,11 @@ class Server:
                     if data.user_id_ in login_list:
                         perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
-        # 채팅방 유저 입장 요청
-        elif type(data) == ReqJoinMember:
-            pass
-
         # 유저 나가기 요청
-        elif type(data) == DeleteMyTable:
-            # self.db.delete_my_table
-            pass
-
+        elif type(data) == DeleteTable:
+            self.db.delete_table(data)
+            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 입장했습니다."))
+            perdata = data
         else:
             return data
 

@@ -13,10 +13,9 @@ class ReceiveThread(QThread):
     res_regist = pyqtSignal(PerRegist)
     res_login = pyqtSignal(PerLogin)
     res_friend = pyqtSignal(PerAcceptFriend)
-    res_joinmember = pyqtSignal(ReqJoinMember)
     res_change_state = pyqtSignal(ReqStateChange)
+
     res_delete_table = pyqtSignal(DeleteTable)
-    res_delete_my_table = pyqtSignal(DeleteMyTable)
 
     login_info_updata = pyqtSignal(LoginInfo)
     join_chat = pyqtSignal(JoinChat)
@@ -58,10 +57,6 @@ class ReceiveThread(QThread):
             elif type(data) == PerLogin:
                 self.res_login.emit(data)
 
-            # 대화방 입장
-            elif type(data) == ReqJoinMember:
-                self.res_joinmember.emit(data)
-
             # 유저 프로필, 상태메시지 변경
             elif type(data) == ReqStateChange:
                 self.res_change_state.emit(data)
@@ -69,10 +64,6 @@ class ReceiveThread(QThread):
             # 서버 대화테이블 삭제
             elif type(data) == DeleteTable:
                 self.res_delete_table.emit(data)
-
-            # 클라이언트 대화테이블 삭제
-            elif type(data) == DeleteMyTable:
-                self.res_delete_my_table.emit(data)
 
             # 로그인시 유저 관련 정보 받기
             elif type(data) == LoginInfo:

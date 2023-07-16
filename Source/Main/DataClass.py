@@ -94,9 +94,10 @@ class DeleteMyTable:
 # 2. TB_CHATROOM에서 CR_ID 삭제
 # 참여멤버가 0인 채팅방 아이디
 class DeleteTable:
-    def __init__(self, cr_id: str, my_id: str):
+    def __init__(self, cr_id: str, my_id: str, my_name:str):
         self.cr_id = cr_id
         self.my_id = my_id
+        self.my_name = my_name
 
 # ==================== 로그인
 
