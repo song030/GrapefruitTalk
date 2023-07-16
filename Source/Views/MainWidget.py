@@ -219,7 +219,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
 
         # 친구 초대 요청/응답
-        self.receive_thread.res_friend.connect(self.request_friend)
+        self.receive_thread.per_friend.connect(self.per_friend)
+        self.receive_thread.req_friend.connect(self.req_friend)
 
         # 서버 정보 업데이트
         self.receive_thread.login_info_updata.connect(self.login_info_update)
@@ -1053,18 +1054,18 @@ class MainWidget(QWidget, Ui_MainWidget):
         print(text)
         print(get_data_tuple(data))
 
-    # 친구 요청 수락/거절
+    # 친구 요청 응답 보내기
     def add_friend(self, t_type, t_id):
         print("add friend")
         print(t_type, t_id)
 
         if t_type:
             print(f"친구 수락! : {t_id}")
-            self.client.send(ReqSuggetsFriend(t_id, self.user_id, 1))
-            self.db.update_friend(ReqSuggetsFriend(t_id, self.user_id, 1))
+            self.client.send(PerAcceptFriend(t_id, self.user_id, 1))
+            self.db.update_friend(PerAcceptFriend(t_id, self.user_id, 1))
         else:
             print(f"친구 거절! : {t_id}")
-            self.client.send(ReqSuggetsFriend(t_id, self.user_id, 0))
+            self.client.send(PerAcceptFriend(t_id, self.user_id, 0))
             self.db.delete_friend(t_id, self.user_id)
 
         self.clear_layout(self.layout_list)
@@ -1080,21 +1081,19 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.dlg_warning.set_dialog_type(1, "ReqSuggetsFriend")
         self.dlg_warning.exec()
 
-    # 친구 요청 관련 서버 응답
-    def request_friend(self, data: PerAcceptFriend):
-        # 친구 요청 결과
-        if self.user_id == data.user_id_:
-            # 친구 요청 수락
-            if data.result:
-                self.db.update_friend(data)
+    # 친구 수락 응답 받음
+    def per_friend(self, data:PerAcceptFriend):
+        if data.result:
+            self.db.update_friend(data)
 
-            # 친구 요청 거절
-            else:
-                self.db.delete_friend(data.user_id_, data.frd_id_)
-
-        # 친구 요청 받음
+        # 친구 요청 거절
         else:
-            self.db.insert_friend(data)
+            self.db.delete_friend(data.user_id_, data.frd_id_)
+
+    # 친구 요청 받음
+    def req_friend(self, data:ReqSuggetsFriend):
+        self.db.insert_friend(data)
+
 
     # 친구와 1:1 대화하기
     @pyqtSlot()

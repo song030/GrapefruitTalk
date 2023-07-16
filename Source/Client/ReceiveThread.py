@@ -12,13 +12,15 @@ class ReceiveThread(QThread):
     res_emailcheck_2 = pyqtSignal(PerEmailNumber)
     res_regist = pyqtSignal(PerRegist)
     res_login = pyqtSignal(PerLogin)
-    res_friend = pyqtSignal(PerAcceptFriend)
     res_change_state = pyqtSignal(ReqStateChange)
 
     res_delete_table = pyqtSignal(DeleteTable)
 
     login_info_updata = pyqtSignal(LoginInfo)
     join_chat = pyqtSignal(JoinChat)
+
+    req_friend = pyqtSignal(ReqSuggetsFriend)
+    per_friend = pyqtSignal(PerAcceptFriend)
 
     def __init__(self, client:Client):
         super().__init__()
@@ -73,5 +75,8 @@ class ReceiveThread(QThread):
             elif type(data) == JoinChat:
                 self.join_chat.emit(data)
 
+            elif type(data) == ReqSuggetsFriend:
+                self.req_friend.emit(data)
+
             elif type(data) == PerAcceptFriend:
-                self.res_friend.emit(data)
+                self.per_friend.emit(data)

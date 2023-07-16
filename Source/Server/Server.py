@@ -70,7 +70,7 @@ class Server:
             self.send_client(sock, data)
 
         # 친구에게 발송
-        elif type(data) in [PerAcceptFriend]:
+        elif type(data) in [PerAcceptFriend, ReqSuggetsFriend]:
             self.send_friend(sock, data)
 
         elif type(data) in [ReqStateChange]:
@@ -91,7 +91,7 @@ class Server:
         # elif type(data) in [ReqMembership]:
 
     # 친구에게 발송
-    def send_friend(self, sock:socket.socket, data:PerAcceptFriend):
+    def send_friend(self, sock:socket.socket, data):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
             print(f"user_id : {user_id}")
@@ -233,40 +233,22 @@ class Server:
             self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
             perdata = data
 
-        # 친구 요청, 친구 수락/거절
+        # 친구 요청 보내기
         elif type(data) == ReqSuggetsFriend:
-            print("ReqSuggetsFriend")
-            # 요청 유저 아이디
-            req_user_id = self.client[sock.getpeername()][1]
-            login_list = self.get_login_list()
-            perdata = data
-            print(req_user_id, data.user_id_)
-            # 친구 요청
-            if req_user_id == data.user_id_:
-                self.db.insert_friend(data)
-                print(f"data.frd_id {data.frd_id}")
-                print(login_list)
-                # 요청 받은 친구가 접속중인 경우
-                if data.frd_id_ in login_list:
-                    perdata:PerAcceptFriend(data.user_id_, data.frd_id_)
+            self.db.insert_friend(data)
+            perdata: ReqSuggetsFriend(data.user_id_, data.frd_id_)
 
-            # 친구 요청 결과 발송
-            elif req_user_id == data.frd_id_:
-                print("수락 결과!!!")
-                # 수락
-                if data.result == 1:
-                    print('db update!')
-                    self.db.update_friend(data)
+        # 친구 응답 보내기
+        elif type(data) == PerAcceptFriend:
+            if data.result == 1:
+                self.db.update_friend(data)
+                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+            # 거절
+            else:
+                self.db.delete_friend(data)
+                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
-                    if data.user_id_ in login_list:
-                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 1)
 
-                # 거절
-                else:
-                    self.db.delete_friend(data)
-
-                    if data.user_id_ in login_list:
-                        perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         # 유저 나가기 요청
         elif type(data) == DeleteTable:
