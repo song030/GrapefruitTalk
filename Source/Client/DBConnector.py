@@ -98,7 +98,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         return result
 
     def change_user_state(self, data:ReqStateChange):
-        sql = f"UPDATE CTB_USER SET USER_IMG = {data.user_img} WHERE USER_ID = '{data.user_id}'"
+        sql = f"UPDATE CTB_USER SET USER_IMG = '{data.user_img}' WHERE USER_ID = '{data.user_id}'"
         self.conn.execute(sql)
         sql = f"UPDATE CTB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
         self.conn.execute(sql)
@@ -114,7 +114,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def insert_friend(self, data:PlusFriend):
         """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
         self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
-                          "values (?, ?, ?)", get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
+                          "values (?, ?, ?)", (get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1]))
 
     # 친구 요청 결과 적용
     def update_friend(self, data):
