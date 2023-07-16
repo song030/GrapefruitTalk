@@ -112,6 +112,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         """클라이언트 로그인 요청 -> 서버 로그인 허가 """
         result: PerLogin = PerLogin(rescode=2, user_id_=data.id_)
         sql = f"SELECT * FROM TB_USER WHERE USER_ID = '{data.id_}' AND USER_PW = '{data.password}'"
+        print(sql)
         df = pd.read_sql(sql, self.conn)
         row = len(df)
         print("row",row)
@@ -161,7 +162,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.execute(sql)
 
             self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id_}');")
-
+            self.insert_content(ReqChat("PA_1", "", f"'{data.nm}'님이 입장했습니다."))
             self.conn.commit()
         except:
             self.conn.rollback()

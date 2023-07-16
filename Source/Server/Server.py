@@ -205,7 +205,7 @@ class Server:
         # 회원가입 요청
         elif type(data) == ReqMembership:
             perdata: PerRegist = self.db.regist(data)
-            self.db.insert_content(ReqChat("PA_1", "", f"'{data.user_id_}'님이 입장했습니다."))
+            # self.db.insert_content(ReqChat("PA_1", "", f"'{data.user_id_}'님이 입장했습니다."))
 
         # 로그인 요청
         elif type(data) == ReqLogin:
