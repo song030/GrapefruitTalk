@@ -232,7 +232,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     def create_tb_read_cnt(self, data:JoinChat):
         """채팅방 별 메시지 읽음 구분 테이블 생성"""
         # 필요인자 : CR_ID, USER_ID
-        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         self.conn.executescript(f"""
         CREATE TABLE IF NOT EXISTS "CTB_READ_CNT_{data.cr_id_}" (
@@ -243,7 +243,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         """)
         for i in range(len(data.member_id)):
             self.conn.execute(f"""
-            INSERT INTO CTB_READ_CNT_{data.cr_id_} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id_}, {data.member_id[i]}, {now} ) ;
+            INSERT INTO CTB_READ_CNT_{data.cr_id_} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ('{data.cr_id_}', '{data.member_id[i]}', '{now}' ) ;
             """)
 
         self.commit_db()
@@ -251,42 +251,42 @@ class DBConnector:      # DB를 총괄하는 클래스
     def update_last_read_time(self, cr_id, user_id):
         """유저가 방을 열때마다 안읽은 날짜를 갱신한다"""
 
-        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
-        sql = f"UPDATE CTB_READ_CNT_{cr_id} SET LAST_READ_TIME = {now} WHERE USER_ID = {user_id}"
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sql = f"UPDATE CTB_READ_CNT_{cr_id} SET LAST_READ_TIME = '{now}' WHERE USER_ID = '{user_id}'"
         self.conn.execute(sql)
 
-    def count_not_read_chatnum(self, cr_id, user_id_list):
+    def count_not_read_chatnum(self, cr_id, user_id):
         """유저별로 읽지 않음 메세지 수량을 계산한다"""
         # 필요인자 : CR_ID, USER_ID
         print(cr_id)
-        print(user_id_list)
+        print(user_id)
 
-        # now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
-        formatted_time_list = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchall()
-        dict_id_cnt = {}
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
+        try:
+            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchone()[0]
+        except:
+            self.create_tb_read_cnt(JoinChat(user_id, [user_id], list(), "", cr_id_=cr_id))
+            formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchone()[0]
+
 
         last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1").fetchone()[0]
 
-        for i in range(len(user_id_list)):
-            formatted_time = formatted_time_list[i][0]
-            print(f"{user_id_list[i]}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
-            print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
-            #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
-            #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
-            cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
-                                    f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
-                                    f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
-                                    f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
-                                    f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
+        print(f"{user_id}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
+        print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
+        #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
+        #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
+        cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
+                                f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
+                                f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
+                                f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
+                                f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
 
-            dict_id_cnt[f'{user_id_list[i]}'] = len(cnt)
+        if len(cnt) == 0:
+            return 0
+        else:
+            return len(cnt[0])
 
-        # 결과 출력
-        for user_id, count in dict_id_cnt.items():
-            print(f"User ID: {user_id}, Unread Message Count: {count}")
-        # return : {'유저아이디' :  안읽은 메세지 수}
-        return dict_id_cnt
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 
@@ -327,5 +327,5 @@ class DBConnector:      # DB를 총괄하는 클래스
 
 
 if __name__ == "__main__":
-    # DBConnector().create_chatroom("")
+
     pass

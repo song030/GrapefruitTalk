@@ -225,7 +225,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 채팅방 생성
         self.receive_thread.join_chat.connect(self.join_chat_room)
-        self.receive_thread.res_delete_table.connect(self.delete_table)
+        self.receive_thread.res_delete_table.connect(self.delete_talbe)
 
 
     # 레이아웃 비우기
@@ -837,7 +837,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 else:
                     last_msg = last_msg.iat[0, 0]
                 item = ListItem(data["CR_ID"], data["CR_NM"], last_msg)
-                item.set_info(datetime.now(), data["CR_ID"], self.user_id)
+                item.set_info(datetime.now(), self.db.count_not_read_chatnum(data["CR_ID"], self.user_id))
                 item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
