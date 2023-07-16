@@ -242,7 +242,7 @@ class MainWidget(QWidget, Ui_MainWidget):
     # 로그인 유저 정보 업데이트
     def login_info_update(self, data:LoginInfo):
         # 로그인 중이고 보유중인 로그인 리스트에 정보가 없을 경우 유저 정보 추가
-        print(get_data_tuple((data)))
+        print(get_data_tuple(data))
         if data.login and data.id_ not in self.login_list:
             self.login_list.append(data.id_)
             print(f"{data.id_} 로그인")
@@ -567,7 +567,6 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
             'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{self.user_id}')"
             ,
-
         }
 
         # 클라이언트 테이블 생성(있으면 삭제 후 추가)
@@ -577,6 +576,17 @@ class MainWidget(QWidget, Ui_MainWidget):
             client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
             server_data = pd.read_sql_query(query, server_conn)
             server_data.to_sql(c_table, client_conn, index=False)
+
+        condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{self.user_id}'"
+        condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
+        table_dict = pd.read_sql_query(condition_2, server_conn).to_dict()
+
+        # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
+        for idx in table_dict.values():
+            table_name = f'C{idx[0]}'  # 테이블 이름(클라이언트는 C 붙음)
+            client_cursor.executescript(f"DROP TABLE IF EXISTS {table_name}")  # 테이블 삭제
+            server_data = pd.read_sql_query(f"SELECT * FROM {idx[0]}", server_conn)  # 테이블 내용 불러오기
+            server_data.to_sql(table_name, client_conn, index=False)  # 저장
 
         # 변경사항 저장
         client_conn.commit()
@@ -632,12 +642,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:       # ------------------------- TB_CONTENT 예외처리
                 text_ = data["CNT_CONTENT"]
                 if "-" in text_:
-                    self.add_date_line(datetime.datetime.strptime(text_, '%Y-%m-%d'))       # /// 오류 예상 지점 ///
-                elif "님이 " in text_:
-                    t_split = text_.split("님이 ")
-                    nm_ = t_split[0]
-                    type_ = t_split[1].rstrip("하셨습니다.")
-                    self.add_notice_line(nm_, type_)
+                    self.add_date_line(datetime.strptime(text_, '%Y-%m-%d'))       # /// 오류 예상 지점 ///
+                else:
+                    self.add_notice_line(text_)
 
         QtTest.QTest.qWait(50)
 
@@ -649,8 +656,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.layout_talk.addLayout(talkbox.layout)
 
     # 입퇴장 안내 문구 추가
-    def add_notice_line(self, t_nick: str, t_type: str = "입장"):
-        noticeline = NoticeLine(t_nick, t_type)
+    def add_notice_line(self, text:str):
+        noticeline = NoticeLine(text)
         self.layout_talk.addLayout(noticeline.layout)
 
     # 대화 박스 추가
@@ -673,7 +680,6 @@ class MainWidget(QWidget, Ui_MainWidget):
                 pass
 
             QtTest.QTest.qWait(50)
-            self.edt_txt.setText("")
             self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
         else:
             self.edt_txt.setStyleSheet("""color: rgb(255, 0, 4);""")
@@ -989,30 +995,47 @@ class MainWidget(QWidget, Ui_MainWidget):
             if not chat_name:
                 chat_name = ', '.join(chat_mem)
 
-            member_cnt = len(self.dlg_add_chat.members)
+            member_cnt = len(chat_mem[0])
 
             if member_cnt > 0:      # 개인방 추가
-                self.new_chat_room(chat_name, chat_mem)
+                self.new_chat_room(chat_name, chat_mem[0], chat_mem[1])
             else:
                 self.dlg_warning.set_dialog_type(bt_cnt=1, text="아무 일도 일어나지 않습니다.")
 
     # 채팅방 개설
-    def new_chat_room(self, t_name: str, t_member: list):
+    def new_chat_room(self, t_title: str, t_id: list, t_nm:list):
         """
         :param t_name: 채팅방 이름
         :param t_member: 채팅방 참여멤버 (현재는 객체로 받고 있음 → DB 연결시 id로 수정)
         :return:
         """
-        chat_room = JoinChat(self.user_id, t_member, t_name)
-        cr_id = self.db.create_chatroom(chat_room)
-        chat_room.cr_id_ = cr_id
-        self.client.send(chat_room)
 
-        self.init_talk(cr_id)    # 새 채팅방으로 이동
+        # 방 개설
+        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title)
+        # cr_id = self.db.create_chatroom(chat_room)
+        # self.client.send(chat_room)
+
+        # 입장 알림
+        text = ", ".join(t_nm)+"님이 입장했습니다."
+        # self.db.insert_content(ReqChat("", "", text))
+        self.add_notice_line(text)
+        # chat_room.cr_id_ = cr_id
+        print(text)
+        print(get_data_tuple(chat_room))
+
+        # self.init_talk(cr_id)    # 새 채팅방으로 이동
 
     # 신규 방 개설 (타유저 개설)
     def join_chat_room(self, data:JoinChat):
-        self.db.create_chatroom(data)
+        # 방 개설
+        # self.db.create_chatroom(data)
+
+        # 입장 알림
+        text = ", ".join(data.member_name)+"님이 입장했습니다."
+        # self.db.insert_content(ReqChat("", "", text))
+        self.add_notice_line(text)
+        print(text)
+        print(get_data_tuple(data))
 
     # 친구 요청 수락/거절
     def add_friend(self, t_type, t_id):
@@ -1076,7 +1099,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             if value_.item_nm == t_friend.item_nm:
                 self.init_talk(value_.item_id)
                 return
-        self.new_chat_room(t_friend.item_nm, [t_friend])
+
+        self.new_chat_room(t_friend.item_nm, [t_friend.item_id], [t_friend.item_nm])
 
     # 로그아웃 버튼 클릭 시
     def logout(self):

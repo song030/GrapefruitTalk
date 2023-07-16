@@ -6,6 +6,98 @@ import pandas
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트
 
+# 읽지않은 메세지 출력 요청
+class ReqCntNum:
+    def __init__(self, cr_id:str, user_id: list): #채팅방 참여 멤버의 아이디는 list에 담김
+        self.cr_id = cr_id
+        self.user_id = user_id
+
+# 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 개인 채팅방 목록을 불러온다.
+# 채팅방 번호(타입), 채팅방 멤버
+class CallSchatList:
+    def __init__(self, chat_room_id: str, chat_room_members: list):
+        self.chat_room = chat_room_id
+        self.chat_room_members = chat_room_members
+
+# 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 단체 채팅방 목록을 불러온다.
+# 채팅방 번호(타입), 채팅방 멤버
+class CallGchatList:
+    def __init__(self, chat_room_id: str, chat_room_members: list):
+        self.chat_room = chat_room_id
+        self.chat_room_members = chat_room_members
+
+# 참가자가 입장할 때 채팅방에 접속인원을 알려준다.
+# 참여멤버
+class ReqJoinMember:
+    def __init__(self, my_id: str, members: list):
+        self.my_id = my_id
+        self.members = members
+
+# 채팅 송신 허가 응답
+# 발신 아이디, 메세지
+class PerChat:
+    def __init__(self, sender_id: str, msg: str):
+        self.sender_id = sender_id
+        self.msg = msg
+
+# 유저가 입력한 메세지가 아이디, 번호, 내용, 시간이 db에 저장된다.
+# 아이디, 번호, 내용, 시간
+class ReqSaveChat:
+    def __init__(self, id: str, msg: str, time: str):
+        self.id = id
+        self.msg = msg
+        self.time = time
+
+# 친구요청을 하면 요청자와 친구 아이디를 넘겨준다.
+# (요청자 아이디, 수락자 아이디), 허락여부
+class PlusFriend:
+    def __init__(self, id_tuple: tuple, result: bool):
+        self.id_tuple = id_tuple
+        self.result = result
+
+# 로그아웃을 하면 접속상태를 0으로 변경시킨다.
+class ReqLogout:
+    def __init__(self, id: str):
+        self.id = id
+
+# 사용자의 프로필과 상태메세지를 변경할 수 있다.
+# 유저아이디, 상태메세지
+class ReqStateChange:
+    def __init__(self, user_id: str, user_state: str, user_img:str):
+        self.user_id = user_id
+        self.user_state = user_state
+        self.user_img = user_img
+
+# 사용자의 채팅창 배경이미지를 변경할 수 있다.
+# 유저아이디, 채팅창 배경이미지 경로
+# class ReqImgChange:
+#     def __init__(self, user_id: str, user_chatimg_path: str):
+#         self.user_id = user_id
+#         self.user_chatimg_path = user_chatimg_path
+
+# 친구 리스트가 우측에 출력된다.
+# 사용자 프로필, 친구 이름, 접속 상태
+class ShowFrdList:
+    def __init__(self, user_profile: str, friend_name: str, is_online: bool):
+        self.user_profile: user_profile
+        self.friend_name = friend_name
+        self.is_online = is_online
+
+# 나가기를 누른 CTB_CHATROOM 테이블에서 CR_ID에 맞는 행들만 삭제한다.
+# 내 아이디, 나간 채팅방 아이디
+class DeleteMyTable:
+    def __init__(self, my_id: str, cr_id: str):
+        self.my_id = my_id
+        self.cr_id = cr_id
+
+# 1. 해당 CR_ID의 TB_CONTENT, TB_READ_CNT 테이블을 삭제한다.
+# 2. TB_CHATROOM에서 CR_ID 삭제
+# 참여멤버가 0인 채팅방 아이디
+class DeleteTable:
+    def __init__(self, cr_id: str, my_id: str):
+        self.cr_id = cr_id
+        self.my_id = my_id
+
 # ==================== 로그인
 
 # 로그인 요청 : 아이디, 비밀번호
@@ -108,9 +200,10 @@ class PerAcceptFriend:
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id_: str, member: list, title:str, cr_id_=""):
+    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, cr_id_=""):
         self.user_id_ = user_id_
-        self.member = member
+        self.member_id = member_id
+        self.member_name = member_name
         self.title = title
         self.cr_id_ = cr_id_
 

@@ -170,11 +170,27 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.close()
         return result
 
+    def change_user_state(self, data:ReqStateChange):
+        if 'Images' in data.user_state:
+            sql = f"UPDATE TB_USER SET USER_IMG = {data.user_state} WHERE USER_ID = '{data.user_id}'"
+            self.conn.execute(sql)
+        if '상태' in data.user_state:
+            sql = f"UPDATE TB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
+            self.conn.execute(sql)
+
+        self.conn.commit()
+
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data: ReqSuggetsFriend):
-        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
-        self.commit_db()
+    # def insert_friend(self, data: ReqSuggetsFriend):
+    #     self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+    #     self.commit_db()
+
+    def insert_friend(self, data:PlusFriend):
+        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
+        self.conn.execute("insert into TB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)",
+                          get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
+
 
     # 친구 요청 결과 적용
     def update_friend(self, data: ReqSuggetsFriend):
@@ -251,6 +267,41 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         return df
 
+    def delete_table(self, data:DeleteTable):
+        """PK,FK를 고려하여 순서작성함"""
+
+        if len(data.user_id_list) > 1:
+            # 나간 유저를 제외한 접속 멤버로 값 update
+            df = pd.read_sql(f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'", self.conn)
+            user_id_list = df['USER_ID'].tolist()
+            user_id_list.pop(f'{data.my_id}')
+
+            self.conn.execute(f"UPDATE TB_USER_CHATROOM SET USER_ID = {user_id_list} WHERE CR_ID = {data.cr_id}")
+            self.conn.commit()
+
+        elif len(data.user_id_list) <= 1:
+            # TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
+            sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = {data.cr_id}"
+            # TB_CHATROOM 의 CR_ID 삭제
+            sql_2 = f"DELETE FROM TB_CHATROOM WHERE CR_ID = {data.cr_id}"
+            # TB_READ_CNT_{CR_ID} 테이블 삭제
+            sql_3 = f"DROP TABLE TB_READ_CNT_{data.cr_id}"
+            # TB_CONTENT_{CR_ID} 테이블 삭제
+            sql_4 = f"DROP TABLE TB_CONTENT_{data.cr_id}"
+
+            process_sql = [sql_1, sql_2, sql_3, sql_4]
+            try:
+                for sql in process_sql:
+                    self.conn.execute(sql)
+                self.commit_db()
+            except Exception as e:
+                self.conn.rollback()
+                # 오류 처리 또는 로깅
+                print(f"delete_table에서 Error occurred: {e}")
+            finally:
+                self.end_conn()
+
+
     ## TB_user_chatroom ================================================================================ ##
 
     # 방 맴버 정보 조회
@@ -263,10 +314,10 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select * from TB_USER_CHATROOM natural join TB_CHATROOM where USER_ID = {user_id}", self.conn)
         return df
 
-    # 채팅방 나가기
-    def delete_chatroom_member(self, cr_id: str, user_id):
-        self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
-        self.commit_db()
+    # # 채팅방 나가기
+    # def delete_chatroom_member(self, cr_id: str, user_id):
+    #     self.conn.execute("delete from TB_USER_CHATROOM where CR_ID = ? and USER_ID", (cr_id,user_id))
+    #     self.commit_db()
 
     ## TB_content ================================================================================ ##
     # 대화 추가

@@ -1,4 +1,5 @@
 import sqlite3
+import datetime
 
 import pandas as pd
 
@@ -96,11 +97,24 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.close()
         return result
 
+    def change_user_state(self, data:ReqStateChange):
+        sql = f"UPDATE CTB_USER SET USER_IMG = {data.user_img} WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
+        sql = f"UPDATE CTB_USER SET USER_STATE = '{data.user_state}' WHERE USER_ID = '{data.user_id}'"
+        self.conn.execute(sql)
+
+        self.conn.commit()
+
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    def insert_friend(self, data):
-        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
-        self.commit_db()
+    # def insert_friend(self, data):
+    #     self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+    #     self.commit_db()
+
+    def insert_friend(self, data:PlusFriend):
+        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
+        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
+                          "values (?, ?, ?)", get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1])
 
     # 친구 요청 결과 적용
     def update_friend(self, data):
@@ -171,6 +185,30 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         return _cr_id
 
+    def delete_my_table(self, data:DeleteMyTable):
+        """PK,FK를 고려하여 순서작성함"""
+
+        #CTB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
+        sql_1 = f"DELETE FROM CTB_USER_CHATROOM WHERE CR_ID = {data.cr_id}"
+        #CTB_CHATROOM 의 CR_ID 삭제
+        sql_2 = f"DELETE FROM CTB_CHATROOM WHERE CR_ID = {data.cr_id}"
+        #CTB_READ_CNT_{CR_ID} 테이블 삭제
+        sql_3 = f"DROP TABLE CTB_READ_CNT_{data.cr_id}"
+        #CTB_CONTENT_{CR_ID} 테이블 삭제
+        sql_4 = f"DROP TABLE CTB_CONTENT_{data.cr_id}"
+
+        process_sql = [sql_1, sql_2, sql_3, sql_4]
+        try:
+            for sql in process_sql:
+                self.conn.execute(sql)
+            self.commit_db()
+        except Exception as e:
+            self.conn.rollback()
+            # 오류 처리 또는 로깅
+            print(f"delete_my_table에서 Error occurred: {e}")
+        finally:
+            self.end_conn()
+
     ## TB_content ================================================================================ ##
     # 대화 추가
     def insert_content(self, data:ReqChat):
@@ -185,6 +223,75 @@ class DBConnector:      # DB를 총괄하는 클래스
     def get_content(self, cr_id):
         df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
         return df
+
+    def create_tb_read_cnt(self, t_type, data:ReqCntNum):
+        """채팅방 별 메시지 읽음 구분 테이블 생성"""
+        # 필요인자 : CR_ID, USER_ID
+        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+
+        if t_type in [None, 'plus_chatroom']:
+            self.conn.executescript(f"""
+            CREATE TABLE IF NOT EXISTS "CTB_READ_CNT_{data.cr_id}" (
+            "CR_ID" TEXT,
+            "USER_ID" TEXT,
+            "LAST_READ_TIME" TEXT,
+            FOREIGN KEY("USER_ID") REFERENCES "CTB_CONTENT_{data.cr_id}"("USER_ID") );
+            """)
+
+            for i in range(len(data.user_id)):
+                self.conn.execute(f"""
+                INSERT INTO CTB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[i]}, {now} ) ;
+                """)
+
+        elif t_type == 'plus_member':
+            # USER_ID[-1] : 채팅방에 마지막으로 추가된 참여멤버
+            self.conn.execute(f"""
+            INSERT INTO CTB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[-1]}, {now} ) ;
+            """)
+
+        self.commit_db()
+        self.end_conn()
+
+    def update_last_read_time(self, cr_id, user_id):
+        """유저가 방을 열때마다 안읽은 날짜를 갱신한다"""
+
+        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
+        sql = f"UPDATE CTB_READ_CNT_{cr_id} SET LAST_READ_TIME = {now} WHERE USER_ID = {user_id}"
+        self.conn.execute(sql)
+        self.end_conn()
+
+    def count_not_read_chatnum(self, cr_id, user_id_list):
+        """유저별로 읽지 않음 메세지 수량을 계산한다"""
+        # 필요인자 : CR_ID, USER_ID
+        print(cr_id)
+        print(user_id_list)
+
+        # now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+        now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
+        formatted_time_list = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id}").fetchall()
+        dict_id_cnt = {}
+
+        last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1").fetchone()[0]
+
+        for i in range(len(user_id_list)):
+            formatted_time = formatted_time_list[i][0]
+            print(f"{user_id_list[i]}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
+            print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
+            #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
+            #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
+            cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
+                                    f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
+                                    f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
+                                    f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
+                                    f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
+
+            dict_id_cnt[f'{user_id_list[i]}'] = len(cnt)
+
+        # 결과 출력
+        for user_id, count in dict_id_cnt.items():
+            print(f"User ID: {user_id}, Unread Message Count: {count}")
+        # return : {'유저아이디' :  안읽은 메세지 수}
+        return dict_id_cnt
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
 

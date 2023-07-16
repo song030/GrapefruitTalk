@@ -79,7 +79,7 @@ class AddChat(QDialog):
             item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
             _scroll_layout.addWidget(item.frame)
             _scroll_layout.addLayout(item.add_checkbox())
-            self._all_friend[i] = item.item_id
+            self._all_friend[i] = [item.item_id, item.item_nm]
 
         # 스크롤 내부 스페이서 추가
         _spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -118,11 +118,14 @@ class AddChat(QDialog):
     @property
     def members(self):
         """채팅방 멤버"""
-        member = list()
+        member_id = list()
+        member_name = list()
+
         for i, check in enumerate(self.checkboxes):
             if check.isChecked():
-                member.append(self._all_friend[i])
-        return member
+                member_id.append(self._all_friend[i][0])
+                member_name.append(self._all_friend[i][1])
+        return member_id, member_name
 
 
 if __name__ == '__main__':

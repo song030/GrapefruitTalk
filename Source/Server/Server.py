@@ -58,7 +58,7 @@ class Server:
     # 데이터 타입에따른 데이터 전송
     def send(self, sock:socket.socket, data):
         # 같은 채팅방 멤버에게 발송
-        if type(data) in [ReqChat, JoinChat]:
+        if type(data) in [ReqChat, JoinChat, ReqJoinMember, DeleteTable]:
             self.send_message(data)
 
         # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
@@ -72,6 +72,9 @@ class Server:
         # 친구에게 발송
         elif type(data) in [PerAcceptFriend]:
             self.send_friend(sock, data)
+
+        elif type(data) in [ReqStateChange]:
+            self.send_all_client(data)
 
         # 클라이언트 로그인 요청 → 두 방식으로 발송해야해서 따로 나눔
         elif type(data) in [PerLogin]:
@@ -217,8 +220,13 @@ class Server:
             self.client[sock.getpeername()][1] = ""
             perdata: LoginInfo([user_id], False)
 
+        # 유저 프로필 사진, 상태메세지 변경
+        elif type(data) == ReqStateChange:
+            perdata: ReqStateChange = self.db.change_user_state(data)
+
         elif type(data) == JoinChat:
             self.db.create_chatroom(data)
+            self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
             perdata = data
 
         # 친구 요청, 친구 수락/거절
@@ -252,9 +260,19 @@ class Server:
                     if data.user_id_ in login_list:
                         perdata:PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
+        # 채팅방 유저 입장 요청
+        elif type(data) == ReqJoinMember:
+            pass
+
+        # 유저 나가기 요청
+        elif type(data) == DeleteMyTable:
+            # self.db.delete_my_table
+            pass
+
         else:
             return data
 
+        print("after")
         print(f"process_data : {type(perdata)}")
         print("perdata", get_data_tuple(data))
         print()
@@ -273,7 +291,6 @@ class Server:
 
     def db_log_inout_state_save(self, rescode):
         """로그인 / 로그아웃 내역(시간) USER_LOG에 저장"""
-        sql_ = ''
         time_ = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
         print(time_)
         print(rescode)

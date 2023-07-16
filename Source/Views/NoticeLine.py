@@ -5,7 +5,7 @@ from Source.Views.Font import Font
 
 
 class NoticeLine:
-    def __init__(self, t_nick: str, t_type: str):
+    def __init__(self, text:str):
         """
         :param t_nick: 유저 닉네임
         :param t_type: 입장 / 퇴장
@@ -13,7 +13,7 @@ class NoticeLine:
         self._layout = QHBoxLayout()
 
         # 안내 문구
-        t_notice = f"{t_nick}님이 {t_type}하셨습니다."
+        t_notice = text
         self._lbl_notice = QLabel()
         self._lbl_notice.setAlignment(Qt.AlignCenter)
         self._lbl_notice.setText(t_notice)
