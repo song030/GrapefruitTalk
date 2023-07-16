@@ -92,6 +92,9 @@ class DialogSetting(QDialog, Ui_DialogSetting):
 
     # 프로필 변경 사항 전달
     def return_profile_data(self):
+        if self.ret is None:
+            return
+
         img_ = self.ret[12:]
         nick_ = self.lineEdit_nickname.text()
         state_ = self.lineEdit_state.text()
