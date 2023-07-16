@@ -57,6 +57,8 @@ class Server:
 
     # 데이터 타입에따른 데이터 전송
     def send(self, sock:socket.socket, data):
+        print("send!")
+
         # 같은 채팅방 멤버에게 발송
         if type(data) in [ReqChat, JoinChat, ReqJoinMember, DeleteTable]:
             self.send_message(data)
@@ -168,7 +170,6 @@ class Server:
     def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         try:
-            # receive_bytes = sock.recv(4096)
             receive_bytes = sock.recv(2048)
 
             # 데이터 수신 실패시 오류 발생
@@ -247,8 +248,6 @@ class Server:
             else:
                 self.db.delete_friend(data)
                 perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 0)
-
-
 
         # 유저 나가기 요청
         elif type(data) == DeleteTable:

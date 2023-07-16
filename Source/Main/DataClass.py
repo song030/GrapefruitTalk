@@ -106,10 +106,11 @@ class ReqLogin:
 # rescode = 1 ("비밀번호 존재하지 않음")
 # rescode = 2 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, user_id_:str, login_info=[], ):
+    def __init__(self, rescode: int, user_id_:str, login_info=[], user_info=[]):
         self.rescode = rescode
         self.user_id_ = user_id_
         self.login_info = login_info
+        self.user_info = user_info
 
 # 로그인 유저 정보 발송
 # len(list)=1: 신규로 로그인/로그아웃 발행할때 발송용

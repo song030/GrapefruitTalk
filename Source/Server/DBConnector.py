@@ -164,6 +164,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.execute(f"insert into TB_USER_CHATROOM values ('PA_1', '{data.id_}');")
             self.insert_content(ReqChat("PA_1", "", f"'{data.nm}'님이 입장했습니다."))
             self.conn.commit()
+
         except:
             self.conn.rollback()
             result.Success = False
@@ -188,7 +189,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
 
     # 친구 요청 결과 적용
-    def update_friend(self, data: ReqSuggetsFriend):
+    def update_friend(self, data: PerAcceptFriend):
         print(get_data_tuple(data))
         self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
         self.commit_db()
