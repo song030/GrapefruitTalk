@@ -108,10 +108,11 @@ class PerAcceptFriend:
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id_: str, member: list, title:str):
+    def __init__(self, user_id_: str, member: list, title:str, cr_id_=""):
         self.user_id_ = user_id_
         self.member = member
         self.title = title
+        self.cr_id_ = cr_id_
 
 # 채팅방 나가기
 class OutChat:

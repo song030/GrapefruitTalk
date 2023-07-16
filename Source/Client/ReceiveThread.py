@@ -15,6 +15,7 @@ class ReceiveThread(QThread):
     res_friend = pyqtSignal(PerAcceptFriend)
 
     login_info_updata = pyqtSignal(LoginInfo)
+    join_chat = pyqtSignal(JoinChat)
 
     def __init__(self, client:Client):
         super().__init__()
@@ -59,3 +60,7 @@ class ReceiveThread(QThread):
             # 로그인시 유저 관련 정보 받기
             elif type(data) == LoginInfo:
                 self.login_info_updata.emit(data)
+
+            # 채팅방 개설
+            elif type(data) == JoinChat:
+                self.join_chat.emit(data)

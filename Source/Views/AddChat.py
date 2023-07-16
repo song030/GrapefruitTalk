@@ -15,7 +15,9 @@ class AddChat(QDialog):
         # --- 화면 설정
         # self.setWindowFlags(Qt.FramelessWindowHint)
         self.set_style()
+        self.init_ui()
 
+    def init_ui(self):
         # --- 화면 객체 생성 및 크기 조정
         layout = QVBoxLayout(self)
         layout.setSpacing(12)
@@ -35,21 +37,10 @@ class AddChat(QDialog):
         # --- 친구 목록 스크롤 영역
         self.scroll_area = QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
-        scroll_contents = QWidget()
-        _scroll_layout = QVBoxLayout(scroll_contents)
-        self.scroll_area.setWidget(scroll_contents)
+        self.scroll_contents = QWidget()
+        _scroll_layout = QVBoxLayout(self.scroll_contents)
+        self.scroll_area.setWidget(self.scroll_contents)
         layout.addWidget(self.scroll_area)
-
-        # 스크롤 영역 아이템 추가
-        for i in range(50):
-            item = ListItem(f"member{i}", "닉네임", "이것은 상태창 상태창 상태창")
-            _scroll_layout.addWidget(item.frame)
-            _scroll_layout.addLayout(item.add_checkbox())
-            self._all_friend[i] = item.item_id
-
-        # 스크롤 내부 스페이서 추가
-        _spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        _scroll_layout.addSpacerItem(_spacer)
 
         # --- 선택 인원 합계 출력 영역
         label1 = QLabel('채팅방 총 원: ')
@@ -81,6 +72,19 @@ class AddChat(QDialog):
         # -- 메인 레이아웃 설정
         self.setLayout(layout)
 
+    def set_member_list(self, t_df):
+        _scroll_layout = self.scroll_contents.layout()
+        # 스크롤 영역 아이템 추가
+        for i, data in t_df.iterrows():  # ------------------ 9시 52분 보고 이후 수정
+            item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
+            _scroll_layout.addWidget(item.frame)
+            _scroll_layout.addLayout(item.add_checkbox())
+            self._all_friend[i] = item.item_id
+
+        # 스크롤 내부 스페이서 추가
+        _spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        _scroll_layout.addSpacerItem(_spacer)
+
         # -- 체크박스 체크될 때마다 라벨 변하는 부분 추가
         self.checkboxes = self.findChildren(QCheckBox)
         for checkbox in self.checkboxes:
@@ -102,9 +106,9 @@ class AddChat(QDialog):
     def reset_dialog(self):
         self._chat_name_edit.clear()
         self._lbl_total_num.setText("0명")
-        for checkbox in self.checkboxes:
-            checkbox: QCheckBox
-            checkbox.setChecked(False)
+        # for checkbox in self.checkboxes:
+        #     checkbox: QCheckBox
+        #     checkbox.setChecked(False)
 
     @property
     def chat_name(self):

@@ -74,12 +74,19 @@ class MainWidget(QWidget, Ui_MainWidget):
         if not self.client.connect():
             self.dlg_warning.set_dialog_type(1, 'cannot_service')
             self.dlg_warning.exec()
-            print("연결 불가능")
+            # self.client.disconnect()
+            exit()
         else:
             self.receive_thread = ReceiveThread(self.client)
             self.address = self.client.address()
             self.connect_thread_signal()
             self.receive_thread.start()
+
+    # 클라이언트 프로그램 종료시 소켓, 쓰레드 해제
+    def closeEvent(self, a0):
+        self.client.disconnect()
+        self.thread().disconnect()
+        self.close()
 
     # 화면 글꼴 설정
     def set_font(self):
@@ -208,14 +215,19 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.receive_thread.res_duplicate_id_check.connect(self.check_id_txt)
         self.receive_thread.res_emailcheck_1.connect(self.check_email_condition)
         self.receive_thread.res_emailcheck_2.connect(self.email_check_or_not)
+
+        # 친구 초대 요청/응답
         self.receive_thread.res_friend.connect(self.request_friend)
 
         # 서버 정보 업데이트
         self.receive_thread.login_info_updata.connect(self.login_info_update)
 
+        # 채팅방 생성
+        self.receive_thread.join_chat.connect(self.join_chat_room)
+
     # 레이아웃 비우기
     def clear_layout(self, layout: QLayout):
-        if layout is None:
+        if layout is None or not layout.count():
             return
         while layout.count():
             item = layout.takeAt(0)
@@ -531,7 +543,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-            # ---- 여기서 호출
+            self.create_client_table()
             # print(self.user_info)
 
             self.login_list = data.login_info.copy()
@@ -539,6 +551,39 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             self.set_page_talk()
             return True
+
+    def create_client_table(self):
+        print("유저 아이디 : ", self.user_id)
+        """유저 아이디와 맞는 정보를 서버 db에서 가져와서 정보를 복사해 넣는다."""
+        # 서버 데이터베이스 연결
+        server_conn = sqlite3.connect('../Server/data.db')
+
+        # (조건 설정) 클라이언트 테이블: sql문
+
+        condition = {
+            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
+            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{self.user_id}'",
+            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{self.user_id}' GROUP BY TB_CHATROOM.CR_ID",
+            # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
+            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{self.user_id}')"
+            ,
+
+        }
+
+        # 클라이언트 테이블 생성(있으면 삭제 후 추가)
+        client_conn = sqlite3.connect('../Client/data.db')
+        client_cursor = client_conn.cursor()
+        for c_table, query in condition.items():
+            client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
+            server_data = pd.read_sql_query(query, server_conn)
+            server_data.to_sql(c_table, client_conn, index=False)
+
+        # 변경사항 저장
+        client_conn.commit()
+
+        # 연결 종료
+        client_conn.close()
+
 
     # ================================================== 대화 화면 ==================================================
 
@@ -552,12 +597,12 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.init_talk(self.room_id)
         # --- 스플리터, 스크롤 위치 보정
         self.splitter.setSizes([self.splitter.width() - 100, 100])
-        QtTest.QTest.qWait(100)
+        # QtTest.QTest.qWait(50)
         self.edt_txt.setText("")
-        self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
         # -- 화면 출력
         self.stack_main.setCurrentWidget(self.page_talk)
-
+        self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
+        
     # 채팅방 초기화 (입장)
     def init_talk(self, t_room_id):
 
@@ -582,14 +627,24 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.clear_layout(self.layout_talk)
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
-            self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
+            if data["USER_NM"]:
+                self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
+            else:       # ------------------------- TB_CONTENT 예외처리
+                text_ = data["CNT_CONTENT"]
+                if "-" in text_:
+                    self.add_date_line(datetime.datetime.strptime(text_, '%Y-%m-%d'))       # /// 오류 예상 지점 ///
+                elif "님이 " in text_:
+                    t_split = text_.split("님이 ")
+                    nm_ = t_split[0]
+                    type_ = t_split[1].rstrip("하셨습니다.")
+                    self.add_notice_line(nm_, type_)
 
-        QtTest.QTest.qWait(100)
+        QtTest.QTest.qWait(50)
 
         self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
 
     # 일자 표시선 추가
-    def add_date_line(self, text_ = datetime.now()):
+    def add_date_line(self, text_=datetime.now()):
         talkbox = DateLine(text_)
         self.layout_talk.addLayout(talkbox.layout)
 
@@ -617,7 +672,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 self.add_talk(self.user_info["USER_IMG"], self.user_info["USER_NM"], text, datetime.now())
                 pass
 
-            QtTest.QTest.qWait(100)
+            QtTest.QTest.qWait(50)
             self.edt_txt.setText("")
             self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
         else:
@@ -705,7 +760,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 clear_check = True
 
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
-        # if clear_check and self.layout_list.count() > 0:
+        # if clear_check and self.layout_list.count() > 0:      # ----------------------- clear layout 에 예외처리 하나 추가 했는데 지운는 거 어때요?
         if clear_check:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
@@ -716,8 +771,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if t_type == "member":
             self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
-            friend_df = self.db.get_all_friend(self.user_id)
-            print("친구목록 ", friend_df)
+            friend_df = self.db.get_friend_list()
+            friend_id = friend_df[0]["FRD_ID"]
         elif t_type == "friend":
             self.list_info = self.db.get_friend_list()
         else:
@@ -733,7 +788,11 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 last_msg = self.db.get_last_content(data["CR_ID"])
-                item = ListItem(data["CR_ID"], data["CR_NM"], "")
+                if last_msg.empty:
+                    last_msg = ''
+                else:
+                    last_msg = last_msg.iat[0, 0]
+                item = ListItem(data["CR_ID"], data["CR_NM"], last_msg)
                 item.set_info(datetime.now(), i)
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
@@ -785,7 +844,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                item.set_context_menu("친구 추가 요청", self.friend_request, item.item_id)  # 우클릭 메뉴
+                if friend_id.empty or item.item_id not in friend_id:
+                    item.set_context_menu("친구 추가 요청", self.friend_request, item.item_id)  # 우클릭 메뉴
                 self.current_list[item.item_id] = item
                 if item.item_id in self.login_list:
                     online_items.append(item)
@@ -814,30 +874,33 @@ class MainWidget(QWidget, Ui_MainWidget):
         elif t_type == "friend":
             self.btn_add.setVisible(False)
 
-            req_items = list()
+            req_items = self.list_info[1]
+
+            # --- 요청 수락 대기 중
+            if not req_items.empty:
+                request_ = QLabel()
+                request_.setFont(Font.button(3))
+                request_.setText(f"친구 요청 - {len(req_items.index)}명")
+                self.layout_list.addWidget(request_)
+
+                for i, data in req_items.iterrows():
+                    item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
+                    item.set_button_box(self.add_friend)
+                    self.current_list[item.item_id] = item
+                    self.layout_list.addWidget(item.frame)
+
             online_items = list()
             offline_items = list()
 
             for i, data in self.list_info[0].iterrows():
                 item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                if not data["FRD_ACCEPT"]:  # 친구 수락 대기 중
-                    item.set_button_box(self.add_friend)
-                    req_items.append(item)
+                item.set_context_menu("1:1 대화", self.move_single_chat, item)
+                self.current_list[item.item_id] = item
+                # 온라인 접속 중인 친구
+                if item.item_id in self.login_list:
+                    online_items.append(item)
                 else:
-                    item.set_context_menu("1:1 대화", self.move_single_chat, item)
-                    # 온라인 접속 중인 친구
-                    if item.item_id in self.login_list:
-                        online_items.append(item)
-                    else:
-                        offline_items.append(item)
-            # --- 요청 수락 대기 중
-            if req_items:
-                request_ = QLabel()
-                request_.setFont(Font.button(3))
-                request_.setText(f"친구 요청 - {len(req_items)}명")
-                self.layout_list.addWidget(request_)
-                for item_ in req_items:
-                    self.layout_list.addWidget(item_.frame)
+                    offline_items.append(item)
 
             # --- 온라인
             if online_items:
@@ -912,7 +975,14 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 방 추가 버튼 클릭 시 다이얼로그 연결
     def add_room(self):
+        # 다이얼로그 초기화
+        layout_ = self.dlg_add_chat.scroll_contents.layout()
+        self.clear_layout(layout_)
         self.dlg_add_chat.reset_dialog()
+        # 친구 목록 설정
+        friend_df = self.db.get_friend_list()
+        self.dlg_add_chat.set_member_list(friend_df[0])
+
         if self.dlg_add_chat.exec():
             chat_name = self.dlg_add_chat.chat_name
             chat_mem = self.dlg_add_chat.members
@@ -921,33 +991,28 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             member_cnt = len(self.dlg_add_chat.members)
 
-            if member_cnt == 1:      # 개인방 추가
-                self.new_chat_room("single", chat_name, chat_mem)
-            elif member_cnt > 1:     # 단체방 추가
-                self.new_chat_room("multi", chat_name, chat_mem)
+            if member_cnt > 0:      # 개인방 추가
+                self.new_chat_room(chat_name, chat_mem)
+            else:
+                self.dlg_warning.set_dialog_type(bt_cnt=1, text="아무 일도 일어나지 않습니다.")
 
     # 채팅방 개설
-    def new_chat_room(self, t_type: str, t_name: str, t_member: list):
+    def new_chat_room(self, t_name: str, t_member: list):
         """
-        :param t_type: single / multi
         :param t_name: 채팅방 이름
         :param t_member: 채팅방 참여멤버 (현재는 객체로 받고 있음 → DB 연결시 id로 수정)
         :return:
         """
-        if t_type == "single":
-            self.btn_single.setChecked(True)
-            self.list_btn_check("single")
-            item = ListItem(f"OE_{len(self.current_list):0>2}", f"{t_name}", "")
-        elif t_type == "multi":
-            self.btn_multi.setChecked(True)
-            self.list_btn_check("multi")
-            item = ListItem(f"OA_{len(self.current_list):0>2}", f"{t_name}", "")
-        item.member_cnt = len(t_member)
-        item.set_info(datetime.now(), 0)
-        item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
-        self.current_list[item.item_id] = item
-        self.layout_list.addWidget(item.frame)
-        self.init_talk(item.item_id)    # 새 채팅방으로 이동
+        chat_room = JoinChat(self.user_id, t_member, t_name)
+        cr_id = self.db.create_chatroom(chat_room)
+        chat_room.cr_id_ = cr_id
+        self.client.send(chat_room)
+
+        self.init_talk(cr_id)    # 새 채팅방으로 이동
+
+    # 신규 방 개설 (타유저 개설)
+    def join_chat_room(self, data:JoinChat):
+        self.db.create_chatroom(data)
 
     # 친구 요청 수락/거절
     def add_friend(self, t_type, t_id):
@@ -984,7 +1049,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.dlg_warning.exec()
 
     # 친구 요청 관련 서버 응답
-    def request_friend(self, data:PerAcceptFriend):
+    def request_friend(self, data: PerAcceptFriend):
         # 친구 요청 결과
         if self.user_id == data.user_id_:
             # 친구 요청 수락
@@ -1011,7 +1076,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             if value_.item_nm == t_friend.item_nm:
                 self.init_talk(value_.item_id)
                 return
-        self.new_chat_room("single", t_friend.item_nm, [t_friend])
+        self.new_chat_room(t_friend.item_nm, [t_friend])
 
     # 로그아웃 버튼 클릭 시
     def logout(self):
@@ -1022,7 +1087,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.edt_login_pwd.clear()
         # 화면 갱신
         self.dlg_setting.reject()
+        self.dlg_setting.btn_notice.setChecked(True)  # ------------------ 9시 52분 보고 이후 추가
         self.stack_main.setCurrentWidget(self.page_login)
+        if not self.btn_multi.isChecked():
+            self.btn_multi.setChecked(True)
+            self.btn_single.setChecked(False)
+            self.btn_member.setChecked(False)
+            self.btn_friend.setChecked(False)
         # 서버 로그아웃 요청
         self.client.send(ReqLoout(self.user_id))
 
@@ -1032,7 +1103,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.dlg_setting.exec():
             """프로필 편집 완료 버튼 클릭 시"""
-            print(self.dlg_setting.return_profile_data())
+            print(self.dlg_setting.return_profile_data())   # --- 사용자 프로필 DB 변경 추가 해야 함
 
         if not self.dlg_setting.notice_setting:
             self.badge_single.setVisible(False)

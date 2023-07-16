@@ -120,28 +120,35 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
         # data = JoinChat("admin", ["song030s"], "1:1 대화방 입니다.")
+        len_member = len(data.member)
+
         # 인원 확인
-        if len(data.member) == 0:
+        if len_member  == 0:
             return False
 
-        # 타입 확인 - OE_ 1:1, OA_ 1:N
-        elif len(data.member) == 1:
-            _type = "OE_"
+        # 방 아이디가 없는 경우 새로 생성
+        if data.cr_id_ == "":
+            # 타입 확인 - OE_ 1:1, OA_ 1:N
+            if len(data.member) == 1:
+                _type = "OE_"
+            else:
+                _type = "OA_"
+
+            # 일련번호 부여
+            df = pd.read_sql(f"select MAX(CR_ID) from CTB_CHATROOM where CR_ID like '{_type}%'", self.conn)
+            df = df["MAX(CR_ID)"].iloc[0]
+
+            if df is None:
+                _num = 1
+            else:
+                _cr_id = df[3:]
+                _cr_id = int(_cr_id)
+                _num = _cr_id+1
+
+            _cr_id = f"{_type}{_num}"
         else:
-            _type = "OA_"
+            _cr_id = data.cr_id_
 
-        # 일련번호 부여
-        df = pd.read_sql(f"select MAX(CR_ID) from CTB_CHATROOM where CR_ID like '{_type}%'", self.conn)
-        df = df["MAX(CR_ID)"].iloc[0]
-
-        if df is None:
-            _num = 1
-        else:
-            _cr_id = df[3:]
-            _cr_id = int(_cr_id)
-            _num = _cr_id+1
-
-        _cr_id = f"{_type}{_num}"
 
         # 채팅방 정보 추가
         self.conn.execute(f"insert into CTB_CHATROOM values (?, ?)", (_cr_id, data.title))
@@ -162,7 +169,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        return df
+        return _cr_id
 
     ## TB_content ================================================================================ ##
     # 대화 추가
@@ -218,5 +225,5 @@ class DBConnector:      # DB를 총괄하는 클래스
 
 
 if __name__ == "__main__":
-    DBConnector().create_chatroom("")
+    # DBConnector().create_chatroom("")
     pass
