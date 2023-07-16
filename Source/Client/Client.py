@@ -7,7 +7,7 @@ class Client:
     # 주양 : 10.10.20.104
     # 혜인 : 10.10.20.99
 
-    def __init__(self, server_ip="10.10.20.117", server_port=1989):
+    def __init__(self, server_ip="10.10.20.117", server_port=1234):
         self.server_ip = server_ip
         self.server_port = server_port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

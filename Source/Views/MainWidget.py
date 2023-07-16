@@ -684,9 +684,9 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             QtTest.QTest.qWait(50)
             self.scroll_talk.ensureVisible(0, self.scrollAreaWidgetContents.height())
+            self.edt_txt.setText('')
         else:
             self.edt_txt.setStyleSheet("""color: rgb(255, 0, 4);""")
-            self.edt_txt.setText('')
             self.dlg_warning.set_dialog_type(1, 'use_ban_word')
             self.dlg_warning.exec()
 
