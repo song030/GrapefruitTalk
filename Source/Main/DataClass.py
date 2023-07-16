@@ -106,7 +106,7 @@ class ReqLogin:
 # rescode = 1 ("비밀번호 존재하지 않음")
 # rescode = 2 ("로그인 허가 완료")
 class PerLogin:
-    def __init__(self, rescode: int, user_id_:str, login_info=[]):
+    def __init__(self, rescode: int, user_id_:str, login_info=[], ):
         self.rescode = rescode
         self.user_id_ = user_id_
         self.login_info = login_info
@@ -179,14 +179,14 @@ class PerEmailNumber:
 
 # 친구 초대 요청
 class ReqSuggetsFriend:
-    def __init__(self, user_id_: str, frd_id_: str, result=False):
+    def __init__(self, user_id_: str, frd_id_: str, result=0):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
         self.result = result
 
 # 친구 수락 허가 응답
 class PerAcceptFriend:
-    def __init__(self, user_id_: str, frd_id_: str, result=False):
+    def __init__(self, user_id_: str, frd_id_: str, result=0):
         self.user_id_ = user_id_
         self.frd_id_ = frd_id_
         self.result = result

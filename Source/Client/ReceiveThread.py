@@ -72,3 +72,6 @@ class ReceiveThread(QThread):
             # 채팅방 개설
             elif type(data) == JoinChat:
                 self.join_chat.emit(data)
+
+            elif type(data) == PerAcceptFriend:
+                self.res_friend.emit(data)

@@ -94,6 +94,8 @@ class Server:
     def send_friend(self, sock:socket.socket, data:PerAcceptFriend):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
+            print(f"user_id : {user_id}")
+            print(f"data : {data.user_id_} , {data.frd_id_}")
 
             # 친구 요청
             if user_id == data.user_id_:
@@ -103,7 +105,9 @@ class Server:
             else:
                 send_id = data.user_id_
 
+            print(send_id)
             for client in self.client.values():
+                print(f"--- {client[1]}, {send_id}")
                 if client[1] == send_id:
                     client[0].sendall(pickle.dumps(data))
                     break
@@ -231,15 +235,17 @@ class Server:
 
         # 친구 요청, 친구 수락/거절
         elif type(data) == ReqSuggetsFriend:
+            print("ReqSuggetsFriend")
             # 요청 유저 아이디
             req_user_id = self.client[sock.getpeername()][1]
             login_list = self.get_login_list()
             perdata = data
-
+            print(req_user_id, data.user_id_)
             # 친구 요청
             if req_user_id == data.user_id_:
                 self.db.insert_friend(data)
-
+                print(f"data.frd_id {data.frd_id}")
+                print(login_list)
                 # 요청 받은 친구가 접속중인 경우
                 if data.frd_id_ in login_list:
                     perdata:PerAcceptFriend(data.user_id_, data.frd_id_)

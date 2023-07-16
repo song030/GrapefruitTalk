@@ -584,6 +584,8 @@ class MainWidget(QWidget, Ui_MainWidget):
             server_data = pd.read_sql_query(query, server_conn)
             server_data.to_sql(c_table, client_conn, index=False)
 
+
+
         condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{self.user_id}'"
         condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
         table_dict = pd.read_sql_query(condition_2, server_conn).to_dict()
@@ -858,7 +860,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             for i, data in self.list_info.iterrows():
                 item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
-                if friend_id.empty or item.item_id not in friend_id:
+                if (friend_id.empty or item.item_id not in friend_id) and item.item_id != self.user_id:
                     item.set_context_menu("친구 추가 요청", self.friend_request, item.item_id)  # 우클릭 메뉴
                 self.current_list[item.item_id] = item
                 if item.item_id in self.login_list:
