@@ -97,11 +97,11 @@ class Server:
 
             # 친구 요청
             if user_id == data.user_id_:
-                send_id = data.user_id_
+                send_id = data.frd_id_
 
             # 요청 답변
             else:
-                send_id = data.frd_id_
+                send_id = data.user_id_
 
             for client in self.client.values():
                 if client[1] == send_id:
