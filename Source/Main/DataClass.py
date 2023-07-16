@@ -6,12 +6,6 @@ import pandas
 # Req : 클라이언트 → 서버
 # Per : 서버 → 클라이언트
 
-# 읽지않은 메세지 출력 요청
-class ReqCntNum:
-    def __init__(self, cr_id:str, user_id: list): #채팅방 참여 멤버의 아이디는 list에 담김
-        self.cr_id = cr_id
-        self.user_id = user_id
-
 # 참여 채팅방 정보를 불러와서 대화에 참여하고 있는 개인 채팅방 목록을 불러온다.
 # 채팅방 번호(타입), 채팅방 멤버
 class CallSchatList:

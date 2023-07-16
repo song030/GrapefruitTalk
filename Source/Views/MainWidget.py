@@ -84,6 +84,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 클라이언트 프로그램 종료시 소켓, 쓰레드 해제
     def closeEvent(self, a0):
+        self.db.end_conn()
         self.client.disconnect()
         self.thread().disconnect()
         self.close()
@@ -622,9 +623,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         :param t_room_id: ListItem.item_id
         """
         self.room_id = t_room_id
-
         target_: ListItem = self.current_list[t_room_id]
         target_.no_msg_cnt = 0
+        self.db.update_last_read_time(self.room_id, self.user_id)
         self.lbl_room_name.setObjectName(t_room_id)
         self.lbl_room_name.setText(f"{target_.item_nm}")
 
@@ -801,7 +802,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 else:
                     last_msg = last_msg.iat[0, 0]
                 item = ListItem(data["CR_ID"], data["CR_NM"], last_msg)
-                item.set_info(datetime.now(), i)
+                item.set_info(datetime.now(), self.db.count_not_read_chatnum(data["CR_ID"], self.user_id))
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
                 if item.item_id in self.login_list:
@@ -836,7 +837,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 else:
                     last_msg = last_msg.iat[0, 0]
                 item = ListItem(data["CR_ID"], data["CR_NM"], last_msg)
-                item.set_info(datetime.now(), i)
+                item.set_info(datetime.now(), data["CR_ID"], self.user_id)
                 item.member_cnt = data["count(USER_ID)"]
                 item.frame.mousePressEvent = lambda _, v=item.item_id: self.init_talk(v)
                 self.current_list[item.item_id] = item
@@ -1023,27 +1024,25 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 방 개설
         chat_room = JoinChat(self.user_id, t_id, t_nm, t_title)
-        # cr_id = self.db.create_chatroom(chat_room)
-        # self.client.send(chat_room)
+        cr_id = self.db.create_chatroom(chat_room)
+        self.client.send(chat_room)
 
         # 입장 알림
         text = ", ".join(t_nm)+"님이 입장했습니다."
-        # self.db.insert_content(ReqChat("", "", text))
+        self.db.insert_content(ReqChat("", "", text))
         self.add_notice_line(text)
-        # chat_room.cr_id_ = cr_id
-        print(text)
-        print(get_data_tuple(chat_room))
+        chat_room.cr_id_ = cr_id
 
-        # self.init_talk(cr_id)    # 새 채팅방으로 이동
+        self.init_talk(cr_id)    # 새 채팅방으로 이동
 
     # 신규 방 개설 (타유저 개설)
     def join_chat_room(self, data:JoinChat):
         # 방 개설
-        # self.db.create_chatroom(data)
+        self.db.create_chatroom(data)
 
         # 입장 알림
         text = ", ".join(data.member_name)+"님이 입장했습니다."
-        # self.db.insert_content(ReqChat("", "", text))
+        self.db.insert_content(ReqChat("", "", text))
         self.add_notice_line(text)
         print(text)
         print(get_data_tuple(data))

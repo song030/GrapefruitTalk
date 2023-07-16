@@ -134,7 +134,7 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
         # data = JoinChat("admin", ["song030s"], "1:1 대화방 입니다.")
-        len_member = len(data.member)
+        len_member = len(data.member_id)
 
         # 인원 확인
         if len_member  == 0:
@@ -143,7 +143,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         # 방 아이디가 없는 경우 새로 생성
         if data.cr_id_ == "":
             # 타입 확인 - OE_ 1:1, OA_ 1:N
-            if len(data.member) == 1:
+            if len(data.member_id) == 1:
                 _type = "OE_"
             else:
                 _type = "OA_"
@@ -170,7 +170,7 @@ class DBConnector:      # DB를 총괄하는 클래스
         # 방장 추가
         self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
-        for member in data.member:
+        for member in data.member_id:
             self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
@@ -182,6 +182,8 @@ class DBConnector:      # DB를 총괄하는 클래스
                     PRIMARY KEY ("CNT_ID" AUTOINCREMENT));""")
 
         self.conn.commit()
+
+        self.create_tb_read_cnt(data)
 
         return _cr_id
 
@@ -227,33 +229,24 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select * from CTB_CONTENT_{cr_id} natural join CTB_USER;", self.conn)
         return df
 
-    def create_tb_read_cnt(self, t_type, data:ReqCntNum):
+    def create_tb_read_cnt(self, data:JoinChat):
         """채팅방 별 메시지 읽음 구분 테이블 생성"""
         # 필요인자 : CR_ID, USER_ID
         now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
-        if t_type in [None, 'plus_chatroom']:
-            self.conn.executescript(f"""
-            CREATE TABLE IF NOT EXISTS "CTB_READ_CNT_{data.cr_id}" (
-            "CR_ID" TEXT,
-            "USER_ID" TEXT,
-            "LAST_READ_TIME" TEXT,
-            FOREIGN KEY("USER_ID") REFERENCES "CTB_CONTENT_{data.cr_id}"("USER_ID") );
-            """)
-
-            for i in range(len(data.user_id)):
-                self.conn.execute(f"""
-                INSERT INTO CTB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[i]}, {now} ) ;
-                """)
-
-        elif t_type == 'plus_member':
-            # USER_ID[-1] : 채팅방에 마지막으로 추가된 참여멤버
+        self.conn.executescript(f"""
+        CREATE TABLE IF NOT EXISTS "CTB_READ_CNT_{data.cr_id_}" (
+        "CR_ID" TEXT,
+        "USER_ID" TEXT,
+        "LAST_READ_TIME" TEXT,
+        FOREIGN KEY("USER_ID") REFERENCES "CTB_CONTENT_{data.cr_id_}"("USER_ID") );
+        """)
+        for i in range(len(data.member_id)):
             self.conn.execute(f"""
-            INSERT INTO CTB_READ_CNT_{data.cr_id} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id}, {data.user_id[-1]}, {now} ) ;
+            INSERT INTO CTB_READ_CNT_{data.cr_id_} (CR_ID, USER_ID, LAST_READ_TIME) VALUES ({data.cr_id_}, {data.member_id[i]}, {now} ) ;
             """)
 
         self.commit_db()
-        self.end_conn()
 
     def update_last_read_time(self, cr_id, user_id):
         """유저가 방을 열때마다 안읽은 날짜를 갱신한다"""
@@ -261,7 +254,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
         sql = f"UPDATE CTB_READ_CNT_{cr_id} SET LAST_READ_TIME = {now} WHERE USER_ID = {user_id}"
         self.conn.execute(sql)
-        self.end_conn()
 
     def count_not_read_chatnum(self, cr_id, user_id_list):
         """유저별로 읽지 않음 메세지 수량을 계산한다"""
