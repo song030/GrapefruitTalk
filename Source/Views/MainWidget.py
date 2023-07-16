@@ -786,7 +786,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         if t_type == "member":
             self.list_info = self.db.get_list_menu_info(t_type, self.room_id)
             friend_df = self.db.get_friend_list()
-            friend_id = friend_df[0]["FRD_ID"]
+            friend_id = friend_df[0]["F_ID"]
         elif t_type == "friend":
             self.list_info = self.db.get_friend_list()
         else:
@@ -907,7 +907,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             offline_items = list()
 
             for i, data in self.list_info[0].iterrows():
-                item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
+                item = ListItem(data["F_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("1:1 대화", self.move_single_chat, item)
                 self.current_list[item.item_id] = item
                 # 온라인 접속 중인 친구
@@ -1064,12 +1064,12 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.layout_list.addWidget(item.frame)
 
             print(f"친구 수락! : {t_id}")
-            self.client.send(ReqSuggetsFriend(self.user_id, t_id, 1))
-            self.db.update_friend(ReqSuggetsFriend(self.user_id, t_id, 1))
+            self.client.send(ReqSuggetsFriend(t_id, self.user_id, 1))
+            self.db.update_friend(ReqSuggetsFriend(t_id, self.user_id, 1))
         else:
             print(f"친구 거절! : {t_id}")
-            self.client.send(ReqSuggetsFriend(self.user_id, t_id, 0))
-            self.db.delete_friend(self.user_id, t_id)
+            self.client.send(ReqSuggetsFriend(t_id, self.user_id, 0))
+            self.db.delete_friend(t_id, self.user_id)
 
         layout_ = self.current_list[t_id].layout
         self.clear_layout(layout_)
