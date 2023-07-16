@@ -898,7 +898,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 self.layout_list.addWidget(request_)
 
                 for i, data in req_items.iterrows():
-                    item = ListItem(data["FRD_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
+                    item = ListItem(data["USER_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                     item.set_button_box(self.add_friend)
                     self.current_list[item.item_id] = item
                     self.layout_list.addWidget(item.frame)
