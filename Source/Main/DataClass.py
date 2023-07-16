@@ -217,8 +217,9 @@ def get_data_tuple(t_class):
 
 # 채팅 송수신
 class ReqChat:
-    def __init__(self, cr_id_:str, user_id_:str, msg: str): #msg = self.edt_txt.text()
+    def __init__(self, cr_id_:str, user_id_:str, msg: str, user_nm=""): #msg = self.edt_txt.text()
         self.cr_id_ = cr_id_
+        self.user_nm = user_nm
         self.user_id_ = user_id_
         self.msg = msg
 

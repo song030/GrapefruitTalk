@@ -107,14 +107,14 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     ## TB_friend ================================================================================ ##
     # 친구 목록 정보 테이블 값 입력
-    # def insert_friend(self, data):
-    #     self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
-    #     self.commit_db()
+    def insert_friend(self, data):
+        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) values (?, ?, ?)", get_data_tuple(data))
+        self.commit_db()
 
-    def insert_friend(self, data:PlusFriend):
-        """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
-        self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
-                          "values (?, ?, ?)", (get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1]))
+    # def insert_friend(self, data:PlusFriend):
+    #     """get_data_tuple(data)[1]는 bool값이므로 db저장될 수 없음, 가공 필요"""
+    #     self.conn.execute("insert into CTB_FRIEND (USER_ID, FRD_ID, FRD_ACCEPT) "
+    #                       "values (?, ?, ?)", (get_data_tuple(data)[0][0], get_data_tuple(data)[0][1], get_data_tuple(data)[1]))
 
     # 친구 요청 결과 적용
     def update_friend(self, data):

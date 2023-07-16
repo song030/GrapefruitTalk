@@ -22,7 +22,7 @@ class TalkBox:
         self._grid_layout.setVerticalSpacing(10)
 
         # 프로필 이미지
-        self._lbl_profile = ProfileImage()
+        self._lbl_profile = ProfileImage(t_img)
         self._grid_layout.addWidget(self._lbl_profile.image, 0, 0, 2, 1, Qt.AlignTop)
 
         # 닉네임

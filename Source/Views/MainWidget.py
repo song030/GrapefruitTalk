@@ -678,7 +678,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         if self.check_banchat():
             # widget = self.add_talk(0, "발송", text, datetime.now())
-            chat = ReqChat(self.room_id, self.user_id, text)
+            chat = ReqChat(self.room_id, self.user_id, text, self.user_info["USER_NM"])
             if self.client.send(chat):
                 self.db.insert_content(chat)
                 print("발송 완료")
@@ -709,7 +709,7 @@ class MainWidget(QWidget, Ui_MainWidget):
     def receive_message(self, data: ReqChat):
         # 현재 보고있는 화면과 같은 화면 일때만 보기
         if data.cr_id_ == self.room_id:
-            self.add_talk(self, data.user_id_, data.msg, datetime.now())
+            self.add_talk(self.user_info["USER_IMG"], data.user_nm, data.msg, datetime.now())
 
         # 수신메시지 DB에 저장
         self.db.insert_content(data)
