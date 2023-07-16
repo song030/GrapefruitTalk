@@ -194,12 +194,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 친구 요청 결과 적용
     def update_friend(self, data: ReqSuggetsFriend):
+        print(get_data_tuple(data))
         self.conn.execute("update tb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
         self.commit_db()
 
     # 친구 삭제
     def delete_friend(self, data: ReqSuggetsFriend):
-        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} FRD_ID = {data.frd_id_}")
+        self.conn.execute(f"delete from TB_FRIEND where USER_ID = {data.user_id_} and FRD_ID = {data.frd_id_}")
         self.commit_db()
 
     ## TB_log ================================================================================ ##

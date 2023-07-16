@@ -246,8 +246,10 @@ class Server:
 
             # 친구 요청 결과 발송
             elif req_user_id == data.frd_id_:
+                print("수락 결과!!!")
                 # 수락
                 if data.result == 1:
+                    print('db update!')
                     self.db.update_friend(data)
 
                     if data.user_id_ in login_list:

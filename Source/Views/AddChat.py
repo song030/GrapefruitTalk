@@ -75,7 +75,7 @@ class AddChat(QDialog):
     def set_member_list(self, t_df):
         _scroll_layout = self.scroll_contents.layout()
         # 스크롤 영역 아이템 추가
-        for i, data in t_df.iterrows():  # ------------------ 9시 52분 보고 이후 수정
+        for i, data in t_df.iterrows():
             item = ListItem(data["F_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
             _scroll_layout.addWidget(item.frame)
             _scroll_layout.addLayout(item.add_checkbox())

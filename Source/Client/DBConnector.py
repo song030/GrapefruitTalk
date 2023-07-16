@@ -118,7 +118,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 친구 요청 결과 적용
     def update_friend(self, data):
-        self.conn.execute("update ctb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.frd_id_, data.user_id_))
+        self.conn.execute("update ctb_friend set frd_accept = ? where user_id=? and frd_id=?", (data.result, data.user_id_, data.frd_id_))
         self.commit_db()
 
     # 친구 삭제
@@ -174,7 +174,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성
-        self.conn.execute(f""" CREATE TABLE CTB_CONTENT_{_cr_id} (
+        self.conn.execute(f""" CREATE TABLE IF NOT EXISTS CTB_CONTENT_{_cr_id} (
                     "USER_ID" TEXT,
                     "CNT_ID" INTEGER,
                     "CNT_CONTENT" TEXT,
@@ -183,7 +183,8 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        self.create_tb_read_cnt(_cr_id)
+        print(_cr_id)
+        self.create_tb_read_cnt(JoinChat("", list(), list(), "", cr_id_=_cr_id))
 
         return _cr_id
 
