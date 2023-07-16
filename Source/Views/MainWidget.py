@@ -176,6 +176,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         # ===== 메인 (로그인)
         self.lbl_join.mousePressEvent = lambda e: self.stack_main.setCurrentWidget(self.page_join)
         self.btn_login.clicked.connect(self.check_login_info)
+        self.edt_login_pwd.returnPressed.connect(self.check_login_info)
 
         # ===== 회원가입
         self.btn_join_id.clicked.connect(self.check_duplicate_id)
@@ -568,7 +569,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         condition = {
             'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
-            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{self.user_id}'",
+            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{self.user_id}' OR FRD_ID ='{self.user_id}'",
             'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{self.user_id}' GROUP BY TB_CHATROOM.CR_ID",
             # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
             'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{self.user_id}')"
@@ -1008,7 +1009,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         if self.dlg_add_chat.exec():
             chat_name = self.dlg_add_chat.chat_name
             chat_mem = self.dlg_add_chat.members
-            if not chat_name:
+            if not chat_name and chat_mem:
                 chat_name = ', '.join(chat_mem)
 
             member_cnt = len(chat_mem[0])

@@ -23,7 +23,7 @@
    <item>
     <widget class="QStackedWidget" name="stack_main">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page_login">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
@@ -1106,7 +1106,7 @@ QScrollBar::sub-line:vertical {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>532</width>
+                <width>486</width>
                 <height>738</height>
                </rect>
               </property>

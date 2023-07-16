@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file './UI/MainWidget.ui'
+# Form implementation generated from reading ui file 'MainWidget.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -489,7 +490,7 @@ class Ui_MainWidget(object):
         self.scroll_talk.setWidgetResizable(True)
         self.scroll_talk.setObjectName("scroll_talk")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 532, 738))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 486, 738))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -588,7 +589,7 @@ class Ui_MainWidget(object):
         self.verticalLayout.addWidget(self.stack_main)
 
         self.retranslateUi(MainWidget)
-        self.stack_main.setCurrentIndex(1)
+        self.stack_main.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWidget)
         MainWidget.setTabOrder(self.edt_join_id, self.btn_join_id)
         MainWidget.setTabOrder(self.btn_join_id, self.edt_join_pwd1)
@@ -639,3 +640,13 @@ class Ui_MainWidget(object):
         self.btn_join_cancel.setText(_translate("MainWidget", "취소"))
         self.lbl_room_name.setText(_translate("MainWidget", "방이름"))
         self.btn_add.setText(_translate("MainWidget", "+"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWidget = QtWidgets.QWidget()
+    ui = Ui_MainWidget()
+    ui.setupUi(MainWidget)
+    MainWidget.show()
+    sys.exit(app.exec_())
