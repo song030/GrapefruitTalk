@@ -608,7 +608,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:       # ------------------------- TB_CONTENT 예외처리
                 text_ = data["CNT_CONTENT"]
                 if "-" in text_:
-                    self.add_date_line(datetime.strptime(text_, '%Y-%m-%d'))       # /// 오류 예상 지점 ///
+                    self.add_date_line(datetime.strptime(text_, '%Y-%m-%d'))
                 else:
                     self.add_notice_line(text_)
 
@@ -1058,7 +1058,6 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.list_btn_check("single")
         for value_ in self.current_list.values():
             if value_.item_nm == t_friend.item_nm:
-                print("---2")
                 self.init_talk(value_.item_id)
                 return
         nm_ = t_friend.item_nm.lstrip("[ ")

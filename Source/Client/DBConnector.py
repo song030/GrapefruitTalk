@@ -50,7 +50,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         for i in range(size):
             column += "?, "
         column = column[:-2]
-        print(column)
 
         for d in data:
             self.conn.execute(f"insert into {tb_name} values ({column})", d)
@@ -129,7 +128,6 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
         # data = JoinChat("admin", ["song030s"], "1:1 대화방 입니다.")
-        print("create room ", data.cr_id_)
         # 채팅방 정보 추가
         self.conn.execute(f"insert into CTB_CHATROOM values (?, ?)", (data.cr_id_, data.title))
 
