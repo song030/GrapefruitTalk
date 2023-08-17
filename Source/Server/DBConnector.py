@@ -348,10 +348,8 @@ class DBConnector:      # DB를 총괄하는 클래스
         condition = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID = '{user_id}'"
         table_dict = pd.read_sql_query(condition, self.conn).values.tolist()
         table_dict = table_dict
-        print("get db", table_dict)
         # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
         for idx in table_dict:
-            print(idx)
             server_data = pd.read_sql_query(f"SELECT * FROM TB_CONTENT_{idx[0]}", self.conn)  # 테이블 내용 불러오기
             db["CTB_CONTENT_"+idx[0]] = server_data
 

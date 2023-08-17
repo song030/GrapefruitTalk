@@ -222,8 +222,6 @@ class DBConnector:      # DB를 총괄하는 클래스
     def count_not_read_chatnum(self, cr_id, user_id):
         """유저별로 읽지 않음 메세지 수량을 계산한다"""
         # 필요인자 : CR_ID, USER_ID
-        print(cr_id)
-        print(user_id)
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         # now = datetime.now().strftime("%y/%m/%d %H:%M:%S")
@@ -233,7 +231,6 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.create_tb_read_cnt(JoinChat(user_id, [user_id], list(), "", cr_id_=cr_id))
             formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id} where USER_ID = '{user_id}'").fetchone()[0]
 
-        print(cr_id)
         last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1")
         if last_content.rowcount > 0:
             last_content = last_content.fetchone()[0]
@@ -300,11 +297,8 @@ class DBConnector:      # DB를 총괄하는 클래스
         return df
 
     def save_user_db(self, db:dict):
-        print("save user db")
         client_cursor = self.conn.cursor()
         for table, df in db.items():
-            print(table)
-            print(df)
             client_cursor.executescript(f"DROP TABLE IF EXISTS {table}")
             df.to_sql(table, self.conn, index=False)
             if table[:2] == "OE":
@@ -312,12 +306,9 @@ class DBConnector:      # DB를 총괄하는 클래스
                 sql = f"select USER_ID from CTB_USER_CHATROOM where CR_ID = {cr_id};"
                 member = pd.read_sql(sql, self.conn)
                 member = member.values.tolist()
-                print("-------", member)
                 self.create_tb_read_cnt(JoinChat(member[0], member[1:], list(), "", cr_id_=cr_id))
 
         self.commit_db()
-
-
 
 if __name__ == "__main__":
 

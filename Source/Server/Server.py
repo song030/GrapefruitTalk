@@ -60,8 +60,11 @@ class Server:
         print("send!")
 
         if type(data) == JoinChat:
+            print("create join chat")
             self.send_message(data)
+            print("complete send")
             self.send_client(sock, data)
+            print("complete client")
 
         # 같은 채팅방 멤버에게 발송
         elif type(data) in [ReqChat, ReqJoinMember, DeleteTable]:
@@ -139,17 +142,18 @@ class Server:
         if self.connected():
             if type(data) == ReqChat:
                 member = self.db.find_user_chatroom(data.cr_id_)
-            elif type(data) == JoinChat:
-                member = data.member
 
+            elif type(data) == JoinChat:
+                member = data.member_id
+
+            print("send_message member : ", member)
             for idx, client in enumerate(self.client.values()):
-                print("-", client[1])
                 if data.user_id_ != client[1] and client[1] in member:
                     client[0].sendall(pickle.dumps(data))
                     # self.db.insert_content(data)
 
                 # 메시지 발송내역은 한번만 저장
-                if idx == 0:
+                if idx == 0 and type(data) == ReqChat:
                     self.db.insert_content(data)
             return True
         else:
@@ -157,7 +161,6 @@ class Server:
 
     # 발송자를 제외한 나머지 접속자에게 발송
     def send_exclude_sender(self, sock: socket.socket, data: LoginInfo):
-        print("send_exclude_sender")
         if self.connected():
             for idx, client in enumerate(self.client.values()):
                 if self.client[sock.getpeername()][1] != client[1]:
@@ -232,7 +235,8 @@ class Server:
 
         elif type(data) == JoinChat:
             cr_id = self.db.create_chatroom(data)
-            self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
+            chat = ReqChat(cr_id, "", ", ".join(data.member_name) + "님이 입장했습니다.")
+            self.db.insert_content(chat)
             perdata = data
             perdata.cr_id_ = cr_id
 
@@ -249,7 +253,6 @@ class Server:
                 perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
             # 거절
             else:
-                print(" 친구 초대 거절", data)
                 self.db.delete_friend(data)
                 perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 

@@ -79,7 +79,10 @@ class AddChat(QDialog):
             item = ListItem(data["F_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
             _scroll_layout.addWidget(item.frame)
             _scroll_layout.addLayout(item.add_checkbox())
-            self._all_friend[i] = [item.item_id, item.item_nm]
+            nm_ = item.item_nm
+            nm_ = nm_.lstrip("[ ")
+            nm_ = nm_.rstrip(" ]")
+            self._all_friend[i] = [item.item_id, nm_]
 
         # 스크롤 내부 스페이서 추가
         _spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Expanding)

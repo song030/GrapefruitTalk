@@ -42,7 +42,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 유저정보
         self.user_id = ""
-        self.user_name = ""
         self.room_id = "PA_1"
         self.user_info = pandas.DataFrame
 
@@ -601,9 +600,9 @@ class MainWidget(QWidget, Ui_MainWidget):
             self.lbl_room_number.clear()
 
         self.clear_layout(self.layout_talk)
+        QtTest.QTest.qWait(50)
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
-            self.user_name = data["USER_NM"]
             if data["USER_NM"]:
                 self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
             else:       # ------------------------- TB_CONTENT 예외처리
@@ -864,7 +863,6 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             online_items = list()
             offline_items = list()
-
             for i, data in self.list_info[0].iterrows():
                 item = ListItem(data["F_ID"], data["USER_NM"], data["USER_STATE"], data["USER_IMG"])
                 item.set_context_menu("1:1 대화", self.move_single_chat, item)
@@ -972,7 +970,7 @@ class MainWidget(QWidget, Ui_MainWidget):
             chat_name = self.dlg_add_chat.chat_name
             chat_mem = self.dlg_add_chat.members
             if not chat_name and chat_mem:
-                chat_name = ', '.join(chat_mem)
+                chat_name = ', '.join(chat_mem[1])
 
             member_cnt = len(chat_mem[0])
 
@@ -983,12 +981,15 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 채팅방 개설 요성
     def new_chat_room(self, t_title: str, t_id: list, t_nm:list):
+        print("개설 요청 발송")
         # 방 개설
-        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title, self.user_name)
+        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title, user_name_=self.user_info["USER_NM"])
         self.client.send(chat_room)
 
     # 채팅방 개설 수신
     def join_chat_room(self, data:JoinChat):
+        print("join_chat_room")
+        print(data.__dict__)
         # 방 개설
         self.db.create_chatroom(data)
 
@@ -997,8 +998,9 @@ class MainWidget(QWidget, Ui_MainWidget):
         text += ", ".join(data.member_name)+"님이 입장했습니다."
         self.db.insert_content(ReqChat(data.cr_id_, "", text))
         self.add_notice_line(text)
-
+        print("개설 완료!")
         if data.user_id_ == self.user_id:
+            self.init_list("single")
             self.init_talk(data.cr_id_)  # 새 채팅방으로 이동
 
     # 친구 요청 응답 보내기
@@ -1056,12 +1058,13 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.list_btn_check("single")
         for value_ in self.current_list.values():
             if value_.item_nm == t_friend.item_nm:
+                print("---2")
                 self.init_talk(value_.item_id)
                 return
         nm_ = t_friend.item_nm.lstrip("[ ")
         nm_ = nm_.rstrip(" ]")
-        title = f"{nm_}님, {self.user_name}의 1:1 대화방"
-        self.new_chat_room(nm_, [t_friend.item_id], [t_friend.item_nm])
+        title = f"{nm_}님, {self.user_info['USER_NM']}의 1:1 대화방'"
+        self.new_chat_room(title, [t_friend.item_id], [t_friend.item_nm])
 
     # 로그아웃 버튼 클릭 시
     def logout(self):
