@@ -191,7 +191,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     def get_content(self, cr_id):
         df = pd.read_sql(
-            f"select * from CTBCONTENT{cr_id} left join CTB_USER on (CTBCONTENT{cr_id}.USER_ID = CTB_USER.USER_ID);",
+            f"select * from CTB_CONTENT_{cr_id} left join CTB_USER on (CTB_CONTENT_{cr_id}.USER_ID = CTB_USER.USER_ID);",
             self.conn)
         return df
 
