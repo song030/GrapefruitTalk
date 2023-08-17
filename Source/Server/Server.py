@@ -238,17 +238,17 @@ class Server:
         # 친구 요청 보내기
         elif type(data) == ReqSuggetsFriend:
             self.db.insert_friend(data)
-            perdata = ReqSuggetsFriend(data.user_id_, data.frd_id_)
+            perdata:ReqSuggetsFriend = ReqSuggetsFriend(data.user_id_, data.frd_id_)
 
         # 친구 응답 보내기
         elif type(data) == PerAcceptFriend:
             if data.result == 1:
                 self.db.update_friend(data)
-                perdata = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+                perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
             # 거절
             else:
                 self.db.delete_friend(data)
-                perdata = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
+                perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         # 유저 나가기 요청
         elif type(data) == DeleteTable:
