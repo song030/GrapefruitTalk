@@ -60,11 +60,8 @@ class Server:
         print("send!")
 
         if type(data) == JoinChat:
-            print("create join chat")
             self.send_message(data)
-            print("complete send")
             self.send_client(sock, data)
-            print("complete client")
 
         # 같은 채팅방 멤버에게 발송
         elif type(data) in [ReqChat, ReqJoinMember, DeleteTable]:
@@ -102,8 +99,6 @@ class Server:
     def send_friend(self, sock:socket.socket, data):
         if self.connected():
             user_id = self.client[sock.getpeername()][1]
-            print(f"user_id : {user_id}")
-            print(f"data : {data.user_id_} , {data.frd_id_}")
 
             # 친구 요청
             if user_id == data.user_id_:
@@ -113,9 +108,7 @@ class Server:
             else:
                 send_id = data.user_id_
 
-            print(send_id)
             for client in self.client.values():
-                print(f"--- {client[1]}, {send_id}")
                 if client[1] == send_id:
                     client[0].sendall(pickle.dumps(data))
                     break
@@ -146,7 +139,6 @@ class Server:
             elif type(data) == JoinChat:
                 member = data.member_id
 
-            print("send_message member : ", member)
             for idx, client in enumerate(self.client.values()):
                 if data.user_id_ != client[1] and client[1] in member:
                     client[0].sendall(pickle.dumps(data))
