@@ -328,6 +328,14 @@ class DBConnector:      # DB를 총괄하는 클래스
         df = pd.read_sql(f"select CNT_CONTENT, CNT_SEND_TIME from CTB_CONTENT_{cr_id} natural join CTB_USER order by CNT_SEND_TIME DESC LIMIT 1;", self.conn)
         return df
 
+    def save_user_db(self, db:dict):
+        client_cursor = self.conn.cursor()
+        for table, df in db.items():
+            client_cursor.executescript(f"DROP TABLE IF EXISTS {table}")
+            df.to_sql(table, self.conn, index=False)
+        self.commit_db()
+
+
 
 if __name__ == "__main__":
 

@@ -551,59 +551,14 @@ class MainWidget(QWidget, Ui_MainWidget):
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
             self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-            self.create_client_table()
-            # print(self.user_info)
+
+            self.db.save_user_db(data.user_db)
 
             self.login_list = data.login_info.copy()
             print("접속중 유저 :", self.login_list)
 
             self.set_page_talk()
             return True
-
-    def create_client_table(self):
-        print("유저 아이디 : ", self.user_id)
-        """유저 아이디와 맞는 정보를 서버 db에서 가져와서 정보를 복사해 넣는다."""
-        # 서버 데이터베이스 연결
-        server_conn = sqlite3.connect('../Server/data.db')
-
-        # (조건 설정) 클라이언트 테이블: sql문
-
-        condition = {
-            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
-            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{self.user_id}' OR FRD_ID ='{self.user_id}'",
-            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{self.user_id}' GROUP BY TB_CHATROOM.CR_ID",
-            # 'CTB_USER_CHATROOM': "SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' GROUP BY 'CR_ID')",
-            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{self.user_id}')"
-            ,
-        }
-
-        # 클라이언트 테이블 생성(있으면 삭제 후 추가)
-        client_conn = sqlite3.connect('../Client/data.db')
-        client_cursor = client_conn.cursor()
-        for c_table, query in condition.items():
-            client_cursor.executescript(f"DROP TABLE IF EXISTS {c_table}")
-            server_data = pd.read_sql_query(query, server_conn)
-            server_data.to_sql(c_table, client_conn, index=False)
-
-
-
-        condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{self.user_id}'"
-        condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
-        table_dict = pd.read_sql_query(condition_2, server_conn).to_dict()
-
-        # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
-        for idx in table_dict.values():
-            table_name = f'C{idx[0]}'  # 테이블 이름(클라이언트는 C 붙음)
-            client_cursor.executescript(f"DROP TABLE IF EXISTS {table_name}")  # 테이블 삭제
-            server_data = pd.read_sql_query(f"SELECT * FROM {idx[0]}", server_conn)  # 테이블 내용 불러오기
-            server_data.to_sql(table_name, client_conn, index=False)  # 저장
-
-        # 변경사항 저장
-        client_conn.commit()
-
-        # 연결 종료
-        client_conn.close()
-
 
     # ================================================== 대화 화면 ==================================================
 

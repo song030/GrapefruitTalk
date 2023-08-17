@@ -332,6 +332,30 @@ class DBConnector:      # DB를 총괄하는 클래스
         self.commit_db()
         return df
 
+    def get_user_db(self, user_id):
+        # (조건 설정) 클라이언트 테이블: sql문
+        db = {
+            'CTB_USER': f"SELECT USER_ID, USER_NM, USER_IMG, USER_STATE FROM 'TB_USER'",
+            'CTB_FRIEND': f"SELECT USER_ID, FRD_ID, FRD_ACCEPT FROM TB_FRIEND WHERE USER_ID = '{user_id}' OR FRD_ID ='{user_id}'",
+            'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{user_id}' GROUP BY TB_CHATROOM.CR_ID",
+            'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{user_id}')"
+        }
+
+        for c_table, query in db.items():
+            server_data = pd.read_sql_query(query, self.conn)
+            db[c_table] = server_data
+
+        condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{user_id}'"
+        condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
+        table_dict = pd.read_sql_query(condition_2, self.conn).to_dict()
+
+        # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
+        for idx in table_dict.values():
+            server_data = pd.read_sql_query(f"SELECT * FROM {idx[0]}", self.conn)  # 테이블 내용 불러오기
+            db[idx[0]] = server_data
+
+        return db
+
 if __name__ == "__main__":
     # df = DBConnector().find_user_chatroom("PA_1")
     # print()

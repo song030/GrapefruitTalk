@@ -111,6 +111,7 @@ class PerLogin:
         self.user_id_ = user_id_
         self.login_info = login_info
         self.user_info = user_info
+        self.user_db = {}
 
 # 로그인 유저 정보 발송
 # len(list)=1: 신규로 로그인/로그아웃 발행할때 발송용

@@ -170,7 +170,7 @@ class Server:
     def recevie(self, sock:socket.socket):
         # 데이터를 발송한 클라이언트의 어드레스 얻기
         try:
-            receive_bytes = sock.recv(4096)
+            receive_bytes = sock.recv(50000)
 
             # 데이터 수신 실패시 오류 발생
             if not receive_bytes:
@@ -218,6 +218,7 @@ class Server:
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.user_id_
                 perdata.login_info = self.get_login_list()
+                perdata.user_db = self.db.get_user_db(perdata.user_id_)
 
         # 로그 아웃
         elif type(data) == ReqLoout:
@@ -237,17 +238,17 @@ class Server:
         # 친구 요청 보내기
         elif type(data) == ReqSuggetsFriend:
             self.db.insert_friend(data)
-            perdata: ReqSuggetsFriend(data.user_id_, data.frd_id_)
+            perdata = ReqSuggetsFriend(data.user_id_, data.frd_id_)
 
         # 친구 응답 보내기
         elif type(data) == PerAcceptFriend:
             if data.result == 1:
                 self.db.update_friend(data)
-                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 1)
+                perdata = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
             # 거절
             else:
                 self.db.delete_friend(data)
-                perdata: PerAcceptFriend(data.user_id_, data.frd_id_, 0)
+                perdata = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 
         # 유저 나가기 요청
         elif type(data) == DeleteTable:
