@@ -197,8 +197,9 @@ class PerAcceptFriend:
 
 # 채팅방 요청
 class JoinChat:
-    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, cr_id_=""):
+    def __init__(self, user_id_: str, member_id: list, member_name: list, title:str, user_name_="", cr_id_=""):
         self.user_id_ = user_id_
+        self.user_name_ = user_name_
         self.member_id = member_id
         self.member_name = member_name
         self.title = title

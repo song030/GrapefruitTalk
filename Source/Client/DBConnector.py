@@ -129,47 +129,18 @@ class DBConnector:      # DB를 총괄하는 클래스
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
         # data = JoinChat("admin", ["song030s"], "1:1 대화방 입니다.")
-        len_member = len(data.member_id)
-
-        # 인원 확인
-        if len_member  == 0:
-            return False
-
-        # 방 아이디가 없는 경우 새로 생성
-        if data.cr_id_ == "":
-            # 타입 확인 - OE_ 1:1, OA_ 1:N
-            if len(data.member_id) == 1:
-                _type = "OE_"
-            else:
-                _type = "OA_"
-
-            # 일련번호 부여
-            df = pd.read_sql(f"select MAX(CR_ID) from CTB_CHATROOM where CR_ID like '{_type}%'", self.conn)
-            df = df["MAX(CR_ID)"].iloc[0]
-
-            if df is None:
-                _num = 1
-            else:
-                _cr_id = df[3:]
-                _cr_id = int(_cr_id)
-                _num = _cr_id+1
-
-            _cr_id = f"{_type}{_num}"
-        else:
-            _cr_id = data.cr_id_
-
-
+        print("create room ", data.cr_id_)
         # 채팅방 정보 추가
-        self.conn.execute(f"insert into CTB_CHATROOM values (?, ?)", (_cr_id, data.title))
+        self.conn.execute(f"insert into CTB_CHATROOM values (?, ?)", (data.cr_id_, data.title))
 
         # 방장 추가
-        self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
+        self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (data.cr_id_, data.user_id_))
         # 채팅 맴버 추가
         for member in data.member_id:
-            self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (_cr_id, member))
+            self.conn.execute(f"insert into CTB_USER_CHATROOM values (?, ?)", (data.cr_id_, member))
 
         # 대화 테이블 생성
-        self.conn.execute(f""" CREATE TABLE IF NOT EXISTS CTB_CONTENT_{_cr_id} (
+        self.conn.execute(f""" CREATE TABLE IF NOT EXISTS CTB_CONTENT_{data.cr_id_} (
                     "USER_ID" TEXT,
                     "CNT_ID" INTEGER,
                     "CNT_CONTENT" TEXT,
@@ -178,10 +149,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        print(_cr_id)
-        self.create_tb_read_cnt(JoinChat("", list(), list(), "", cr_id_=_cr_id))
-
-        return _cr_id
+        self.create_tb_read_cnt(JoinChat("", list(), list(), "", cr_id_=data.cr_id_))
 
     def delete_my_table(self, data:DeleteTable):
         """PK,FK를 고려하여 순서작성함"""
@@ -265,23 +233,27 @@ class DBConnector:      # DB를 총괄하는 클래스
             self.create_tb_read_cnt(JoinChat(user_id, [user_id], list(), "", cr_id_=cr_id))
             formatted_time = self.conn.execute(f"select LAST_READ_TIME from CTB_READ_CNT_{cr_id} where USER_ID = '{user_id}'").fetchone()[0]
 
+        print(cr_id)
+        last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1")
+        if last_content.rowcount > 0:
+            last_content = last_content.fetchone()[0]
 
-        last_content = self.conn.execute(f"SELECT CNT_SEND_TIME FROM CTB_CONTENT_{cr_id} ORDER BY CNT_ID DESC LIMIT 1").fetchone()[0]
+            print(f"{user_id}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
+            print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
+            #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
+            #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
+            cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
+                                    f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
+                                    f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
+                                    f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
+                                    f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
 
-        print(f"{user_id}가 채팅방에서 마지막으로 읽은 시간 : {formatted_time}")
-        print(f"채팅방 {cr_id}의 마지막 메세지발송시간 : {last_content}")
-        #마지막으로 읽은 시간보다 더 이후에 메시지가 발송되었는지 확인
-        #메시지 발송 시간이 마지막 메시지 발송 시간보다 이전 또는 동일한지 확인
-        cnt = self.conn.execute(f"SELECT CNT_SEND_TIME "
-                                f"FROM CTB_CONTENT_{cr_id} LEFT JOIN CTB_READ_CNT_{cr_id} ON "
-                                f"CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID "
-                                f"WHERE '{formatted_time}' < CNT_SEND_TIME AND CNT_SEND_TIME <= '{last_content}' "
-                                f"AND CTB_CONTENT_{cr_id}.USER_ID = CTB_READ_CNT_{cr_id}.USER_ID").fetchall()
-
-        if len(cnt) == 0:
-            return 0
+            if len(cnt) == 0:
+                return 0
+            else:
+                return len(cnt[0])
         else:
-            return len(cnt[0])
+            return 0
 
 
     ## 오른쪽 리스트 메뉴 출력용 함수 ================================================================================ ##
@@ -320,7 +292,6 @@ class DBConnector:      # DB를 총괄하는 클래스
         df2 = pd.read_sql(sql2, self.conn)
         df3 = pd.read_sql(sql3, self.conn)
         result = df1._append(df2)
-        print(result)
 
         return result, df3
 
@@ -329,10 +300,21 @@ class DBConnector:      # DB를 총괄하는 클래스
         return df
 
     def save_user_db(self, db:dict):
+        print("save user db")
         client_cursor = self.conn.cursor()
         for table, df in db.items():
+            print(table)
+            print(df)
             client_cursor.executescript(f"DROP TABLE IF EXISTS {table}")
             df.to_sql(table, self.conn, index=False)
+            if table[:2] == "OE":
+                cr_id = table[-4:]
+                sql = f"select USER_ID from CTB_USER_CHATROOM where CR_ID = {cr_id};"
+                member = pd.read_sql(sql, self.conn)
+                member = member.values.tolist()
+                print("-------", member)
+                self.create_tb_read_cnt(JoinChat(member[0], member[1:], list(), "", cr_id_=cr_id))
+
         self.commit_db()
 
 

@@ -8,7 +8,7 @@ from Source.Main.DataClass import *
 from threading import Thread
 
 class Server:
-    def __init__(self, port=1234, listener=10):
+    def __init__(self, port=8000, listener=10):
         self.db = DBConnector()
 
         # 접속한 클라이언트 정보 key :(ip,포트번호), value : [소켓정보, 아이디]
@@ -59,12 +59,16 @@ class Server:
     def send(self, sock:socket.socket, data):
         print("send!")
 
+        if type(data) == JoinChat:
+            self.send_message(data)
+            self.send_client(sock, data)
+
         # 같은 채팅방 멤버에게 발송
-        if type(data) in [ReqChat, JoinChat, ReqJoinMember, DeleteTable]:
+        elif type(data) in [ReqChat, ReqJoinMember, DeleteTable]:
             self.send_message(data)
 
         # 요청 클라이언트를 제외한 모든 클라이언트에게 발송
-        if type(data) in [LoginInfo]:
+        elif type(data) in [LoginInfo]:
             self.send_exclude_sender(sock, data)
 
         # 요청한 클라이언트에게 회신
@@ -137,9 +141,6 @@ class Server:
                 member = self.db.find_user_chatroom(data.cr_id_)
             elif type(data) == JoinChat:
                 member = data.member
-
-            print("JoinChat sende message")
-            print("member :", member)
 
             for idx, client in enumerate(self.client.values()):
                 print("-", client[1])
@@ -230,10 +231,11 @@ class Server:
             perdata: ReqStateChange = self.db.change_user_state(data)
 
         elif type(data) == JoinChat:
-            print("join chat db save")
-            self.db.create_chatroom(data)
+            cr_id = self.db.create_chatroom(data)
             self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
             perdata = data
+            perdata.cr_id_ = cr_id
+
 
         # 친구 요청 보내기
         elif type(data) == ReqSuggetsFriend:
@@ -247,6 +249,7 @@ class Server:
                 perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 1)
             # 거절
             else:
+                print(" 친구 초대 거절", data)
                 self.db.delete_friend(data)
                 perdata:PerAcceptFriend = PerAcceptFriend(data.user_id_, data.frd_id_, 0)
 

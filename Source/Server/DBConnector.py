@@ -220,7 +220,6 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
-        print(data.__dict__)
         # 인원 확인
         if len(data.member_id) == 0:
             return False
@@ -243,7 +242,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             _num = _cr_id + 1
 
         _cr_id = f"{_type}{_num}"
-        print(_cr_id)
+
         # 채팅방 정보 추가
         self.conn.execute(f"insert into TB_CHATROOM values (?, ?)", (_cr_id, data.title))
 
@@ -263,7 +262,7 @@ class DBConnector:      # DB를 총괄하는 클래스
 
         self.conn.commit()
 
-        return df
+        return _cr_id
 
     def delete_table(self, data:DeleteTable):
         """PK,FK를 고려하여 순서작성함"""
@@ -346,14 +345,15 @@ class DBConnector:      # DB를 총괄하는 클래스
             server_data = pd.read_sql_query(query, self.conn)
             db[c_table] = server_data
 
-        condition_1 = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID LIKE '{user_id}'"
-        condition_2 = f"SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%' || ({condition_1}) || '%'"
-        table_dict = pd.read_sql_query(condition_2, self.conn).to_dict()
-
+        condition = f"SELECT CR_ID FROM TB_USER_CHATROOM WHERE USER_ID = '{user_id}'"
+        table_dict = pd.read_sql_query(condition, self.conn).values.tolist()
+        table_dict = table_dict
+        print("get db", table_dict)
         # 테이블 이름 - 테이블 내용에 맞게 클라이언트 db에 테이블 저장
-        for idx in table_dict.values():
-            server_data = pd.read_sql_query(f"SELECT * FROM {idx[0]}", self.conn)  # 테이블 내용 불러오기
-            db[idx[0]] = server_data
+        for idx in table_dict:
+            print(idx)
+            server_data = pd.read_sql_query(f"SELECT * FROM TB_CONTENT_{idx[0]}", self.conn)  # 테이블 내용 불러오기
+            db["CTB_CONTENT_"+idx[0]] = server_data
 
         return db
 

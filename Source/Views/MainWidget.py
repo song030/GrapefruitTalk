@@ -42,6 +42,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         # 유저정보
         self.user_id = ""
+        self.user_name = ""
         self.room_id = "PA_1"
         self.user_info = pandas.DataFrame
 
@@ -602,6 +603,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.clear_layout(self.layout_talk)
         chat_data = self.db.get_content(t_room_id)
         for i, data in chat_data.iterrows():
+            self.user_name = data["USER_NM"]
             if data["USER_NM"]:
                 self.add_talk(data["USER_IMG"], data["USER_NM"], data["CNT_CONTENT"], data["CNT_SEND_TIME"])
             else:       # ------------------------- TB_CONTENT 예외처리
@@ -732,7 +734,6 @@ class MainWidget(QWidget, Ui_MainWidget):
                 clear_check = True
 
         # 출력 메뉴가 달라진 경우 레이아웃을 비우고 리스트 다시 출력
-        # if clear_check and self.layout_list.count() > 0:      # ----------------------- clear layout 에 예외처리 하나 추가 했는데 지운는 거 어때요?
         if clear_check:
             self.clear_layout(self.layout_list)
             self.init_list(t_type)
@@ -980,38 +981,25 @@ class MainWidget(QWidget, Ui_MainWidget):
             else:
                 self.dlg_warning.set_dialog_type(bt_cnt=1, text="아무 일도 일어나지 않습니다.")
 
-    # 채팅방 개설
+    # 채팅방 개설 요성
     def new_chat_room(self, t_title: str, t_id: list, t_nm:list):
         # 방 개설
-        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title)
-        cr_id = self.db.create_chatroom(chat_room)
+        chat_room = JoinChat(self.user_id, t_id, t_nm, t_title, self.user_name)
         self.client.send(chat_room)
 
-        if len(t_id) == 1:
-            self.init_list("single")
-        else:
-            self.init_list("multi")
-
-        # 입장 알림
-        text = ", ".join(t_nm)+"님이 입장했습니다."
-        self.db.insert_content(ReqChat(cr_id, "", text))
-        self.add_notice_line(text)
-        chat_room.cr_id_ = cr_id
-
-        self.init_talk(cr_id)    # 새 채팅방으로 이동
-
-    # 신규 방 개설 (타유저 개설)
+    # 채팅방 개설 수신
     def join_chat_room(self, data:JoinChat):
-        print()
         # 방 개설
         self.db.create_chatroom(data)
 
         # 입장 알림
-        text = ", ".join(data.member_name)+"님이 입장했습니다."
+        text = data.user_name_+", "
+        text += ", ".join(data.member_name)+"님이 입장했습니다."
         self.db.insert_content(ReqChat(data.cr_id_, "", text))
         self.add_notice_line(text)
-        print(text)
-        print(get_data_tuple(data))
+
+        if data.user_id_ == self.user_id:
+            self.init_talk(data.cr_id_)  # 새 채팅방으로 이동
 
     # 친구 요청 응답 보내기
     def add_friend(self, t_type, t_id):
@@ -1072,6 +1060,7 @@ class MainWidget(QWidget, Ui_MainWidget):
                 return
         nm_ = t_friend.item_nm.lstrip("[ ")
         nm_ = nm_.rstrip(" ]")
+        title = f"{nm_}님, {self.user_name}의 1:1 대화방"
         self.new_chat_room(nm_, [t_friend.item_id], [t_friend.item_nm])
 
     # 로그아웃 버튼 클릭 시
@@ -1083,7 +1072,7 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.edt_login_pwd.clear()
         # 화면 갱신
         self.dlg_setting.reject()
-        self.dlg_setting.btn_notice.setChecked(True)  # ------------------ 9시 52분 보고 이후 추가
+        self.dlg_setting.btn_notice.setChecked(True)
         self.stack_main.setCurrentWidget(self.page_login)
         if not self.btn_multi.isChecked():
             self.btn_multi.setChecked(True)
@@ -1110,5 +1099,4 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     def change_state(self, data):
         self.db.change_user_state(data)
-
 # ==============================================================================================================
