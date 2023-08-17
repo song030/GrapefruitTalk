@@ -259,7 +259,7 @@ class Server:
         # 유저 나가기 요청
         elif type(data) == DeleteTable:
             self.db.delete_table(data)
-            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 입장했습니다."))
+            self.db.insert_content(ReqChat("", "", ", ".join(data.my_name) + "님이 퇴장했습니다."))
             perdata = data
         else:
             return data

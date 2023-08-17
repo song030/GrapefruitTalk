@@ -266,21 +266,21 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     def delete_table(self, data:DeleteTable):
         """PK,FK를 고려하여 순서작성함"""
-
-        if len(data.user_id_list) > 1:
-            # 나간 유저를 제외한 접속 멤버로 값 update
-            df = pd.read_sql(f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'", self.conn)
-            user_id_list = df['USER_ID'].tolist()
-            user_id_list.pop(f'{data.my_id}')
-
-            self.conn.execute(f"UPDATE TB_USER_CHATROOM SET USER_ID = {user_id_list} WHERE CR_ID = {data.cr_id}")
-            self.conn.commit()
-
-        elif len(data.user_id_list) <= 1:
-            # TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
-            sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = {data.cr_id}"
-            # TB_CHATROOM 의 CR_ID 삭제
-            sql_2 = f"DELETE FROM TB_CHATROOM WHERE CR_ID = {data.cr_id}"
+        print("delete table")
+        print(data.__dict__)
+        # 나간 유저를 제외한 접속 멤버로 값 update
+        df = pd.read_sql(f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}'", self.conn)
+        user_id_list = df['USER_ID'].tolist()
+        print(user_id_list)
+        user_id_list.remove(data.my_id)
+        print(user_id_list)
+        # TB_USER_CHATROOM의 CR_ID에 해당하는 내용 삭제
+        sql_1 = f"DELETE FROM TB_USER_CHATROOM WHERE CR_ID = '{data.cr_id}' and USER_ID = '{data.my_id}'"
+        # TB_CHATROOM 의 CR_ID 삭제
+        sql_2 = f"DELETE FROM TB_CHATROOM WHERE CR_ID = '{data.cr_id}'"
+        print(len(user_id_list))
+        # 단톡방에 남은 사람이 1명 이하 경우
+        if len(user_id_list) <= 1:
             # TB_READ_CNT_{CR_ID} 테이블 삭제
             sql_3 = f"DROP TABLE TB_READ_CNT_{data.cr_id}"
             # TB_CONTENT_{CR_ID} 테이블 삭제
