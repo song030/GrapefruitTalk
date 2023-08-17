@@ -84,7 +84,6 @@ class Server:
             self.send_client(sock, data)
             self.db_log_inout_state_save(data.rescode)
 
-
             # 로그인 성공시
             # 서버에 로그인 정보 저장, 접속자 제외한 클라이언트에게 접속 정보 발송
             if data.rescode == 2:
@@ -139,7 +138,7 @@ class Server:
             elif type(data) == JoinChat:
                 member = data.member
 
-            print("sende message")
+            print("JoinChat sende message")
             print("member :", member)
 
             for idx, client in enumerate(self.client.values()):
@@ -231,6 +230,7 @@ class Server:
             perdata: ReqStateChange = self.db.change_user_state(data)
 
         elif type(data) == JoinChat:
+            print("join chat db save")
             self.db.create_chatroom(data)
             self.db.insert_content(ReqChat("", "", ", ".join(data.member)+"님이 입장했습니다."))
             perdata = data

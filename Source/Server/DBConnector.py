@@ -220,12 +220,13 @@ class DBConnector:      # DB를 총괄하는 클래스
 
     # 채팅방 개설
     def create_chatroom(self, data:JoinChat):
+        print(data.__dict__)
         # 인원 확인
-        if len(data.member) == 0:
+        if len(data.member_id) == 0:
             return False
 
         # 타입 확인 - OE_ 1:1, OA_ 1:N
-        elif len(data.member) == 1:
+        elif len(data.member_id) == 1:
             _type = "OE_"
         else:
             _type = "OA_"
@@ -242,14 +243,14 @@ class DBConnector:      # DB를 총괄하는 클래스
             _num = _cr_id + 1
 
         _cr_id = f"{_type}{_num}"
-
+        print(_cr_id)
         # 채팅방 정보 추가
         self.conn.execute(f"insert into TB_CHATROOM values (?, ?)", (_cr_id, data.title))
 
         # 방장 추가
         self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, data.user_id_))
         # 채팅 맴버 추가
-        for member in data.member:
+        for member in data.member_id:
             self.conn.execute(f"insert into TB_USER_CHATROOM values (?, ?)", (_cr_id, member))
 
         # 대화 테이블 생성

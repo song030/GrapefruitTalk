@@ -1002,6 +1002,7 @@ class MainWidget(QWidget, Ui_MainWidget):
 
     # 신규 방 개설 (타유저 개설)
     def join_chat_room(self, data:JoinChat):
+        print()
         # 방 개설
         self.db.create_chatroom(data)
 
@@ -1048,10 +1049,14 @@ class MainWidget(QWidget, Ui_MainWidget):
         else:
             self.db.delete_friend(data.user_id_, data.frd_id_)
 
+        self.clear_layout(self.layout_list)
+        self.init_list("friend")
+
     # 친구 요청 받음
     def req_friend(self, data:ReqSuggetsFriend):
         self.db.insert_friend(data)
-
+        self.clear_layout(self.layout_list)
+        self.init_list("friend")
 
     # 친구와 1:1 대화하기
     @pyqtSlot()
