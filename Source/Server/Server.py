@@ -213,7 +213,9 @@ class Server:
             if perdata.rescode == 2:
                 self.client[sock.getpeername()][1] = perdata.user_id_
                 perdata.login_info = self.get_login_list()
+                print(1)
                 perdata.user_db = self.db.get_user_db(perdata.user_id_)
+                print(2)
 
         # 로그 아웃
         elif type(data) == ReqLoout:

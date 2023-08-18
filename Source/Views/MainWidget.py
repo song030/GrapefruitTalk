@@ -60,8 +60,8 @@ class MainWidget(QWidget, Ui_MainWidget):
         self.use_id_check = False
 
         # 인증메일 송신자
-        self.s_email = 'rhrnaka@gmail.com'
-        self.s_pwd = 'sxrrxnbbfstqniee'
+        self.s_email = 'sjin030@gmail.com'
+        self.s_pwd = 'opocpruqcmfcvczh'
 
         # 이벤트 연결
         self.connect_event()
@@ -513,10 +513,12 @@ class MainWidget(QWidget, Ui_MainWidget):
 
         else:
             self.user_id = id_
+            self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
             self.client.send(ReqMembership(id_, pwd, nm, email, c_date, img))
 
     def join_input_check(self, data: PerRegist):
         """회원가입 정보 입력 , 서버 허가 요청 송신"""
+        print("회원가입 완료")
         if data.Success:
             self.dlg_warning.set_dialog_type(2, "success_join_membership")
             if self.dlg_warning.exec():
@@ -550,9 +552,8 @@ class MainWidget(QWidget, Ui_MainWidget):
 
             # 로그인 후 db에 유저 아이디 전달, 유저 정보 가져오기
             self.db.set_user_id(self.user_id)
-            self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
-
             self.db.save_user_db(data.user_db)
+            self.user_info = self.db.get_table("CTB_USER", user_id=self.user_id).iloc[0]
 
             self.login_list = data.login_info.copy()
             print("접속중 유저 :", self.login_list)

@@ -348,7 +348,7 @@ class DBConnector:      # DB를 총괄하는 클래스
             'CTB_CHATROOM': f"SELECT CR_ID, CR_NM FROM 'TB_CHATROOM' NATURAL JOIN 'TB_USER_CHATROOM' WHERE USER_ID = '{user_id}' GROUP BY TB_CHATROOM.CR_ID",
             'CTB_USER_CHATROOM': f"SELECT * FROM TB_USER_CHATROOM WHERE CR_ID IN (SELECT CR_ID FROM TB_CHATROOM NATURAL JOIN TB_USER_CHATROOM WHERE USER_ID = '{user_id}')"
         }
-
+        print(3)
         for c_table, query in db.items():
             server_data = pd.read_sql_query(query, self.conn)
             db[c_table] = server_data
@@ -360,7 +360,8 @@ class DBConnector:      # DB를 총괄하는 클래스
         for idx in table_dict:
             server_data = pd.read_sql_query(f"SELECT * FROM TB_CONTENT_{idx[0]}", self.conn)  # 테이블 내용 불러오기
             db["CTB_CONTENT_"+idx[0]] = server_data
-
+        print(4)
+        print(db)
         return db
 
 if __name__ == "__main__":
